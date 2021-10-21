@@ -37,6 +37,8 @@ public class Cell {
         if (!fixed_) currState_ = STATE.GREY;
     }
 
+    public boolean isFixed() { return fixed_; }
+    public boolean isRight() { return currState_ == solState_; }
     public STATE getSolState() { return solState_; }
     public STATE getCurrState() { return currState_; }
 

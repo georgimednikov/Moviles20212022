@@ -7,6 +7,7 @@ public class Game {
 
     int contMistakes = 0; //Número de celdas mal puestas
     private Cell[][] mat;
+    private boolean solved = false;
 
     static private Random rand = new Random(System.currentTimeMillis());
     static private boolean getRandomBoolean(float p){
@@ -64,9 +65,15 @@ public class Game {
 
     //Cambia el estado de una celda. Si ha resuelto el nivel, devuelve true
     public boolean changeCell(int i, int j) {
-        if (mat[i][j].changeState()) {
-            contMistakes--;
-            if (contMistakes == 0) return true;
+        if (!mat[i][j].isFixed()) {
+            if (mat[i][j].isRight()) {
+                contMistakes++;
+            }
+            if (mat[i][j].changeState()) {
+                contMistakes--;
+                if (contMistakes == 0) solved = true;
+            }
+            return true;
         }
         return false;
     }
