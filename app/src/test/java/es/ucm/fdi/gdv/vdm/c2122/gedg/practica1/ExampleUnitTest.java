@@ -1,4 +1,4 @@
-package es.ucm.fdi.vdm.c2122.gEDG.practica1;
+package es.ucm.fdi.gdv.vdm.c2122.gedg.practica1;
 
 import org.junit.Test;
 

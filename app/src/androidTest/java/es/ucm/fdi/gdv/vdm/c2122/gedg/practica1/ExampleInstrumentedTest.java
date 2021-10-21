@@ -1,4 +1,4 @@
-package es.ucm.fdi.vdm.c2122.gEDG.practica1;
+package es.ucm.fdi.gdv.vdm.c2122.gedg.practica1;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("es.ucm.fdi.vdm.c2122.gEDG.practica1", appContext.getPackageName());
+        assertEquals("es.ucm.fdi.gdv.vdm.c2122.gedg.practica1", appContext.getPackageName());
     }
 }
