@@ -41,6 +41,7 @@ public class Cell {
     public boolean isRight() { return currState_ == solState_; }
     public STATE getSolState() { return solState_; }
     public STATE getCurrState() { return currState_; }
+    public int getNumber() { return number_; }
 
     //Solo fija la celda (para cuando es roja) y java no permite parámetros por defecto
     public void fixCell() {

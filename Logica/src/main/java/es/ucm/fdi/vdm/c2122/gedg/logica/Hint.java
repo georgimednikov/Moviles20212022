@@ -1,5 +1,7 @@
 package es.ucm.fdi.vdm.c2122.gedg.logica;
 
+import javax.lang.model.type.NullType;
+
 public class Hint {
     public enum HintType {
 
@@ -21,4 +23,8 @@ public class Hint {
         JUST_FILL_ALL,
         NOT_ENOUGH_BLUES
     }
+
+    public HintType type_;
+    public int x_ = -1, y_ = -1;
 }
+

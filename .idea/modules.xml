@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/practica1.iml" filepath="$PROJECT_DIR$/.idea/modules/practica1.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/engine/practica1.Engine.iml" filepath="$PROJECT_DIR$/.idea/modules/engine/practica1.Engine.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Engineandroid/practica1.EngineAndroid.iml" filepath="$PROJECT_DIR$/.idea/modules/Engineandroid/practica1.EngineAndroid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Engine/practica1.Engine.iml" filepath="$PROJECT_DIR$/.idea/modules/Engine/practica1.Engine.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/EngineAndroid/practica1.EngineAndroid.iml" filepath="$PROJECT_DIR$/.idea/modules/EngineAndroid/practica1.EngineAndroid.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/EnginePC/practica1.EnginePC.iml" filepath="$PROJECT_DIR$/.idea/modules/EnginePC/practica1.EnginePC.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/LauncherAndroid/practica1.LauncherAndroid.iml" filepath="$PROJECT_DIR$/.idea/modules/LauncherAndroid/practica1.LauncherAndroid.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/LauncherPC/practica1.LauncherPC.iml" filepath="$PROJECT_DIR$/.idea/modules/LauncherPC/practica1.LauncherPC.iml" />
