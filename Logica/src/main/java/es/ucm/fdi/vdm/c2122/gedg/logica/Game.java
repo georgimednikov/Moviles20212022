@@ -1,6 +1,8 @@
 package es.ucm.fdi.vdm.c2122.gedg.logica;
 import java.util.Random;
 
+import static es.ucm.fdi.vdm.c2122.gedg.logica.Hint.HintType.MUST_PLACE_BLUE;
+
 
 public class Game {
     private final float blueProb = 0.7f; //Porbabilidad de que una celda sea azul en vez de roja en la solución
@@ -31,7 +33,7 @@ public class Game {
             for (int j = 0; j < size; ++j) {
                 if(getRandomBoolean(fixedProb)) {
                     if(mat[i][j].getSolState() == Cell.STATE.RED) mat[i][j].fixCell();
-                    else mat[i][j].fixCell(calculateNumber(mat, i, j));
+                    else mat[i][j].fixCell(calculateNumber(i, j));
                 }
                 else {
                     mat[i][j].setGrey();
@@ -45,9 +47,20 @@ public class Game {
         int i = 1;
         while(mat[x + dx * i][y + dy *i].getSolState() == color) {
             if (!inArray(x + dx * i, y + dy *i, mat)) {
-                    i--; //Devuelve la ANTERIOR posicion viable si se sale de la matriz
-                    break;
-                }
+                int[] res = { -1, -1 }; return res;
+            }
+            i++;
+        }
+        int[] res = { x + dx * i, y + dy *i };
+        return res;
+    }
+
+    public int[] nextSameColor(int x, int y, int dx, int dy, Cell.STATE color) {
+        int i = 1;
+        while(mat[x + dx * i][y + dy *i].getSolState() != color) {
+            if (!inArray(x + dx * i, y + dy *i, mat)) {
+                int[] res = { -1, -1 }; return res;
+            }
             i++;
         }
         int[] res = { x + dx * i, y + dy *i };
@@ -90,26 +103,25 @@ public class Game {
     }
 
     private boolean hint_VISIBLE_CELLS_COVERED(Hint hint, int x, int y, int i, int j, int cont) {
-        if (!mat[x][y].isFixed()) return false;
+        if (!mat[x][y].isFixed() || cont != mat[x][y].getNumber()) return false;
         int[] newPos = nextDiffColor(x, y, i, j, Cell.STATE.BLUE);
-        cont += Math.abs(newPos[0] - x) + Math.abs(newPos[1] - y);
         if (mat[newPos[0]][newPos[1]].getCurrState() == Cell.STATE.GREY) {
             hint.type_ = Hint.HintType.VISIBLE_CELLS_COVERED;
             hint.x_ = x;
             hint.y_ = y;
             return true;
         }
-        return cont == mat[x][y].getNumber();
+        return false;
     }
 
-    private boolean hint_CANNOT_SURPASS_LIMIT(Hint hint, int x, int y, int i, int j) {
-        int curCount = calculateNumber(x, y);
-        if (!mat[x][y].isFixed() || curCount >= mat[x][y].getNumber()) return false;
+    private boolean hint_CANNOT_SURPASS_LIMIT(Hint hint, int x, int y, int i, int j, int cont) {
+        if (!mat[x][y].isFixed() || cont >= mat[x][y].getNumber()) return false;
         int[] newPos = nextDiffColor(x, y, i, j, Cell.STATE.BLUE);
         if (mat[newPos[0]][newPos[1]].getCurrState() == Cell.STATE.GREY) {
             int[] newNewPos = nextDiffColor(newPos[0], newPos[1], i, j, Cell.STATE.BLUE);
+            if (newNewPos[0] < 0) return false;
             int newCont = Math.abs(newNewPos[0] - newPos[0]) + Math.abs(newNewPos[1] - newPos[1]);
-            if(curCount + newCont > mat[x][y].getNumber()){
+            if(cont + newCont > mat[x][y].getNumber()){
                 hint.type_ = Hint.HintType.CANNOT_SURPASS_LIMIT;
                 hint.x_ = newPos[0];
                 hint.y_ = newPos[1];
@@ -119,8 +131,26 @@ public class Game {
         return false;
     }
 
-    private boolean hint_MUST_PLACE_BLUE(Hint hint, int x, int y, int i, int j) {
-
+    private boolean hint_MUST_PLACE_BLUE(Hint hint, int x, int y, int i, int j, int cont) {
+        int[] newPos = nextDiffColor(x, y, i, j, Cell.STATE.BLUE);
+        if(cont == mat[x][y].getNumber() || newPos[0] < 0 || mat[newPos[0]][newPos[1]].getCurrState() == Cell.STATE.RED) return false;
+        int newCont = 0;
+        for(int k = -1; k <= 1; ++k) {
+            for (int l = -1; l <= 1; ++l) {
+                if ((k + l == 2) || (k + l == 0) || (k + l == -2)) continue;
+                if(i == k && j == l) continue;
+                int[] nextNoGrey = nextSameColor(x, y, k, l, Cell.STATE.GREY);
+                if(nextNoGrey[0] < 0) continue;
+                // -1 porque nextSameColor te deja en la casilla que no es del color
+                newCont += Math.abs(nextNoGrey[0] - 1 - newPos[0]) + Math.abs(nextNoGrey[1] - 1 - newPos[1]);
+            }
+        }
+        if(newCont + cont < mat[x][y].getNumber()){
+            hint.x_ = x+i;
+            hint.y_ = y+j;
+            hint.type_ = MUST_PLACE_BLUE;
+            return true;
+        }
         return false;
     }
 
@@ -143,9 +173,9 @@ public class Game {
         for(int i = -1; i <= 1; ++i) {
             for (int j = -1; j <= 1; ++j) {
                 if ((i + j == 2) || (i + j == 0) || (i + j == -2)) continue;
-                return hint_VISIBLE_CELLS_COVERED(hint, x, y, i, j, cont) ||
-                        hint_CANNOT_SURPASS_LIMIT(hint, x, y, i, j) ||
-                        hint_MUST_PLACE_BLUE(hint, x, y, i, j);
+                return hint_VISIBLE_CELLS_COVERED(hint, x, y, i, j, curCount) ||
+                        hint_CANNOT_SURPASS_LIMIT(hint, x, y, i, j, curCount) ||
+                        hint_MUST_PLACE_BLUE(hint, x, y, i, j, curCount);
 
             }
         }

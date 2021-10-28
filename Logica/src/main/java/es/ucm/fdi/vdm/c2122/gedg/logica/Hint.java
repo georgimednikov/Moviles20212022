@@ -19,9 +19,9 @@ public class Hint {
         ISOLATED_AND_EMPTY,
 
         //Pistas adicionales que por supuesto vamos a hacer
-        MONODIRECTIONAL_INCOMPLETE,
-        JUST_FILL_ALL,
-        NOT_ENOUGH_BLUES
+        //MONODIRECTIONAL_INCOMPLETE,
+        //JUST_FILL_ALL,
+        //NOT_ENOUGH_BLUES
     }
 
     public HintType type_;
