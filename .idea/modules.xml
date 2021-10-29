@@ -7,8 +7,8 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/EngineAndroid/practica1.EngineAndroid.iml" filepath="$PROJECT_DIR$/.idea/modules/EngineAndroid/practica1.EngineAndroid.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/EnginePC/practica1.EnginePC.iml" filepath="$PROJECT_DIR$/.idea/modules/EnginePC/practica1.EnginePC.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/LauncherAndroid/practica1.LauncherAndroid.iml" filepath="$PROJECT_DIR$/.idea/modules/LauncherAndroid/practica1.LauncherAndroid.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/LauncherPC/practica1.LauncherPC.iml" filepath="$PROJECT_DIR$/.idea/modules/LauncherPC/practica1.LauncherPC.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Logica/practica1.Logica.iml" filepath="$PROJECT_DIR$/.idea/modules/Logica/practica1.Logica.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/LauncherPC/practica1.launcherPC.iml" filepath="$PROJECT_DIR$/.idea/modules/LauncherPC/practica1.launcherPC.iml" />
     </modules>
   </component>
 </project>

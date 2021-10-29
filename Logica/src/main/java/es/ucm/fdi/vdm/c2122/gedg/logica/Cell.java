@@ -9,11 +9,14 @@ public class Cell {
     }
 
     private boolean fixed_ = false; //Si se puede modificar el estado
+    private int x_ = -1; //Posición
+    private int y_ = -1;
     private int number_ = 0; //Número de la celda
     private STATE currState_; //Color actual de la celda
     private STATE solState_; //Color correcto de la celda
 
-    public Cell(STATE solution){
+    public Cell(int x, int y, STATE solution){
+        x_ = x; y_ = y;
         solState_ = solution;
         currState_ = solState_;
     }
@@ -42,6 +45,8 @@ public class Cell {
     public STATE getSolState() { return solState_; }
     public STATE getCurrState() { return currState_; }
     public int getNumber() { return number_; }
+    public int getX() { return x_; }
+    public int getY() { return y_; }
 
     //Solo fija la celda (para cuando es roja) y java no permite parámetros por defecto
     public void fixCell() {
