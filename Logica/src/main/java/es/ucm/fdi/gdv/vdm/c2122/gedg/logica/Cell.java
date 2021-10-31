@@ -8,7 +8,7 @@ public class Cell {
         BLUE
     }
 
-    private boolean fixed_ = false; //Si se puede modificar el estado
+    private boolean fixed_; //Si se puede modificar el estado
     private int x_; //Posición
     private int y_;
     private int number_; //Número de la celda
@@ -18,8 +18,7 @@ public class Cell {
     public Cell(int x, int y){
         x_ = x;
         y_ = y;
-        number_ = -1;
-        currState_ = solState_ = STATE.GREY;
+        resetCell();
     }
 
     //Solo fija la celda (para cuando es roja) y java no permite parámetros por defecto
@@ -31,6 +30,12 @@ public class Cell {
     public void fixCell(STATE solution, int number) {
         number_ = number;
         fixCell(solution);
+    }
+
+    public void resetCell(){
+        number_ = -1;
+        currState_ = solState_ = STATE.GREY;
+        fixed_ = false;
     }
 
     public void applyHint(Hint h){
