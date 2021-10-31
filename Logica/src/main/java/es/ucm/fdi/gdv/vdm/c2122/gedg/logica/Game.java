@@ -7,7 +7,7 @@ public class Game {
 
     private final boolean DEBUG = true;
 
-    private final float blueProb = 0.8f; //Porbabilidad de que una celda sea azul en vez de roja en la solución
+    private final float blueProb = 0.8f; //Probabilidad de que una celda sea azul en vez de roja en la solución
     private final float fixedProb = 0.5f; //Probabilidad de que una celda sea fija
 
     int contMistakes = 0; //Número de celdas mal puestas
@@ -15,8 +15,8 @@ public class Game {
     private Vector<Cell> fixedBlueCells = new Vector<Cell>();
     private boolean solved = false;
 
-    public Game(int size) {
-        createBoard(size);
+    public Game(int size, char[][] mat) {
+        createBoard(size, mat);
     }
 
     static private Random rand = new Random(System.currentTimeMillis());
@@ -25,16 +25,18 @@ public class Game {
         return rand.nextFloat() < p;
     }
 
-    public void showInConsole(){
-        for (int i = 0; i < board.length; ++i) {
-            for (int j = 0; j < board[0].length; ++j) {
-                Cell.STATE s = board[i][j].getCurrState();
+    public void showInConsole(Cell[][] mat){
+        for (int i = 0; i < mat.length; ++i) {
+            for (int j = 0; j < mat[0].length; ++j) {
+                Cell.STATE s = mat[i][j].getCurrState();
                 switch (s) {
                     case RED:
                         System.out.print("r ");
                         break;
                     case BLUE:
-                        System.out.print(board[i][j].getNumber() + " ");
+                        if(mat[i][j].isFixed())
+                            System.out.print(mat[i][j].getNumber() + " ");
+                        else System.out.print("b ");
                         break;
                     case GREY:
                         System.out.print("0 ");
@@ -47,7 +49,7 @@ public class Game {
     }
 
     //Crea la matriz que representa el nivel de un tamaño dado
-    private void createBoard(int size) {
+    private void createBoard(int size, char[][] mat) {
         // Crea los objetos
         // Primero coloca un numero de casillas en posiciones aleatorias
         board = new Cell[size][size];
@@ -59,7 +61,6 @@ public class Game {
 
         int totalCells = size * size;
         Hint hint = null;
-        outer:
         while (hint == null) {
             int fixedCells = 0;
             if(!DEBUG) {
@@ -79,64 +80,49 @@ public class Game {
                 }
             }
             else {
-                readFromConsole();
+                fixedCells = readFromConsole(mat);
             }
-            Cell[][] mat = copyBoard(board);
-            if(DEBUG) showInConsole();
+            Cell[][] matAux = copyBoard(board);
+            if(DEBUG) showInConsole(board);
             int placedCells = 0;
             boolean tryAgain = true;
             int attempts = 0;
             while (tryAgain && attempts++ < 99) {
-                hint = giveHint(mat);
+                hint = giveHint(matAux);
                 tryAgain = hint != null;
                 if(tryAgain) {
-                    mat[hint.x_][hint.y_].applyHint(hint);
+                    matAux[hint.x_][hint.y_].applyHint(hint);
                     placedCells++;
-                    if (fixedCells + placedCells == totalCells) break outer;
+                    showInConsole(matAux);
                 }
+                if (fixedCells + placedCells == totalCells) return;
             }
         }
     }
 
-    private void readFromConsole(){
+    private int readFromConsole(char[][] mat){
+        int fixedCells = 0;
         for(int i = 0; i < board.length; ++i){
             for(int j = 0; j < board.length; ++j) {
-                char c = '?';
-                try {
-                    do {
-                        c = (char) System.in.read();
-                    }while(c == ' ' || c == '\n');
-                } catch (Exception e){
-                    for (int x = 0; x < board.length; ++x) {
-                        for (int y = 0; y < board.length; ++y) {
-                            board[x][y].resetCell(); //Por si ha habido un intento anterior
-                        }
-                    }
-                    System.out.println("MAL formato");
-                    readFromConsole();
-                    return;
-                }
+                char c = mat[i][j];
+
                 switch (c) {
                     case 'r':
                         board[i][j].fixCell(Cell.STATE.RED);
+                        fixedCells++;
+                        break;
+                    case '0':
                         break;
                     default: // numeros
                         int num = Character.getNumericValue(c);
-                        if(num == -1){
-                            for (int x = 0; x < board.length; ++x) {
-                                for (int y = 0; y < board.length; ++y) {
-                                    board[x][y].resetCell(); //Por si ha habido un intento anterior
-                                }
-                            }
-                            System.out.println("MAL numero");
-                            readFromConsole();
-                            return;
-                        }
                         board[i][j].fixCell(Cell.STATE.BLUE, num);
+                        fixedCells++;
+                        fixedBlueCells.add(board[i][j]);
                         break;
                 }
             }
         }
+        return fixedCells;
     }
 
     private Cell[][] copyBoard(Cell[][] orig) {
@@ -154,7 +140,7 @@ public class Game {
     //Si no hay, devuelve la última casilla que hay.
     public int[] nextDiffColor(Cell[][] mat, int x, int y, int dx, int dy, Cell.STATE color) {
         int i = 1;
-        while(inArray(mat, x + dx * i, y + dy *i) && mat[x + dx * i][y + dy *i].getSolState() == color) {
+        while(inArray(mat, x + dx * i, y + dy *i) && mat[x + dx * i][y + dy *i].getCurrState() == color) {
             i++;
         }
         if(!inArray(mat, x + dx * i, y + dy *i)){
@@ -168,7 +154,7 @@ public class Game {
     //Si no hay, devuelve la última casilla que hay.
     public int[] nextColorCell(Cell[][] mat, int x, int y, int dx, int dy, Cell.STATE color) {
         int i = 1;
-        while(inArray(mat, x + dx * i, y + dy *i) && mat[x + dx * i][y + dy *i].getSolState() != color) {
+        while(inArray(mat, x + dx * i, y + dy *i) && mat[x + dx * i][y + dy *i].getCurrState() != color) {
             i++;
         }
         if(!inArray(mat, x + dx * i, y + dy *i)){
@@ -234,10 +220,10 @@ public class Game {
             if (getHintFixedCell(hint, mat, fixedBlueCells.get(i))) return hint;
         }
         //Pistas basadas en celdas ordinarias
-        for (int i = 0; i < board.length; ++i) {
-            for (int j = 0; j < board[0].length; ++j) {
-                if (board[i][j].isFixed()) continue;
-                if (getHintRegularCell(hint, mat, board[i][j])) return hint;
+        for (int i = 0; i < mat.length; ++i) {
+            for (int j = 0; j < mat[0].length; ++j) {
+                if (mat[i][j].isFixed()) continue;
+                if (getHintRegularCell(hint, mat, mat[i][j])) return hint;
             }
         }
         return null; //No se han encontrado pistas
@@ -318,10 +304,10 @@ public class Game {
             int newCont;
             //Si la siguiente celda no es azul no se ha salido de la matriz y hay que volver a la ultima azul, la anterior
             //Si es azul, se ha salido de la matriz y ha devuelto la ultima azul
-            if (mat[newNewPos[0]][newNewPos[1]].getCurrState() != Cell.STATE.BLUE) {
-                newCont = distanceBetweenPos(cell.getX(), cell.getY(), newNewPos[0] - i, newNewPos[1] - j);
+            if ((newPos[0] == newNewPos[0] && newPos[1] == newNewPos[1]) || mat[newNewPos[0]][newNewPos[1]].getCurrState() == Cell.STATE.BLUE) {
+                newCont = distanceBetweenPos(newPos[0] - i, newPos[1] - j, newNewPos[0], newNewPos[1]);
             }
-            else newCont = distanceBetweenPos(cell.getX(), cell.getY(), newNewPos[0], newNewPos[1]);
+            else newCont = distanceBetweenPos(newPos[0], newPos[1], newNewPos[0], newNewPos[1]);
             //Si poner la casilla gris en azul supera el numero correcto
             if(cont + newCont > cell.getNumber()){
                 hint.type_ = Hint.HintType.CANNOT_SURPASS_LIMIT;
@@ -336,12 +322,7 @@ public class Game {
     private boolean hint_MUST_PLACE_BLUE(Hint hint, Cell[][] mat, Cell cell, int i, int j, int thisBlues) {
         if(thisBlues >= cell.getNumber()) return false;
         int x = cell.getX(); int y = cell.getY();
-        int[] thisDirRed = nextColorCell(mat, x, y, i, j, Cell.STATE.RED);
-        // Si es roja, no ha llegado al final y hay que contar hasta esa excluyendola
-        if(mat[thisDirRed[0]][thisDirRed[1]].getCurrState() == Cell.STATE.RED) {
-            thisDirRed[0] -= i;
-            thisDirRed[1] -= j;
-        }
+
         int otherBlues = 0;
         for(int k = -1; k <= 1; ++k) {
             for (int l = -1; l <= 1; ++l) {
@@ -353,13 +334,21 @@ public class Game {
                     otherDirRed[0] -= k;
                     otherDirRed[1] -= l;
                 }
-                otherBlues += distanceBetweenPos(x, y, otherDirRed[0], otherDirRed[1]);
+                int[] otherNextNoBlue = nextDiffColor(mat, x, y, k, l, Cell.STATE.BLUE);
+                // Si es gris, no ha llegado al final y hay que contar hasta esa excluyendola
+                if(mat[otherNextNoBlue[0]][otherNextNoBlue[1]].getCurrState() != Cell.STATE.BLUE) {
+                    otherNextNoBlue[0] -= k;
+                    otherNextNoBlue[1] -= l;
+                }
+                // Se suman las que se añadirian si se uniese desde la gris hasta la roja
+                otherBlues += distanceBetweenPos(otherNextNoBlue[0], otherNextNoBlue[1], otherDirRed[0], otherDirRed[1]);
             }
         }
         //Si las otras 3 direcciones juntas mas las casillas azules que ya ve no llegan al numero correcto
-        if(otherBlues < cell.getNumber()){
-            hint.x_ = thisDirRed[0];
-            hint.y_ = thisDirRed[1];
+        if(otherBlues + thisBlues < cell.getNumber()){
+            int[] thisFirstGrey = nextColorCell(mat, x, y, i, j, Cell.STATE.GREY);
+            hint.x_ = thisFirstGrey[0];
+            hint.y_ = thisFirstGrey[1];
             hint.type_ = Hint.HintType.MUST_PLACE_BLUE;
             return true;
         }
@@ -404,9 +393,14 @@ public class Game {
         for(int i = -1; i <= 1; ++i) {
             for (int j = -1; j <= 1; ++j) {
                 if ((i + j == 2) || (i + j == 0) || (i + j == -2)) continue;
-                int newX = x + i, newY = y + j;
-                //Para cada adyacente si no es roja no esta aislada
-                if (inArray(mat, newX, newY) && mat[newX][newY].getCurrState() != Cell.STATE.RED) return false;
+                //Para direccion buscar si se puede poner rojo porque no hay una azul bloqueada que podria llegar a esta
+                int adv = 1;
+                while (inArray(mat, x + i * adv, y + j * adv) &&
+                        ((mat[x + i * adv][y + j * adv].getCurrState() == Cell.STATE.BLUE && !mat[x + i * adv][y + j * adv].isFixed()) ||
+                    (mat[x + i * adv][y + j * adv].getCurrState() != Cell.STATE.RED))) {
+                        adv++;
+                }
+                if((mat[x + i * (adv - 1)][y + j * (adv - 1)].getCurrState() == Cell.STATE.BLUE && mat[x + i * (adv - 1)][y + j * (adv - 1)].isFixed())) return false;
             }
         }
         hint.x_ = cell.getX();
