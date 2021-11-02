@@ -11,6 +11,10 @@ public class MyClass {
             mat[i / side][i % side] = args[i].charAt(0);
         }
         Game g = new Game(4, mat);
+        int a = 0;
+        while(a < 3){
+            ++a;
+        }
     }
 
 }
