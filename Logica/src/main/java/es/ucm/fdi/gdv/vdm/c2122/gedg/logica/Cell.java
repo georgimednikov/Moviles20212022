@@ -32,6 +32,10 @@ public class Cell {
         fixCell(solution);
     }
 
+    public void setNumber(int number){
+        number_ = number;
+    }
+
     public void resetCell(){
         number_ = -1;
         currState_ = solState_ = STATE.GREY;
@@ -52,7 +56,7 @@ public class Cell {
         }
     }
 
-    //Cicla el color de la celda siguiendo el orden
+    //Cicla el color de la celda siguiendo el orden, para el juego
     public boolean changeState() {
         switch (currState_)
         {
