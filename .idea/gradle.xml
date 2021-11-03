@@ -10,7 +10,6 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/AndroidEngine" />
             <option value="$PROJECT_DIR$/Engine" />
             <option value="$PROJECT_DIR$/EngineAndroid" />
             <option value="$PROJECT_DIR$/EnginePC" />

@@ -102,8 +102,8 @@
     <orderEntry type="library" name="Gradle: androidx.print:print:1.0.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: androidx.annotation:annotation-experimental:1.0.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: androidx.constraintlayout:constraintlayout:2.1.1@aar" level="project" />
-    <orderEntry type="module" module-name="practica1.AndroidEngine" />
     <orderEntry type="module" module-name="practica1.Engine" />
     <orderEntry type="module" module-name="practica1.Logica" />
+    <orderEntry type="module" module-name="practica1.EngineAndroid" />
   </component>
 </module>
