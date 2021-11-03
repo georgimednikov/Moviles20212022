@@ -2,7 +2,7 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.engine;
 
 public interface Graphics {
     Image newImage(String name);
-    Font newFont(String filename, int size);
+    Font newFont(String filename, Color color, int size);
     void clear(Color color);
     void drawImage(Image image, int x, int y, int width, int height);
     void setColor(Color color);

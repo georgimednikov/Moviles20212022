@@ -1,26 +1,19 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Typeface;
-import android.os.Bundle;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.*;
 
 public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics {
 
-    Canvas canvas_;
-    Paint paint_;
+    private Context context_;
+    private Canvas canvas_;
 
-    public GraphicsAndroid() {
-        paint_ = new Paint();
+    public GraphicsAndroid(Context context) {
+        context_ = context;
     }
 
     @Override
@@ -29,13 +22,13 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
     }
 
     @Override
-    public Font newFont(String filename, int size, boolean isBold) {
-        return null;
+    public Font newFont(String filename, Color color, int size) {
+        return new FontAndroid(context_, filename, color, size);
     }
 
     @Override
-    public void clear(int color) {
-        canvas_.drawColor(color);
+    public void clear(Color color) {
+        canvas_.drawARGB(color.a, color.r, color.g, color.b);
     }
 
     @Override
@@ -44,9 +37,8 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
     }
 
     @Override
-    public void setColor(int color) {
-
-    }
+    @Deprecated
+    public void setColor(Color color) {}
 
     @Override
     public void fillCircle(int cx, int cy, int r) {
@@ -69,7 +61,7 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
     }
 
     @Override
-    public void translate() {
+    public void translate(int dx, int dy) {
 
     }
 
