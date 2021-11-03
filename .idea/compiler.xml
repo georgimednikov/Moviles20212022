@@ -4,6 +4,7 @@
     <bytecodeTargetLevel target="1.7">
       <module name="practica1.AndroidEngine" target="11" />
       <module name="practica1.app" target="11" />
+      <module name="practica1.EngineAndroid" target="11" />
       <module name="practica1.LauncherAndroid" target="11" />
     </bytecodeTargetLevel>
   </component>

@@ -1,9 +1,28 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.os.Bundle;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 
-public class Graphics implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics {
+public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics {
+
+    Canvas canvas_;
+    Paint paint_;
+
+    public GraphicsAndroid() {
+        paint_ = new Paint();
+    }
+
     @Override
     public Image newImage(String name) {
         return null;
@@ -16,7 +35,7 @@ public class Graphics implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics {
 
     @Override
     public void clear(int color) {
-
+        canvas_.drawColor(color);
     }
 
     @Override
