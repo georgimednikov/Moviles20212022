@@ -21,6 +21,11 @@ public class FontAndroid implements Font {
         size_ = size; paint_.setTextSize(size_);
     }
 
+    public boolean isLoaded() {
+        return font_ != null;
+    }
+    public Paint getPaint() { return paint_; }
+
     @Override
     public void setColor(Color color) { paint_.setARGB(color_.a, color_.r, color_.g, color_.b); }
     @Override
