@@ -3,26 +3,30 @@ import javax.swing.JFrame;
 import java.awt.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.*;
 
-public class GraphicsPC extends JFrame implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics  {
+public class GraphicsPC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics  {
 
+    private JFrame jf;
     private Graphics g;
+    private Graphics save;
     GraphicsPC(String title){
-        super(title);
-        g = getBufferStrategy().getDrawGraphics();
+        jf = new JFrame(title);
+        g = jf.getBufferStrategy().getDrawGraphics();
     }
 
     @Override
     public Image newImage(String name) {
-        return null;
+        return new ImagePC();
     }
 
     @Override
-    public Font newFont(String filename, int size, boolean isBold) {
-        return null;
+    public Font newFont(String filename, int size) {
+        return new FontPC(filename, size);
     }
 
     @Override
-    public void clear(int color) {
+    public void clear(Color color) {
+        setColor(color);
+        g.fillRect(0,0, getWidth(), getHeight());
     }
 
     @Override
@@ -30,14 +34,14 @@ public class GraphicsPC extends JFrame implements es.ucm.fdi.gdv.vdm.c2122.gedg.
 
     }
 
-
     @Override
-    public void setColor(int color) {
-
+    public void setColor(Color color) {
+    g.setColor(new java.awt.Color(color.r, color.g, color.b, color.a ));
     }
 
     @Override
     public void fillCircle(int cx, int cy, int r) {
+        g.drawOval(cx - r, cy - r, r, r);
     }
 
     @Override
@@ -56,8 +60,8 @@ public class GraphicsPC extends JFrame implements es.ucm.fdi.gdv.vdm.c2122.gedg.
     }
 
     @Override
-    public void translate() {
-
+    public void translate(int dx, int dy) {
+        g.translate(dx, dy);
     }
 
     @Override
@@ -67,11 +71,11 @@ public class GraphicsPC extends JFrame implements es.ucm.fdi.gdv.vdm.c2122.gedg.
 
     @Override
     public void save() {
-
+        save = g.create();
     }
 
     @Override
     public void restore() {
-
+        g = save.create();
     }
 }

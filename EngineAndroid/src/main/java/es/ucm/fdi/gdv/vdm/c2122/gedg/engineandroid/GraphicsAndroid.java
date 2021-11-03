@@ -1,21 +1,24 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 
-public class Graphics implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics {
+public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics {
+
     @Override
     public Image newImage(String name) {
         return null;
     }
 
     @Override
-    public Font newFont(String filename, int size, boolean isBold) {
+    public Font newFont(String filename, int size) {
         return null;
     }
 
     @Override
-    public void clear(int color) {
+    public void clear(Color color) {
 
     }
 
@@ -25,7 +28,7 @@ public class Graphics implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics {
     }
 
     @Override
-    public void setColor(int color) {
+    public void setColor(Color color) {
 
     }
 
@@ -50,7 +53,7 @@ public class Graphics implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics {
     }
 
     @Override
-    public void translate() {
+    public void translate(int dx, int dy) {
 
     }
 
