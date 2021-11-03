@@ -7,7 +7,7 @@ public class Game {
 
     private final boolean DEBUG = false;
 
-    private final float blueProb = 0.8f; //Probabilidad de que una celda sea azul en vez de roja en la solución
+    private final float blueProb = 0.7f; //Probabilidad de que una celda sea azul en vez de roja en la solución
     private final float fixedProb = 0.5f; //Probabilidad de que una celda sea fija
 
     int contMistakes = 0; //Número de celdas mal puestas
@@ -17,6 +17,7 @@ public class Game {
 
     public Game(int size, char[][] mat) {
         createBoard(size, mat);
+        showInConsole(board);
     }
 
     static private Random rand = new Random(System.currentTimeMillis());
@@ -62,15 +63,16 @@ public class Game {
         int totalCells = size * size;
         Hint hint = null;
         while (hint == null) {
+            fixedBlueCells = new Vector<Cell>();
             int fixedCells = 0;
             if(!DEBUG) {
                 //Se fijan ciertas celdas con valores aleatorios
                 for (int i = 0; i < size; ++i) {
                     for (int j = 0; j < size; ++j) {
                         board[i][j].resetCell(); //Por si ha habido un intento anterior
-                        if (getRandomBoolean(0.4f)) {
+                        if (getRandomBoolean(fixedProb)) {
                             if (getRandomBoolean(blueProb)) {
-                                board[i][j].fixCell(Cell.STATE.BLUE, rand.nextInt(size) + 1);
+                                board[i][j].fixCell(Cell.STATE.BLUE);
                                 fixedBlueCells.add(board[i][j]);
                             } else
                                 board[i][j].fixCell(Cell.STATE.RED);
@@ -78,12 +80,15 @@ public class Game {
                         }
                     }
                 }
+                for(Cell c : fixedBlueCells){
+                    c.setNumber(Math.min(Math.max(calculateNumber(board, c.getX(), c.getY()), rand.nextInt(size) + 1), size));
+                }
             }
             else {
                 fixedCells = readFromConsole(mat);
             }
             Cell[][] matAux = copyBoard(board);
-            showInConsole(board); // DEBUG
+            //showInConsole(board); // DEBUG
             int placedCells = 0;
             boolean tryAgain = true;
             int attempts = 0;
@@ -95,14 +100,15 @@ public class Game {
                 if(tryAgain) {
                     matAux[hint.x_][hint.y_].applyHint(hint);
                     placedCells++;
-                    showInConsole(matAux); // DEBUG
+                    //showInConsole(matAux); // DEBUG
                 }
                 if (fixedCells + placedCells == totalCells){
                     // Comprueba que los numeros tienen sentido, si no, reinicia
-                    for(int i = 0; i < fixedCells; ++i) {
+                    for(int i = 0; i < fixedBlueCells.size(); ++i) {
                         Cell c = fixedBlueCells.get(i);
                         if(calculateNumber(matAux, c.getX(), c.getY()) != c.getNumber()){
                             hint = null;
+                            //showInConsole(matAux); // DEBUG
                             break tries;
                         }
                     }
@@ -142,7 +148,8 @@ public class Game {
         for (int i = 0; i < orig.length; ++i) {
             for (int j = 0; j < orig[0].length; ++j) {
                 copy[i][j] = new Cell(orig[i][j].getX(), orig[i][j].getY());
-                if(orig[i][j].isFixed()) copy[i][j].fixCell(orig[i][j].getSolState(), orig[i][j].getNumber());
+                if (orig[i][j].isFixed())
+                    copy[i][j].fixCell(orig[i][j].getSolState(), orig[i][j].getNumber());
             }
         }
         return copy;

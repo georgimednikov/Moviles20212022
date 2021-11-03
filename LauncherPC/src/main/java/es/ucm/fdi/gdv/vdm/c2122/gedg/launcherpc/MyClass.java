@@ -10,9 +10,9 @@ public class MyClass {
         for(int i = 0; i < args.length; ++i) {
             mat[i / side][i % side] = args[i].charAt(0);
         }
-        Game g = new Game(4, mat);
+        Game g = new Game(5, mat);
         int a = 0;
-        while(a < 3){
+        while(true){
             ++a;
         }
     }
