@@ -10,11 +10,6 @@ public class ImagePC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image {
     }
 
     @Override
-    public void setPosition(int x, int y) {
-
-    }
-
-    @Override
     public void setSize(int width, int height) {
 
     }

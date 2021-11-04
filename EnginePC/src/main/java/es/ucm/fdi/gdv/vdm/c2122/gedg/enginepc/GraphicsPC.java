@@ -19,8 +19,8 @@ public class GraphicsPC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics
     }
 
     @Override
-    public Font newFont(String filename, Color color, int size) {
-        return new FontPC(filename, size);
+    public Font newFont(String filename, Color color, int size, boolean isBold) {
+        return new FontPC(filename, size, isBold);
     }
 
     @Override
