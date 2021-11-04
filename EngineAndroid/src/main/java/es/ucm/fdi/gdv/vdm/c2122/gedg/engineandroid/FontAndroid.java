@@ -15,9 +15,9 @@ public class FontAndroid implements Font {
     private int size_;
     private boolean isBold_;
 
-    public FontAndroid(Context context, String filename, Color color, int size, boolean isBold) {
+    public FontAndroid(Typeface font, Color color, int size, boolean isBold) {
         paint_ = new Paint();
-        font_ = Typeface.createFromAsset(context.getAssets(), filename); paint_.setTypeface(font_);
+        font_ = font; paint_.setTypeface(font_);
         color_ = color; paint_.setARGB(color_.a, color_.r, color_.g, color_.b);
         size_ = size; paint_.setTextSize(size_);
         isBold_ = isBold; paint_.setFakeBoldText(isBold_);

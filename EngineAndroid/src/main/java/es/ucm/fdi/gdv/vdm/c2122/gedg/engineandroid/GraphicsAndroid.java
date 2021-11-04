@@ -7,6 +7,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.view.SurfaceHolder;
 
 import java.io.InputStream;
 
@@ -14,6 +16,7 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.*;
 
 public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics {
 
+    private SurfaceHolder holder_;
     private Context context_;
     private Canvas canvas_;
     private Paint paint_; //Paint para cada elemento visual que lo utilice
@@ -22,6 +25,15 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
     public GraphicsAndroid(Context context) {
         context_ = context;
         paint_ = new Paint();
+    }
+
+    public void lock() {
+        while (!holder_.getSurface().isValid());
+        canvas_ = holder_.lockCanvas();
+    }
+
+    public void unlock() {
+        holder_.unlockCanvasAndPost(canvas_);
     }
 
     @Override
@@ -38,7 +50,8 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
 
     @Override
     public Font newFont(String filename, Color color, int size, boolean isBold) {
-        return new FontAndroid(context_, filename, color, size, isBold);
+        Typeface font = Typeface.createFromAsset(context_.getAssets(), filename);
+        return new FontAndroid(font, color, size, isBold);
     }
 
     @Override

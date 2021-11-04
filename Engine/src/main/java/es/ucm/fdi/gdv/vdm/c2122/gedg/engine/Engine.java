@@ -5,6 +5,6 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Application;
 public interface Engine {
     Graphics getGraphics();
     Input getInput();
-    void setApplication(Application a);
     void run();
+    void setApplication(Application a);
 }
