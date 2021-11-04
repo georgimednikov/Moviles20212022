@@ -14,7 +14,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.launcherandroid.databinding.ActivityMainBinding;
-import es.ucm.fdi.gdv.vdm.c2122.gedg.logica.Game;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.logica.OhnO;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Game g = new Game(4);
+        OhnO g = new OhnO(4);
 
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());

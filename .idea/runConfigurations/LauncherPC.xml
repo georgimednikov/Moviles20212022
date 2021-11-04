@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="LauncherPC" type="Application" factoryName="Application">
     <option name="ALTERNATIVE_JRE_PATH" value="Android API 31 Platform" />
-    <option name="MAIN_CLASS_NAME" value="es.ucm.fdi.gdv.vdm.c2122.gedg.launcherpc.MyClass" />
+    <option name="MAIN_CLASS_NAME" value="es.ucm.fdi.gdv.vdm.c2122.gedg.launcherpc.LauncherPC" />
     <module name="practica1.LauncherPC" />
     <option name="PROGRAM_PARAMETERS" value="1 0 r 0 r 0 0 0 0 0 0 0 0 0 0 0" />
     <method v="2">
