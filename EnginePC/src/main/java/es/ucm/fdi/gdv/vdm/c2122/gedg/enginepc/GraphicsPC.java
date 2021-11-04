@@ -8,8 +8,8 @@ public class GraphicsPC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics
     private JFrame jf;
     private Graphics g;
     private Graphics save;
-    GraphicsPC(String title){
-        jf = new JFrame(title);
+    GraphicsPC(JFrame jf){
+        while(jf.getBufferStrategy() == null) {}
         g = jf.getBufferStrategy().getDrawGraphics();
     }
 
@@ -19,7 +19,7 @@ public class GraphicsPC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics
     }
 
     @Override
-    public Font newFont(String filename, int size) {
+    public Font newFont(String filename, Color color, int size) {
         return new FontPC(filename, size);
     }
 
@@ -41,22 +41,22 @@ public class GraphicsPC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics
 
     @Override
     public void fillCircle(int cx, int cy, int r) {
-        g.drawOval(cx - r, cy - r, r, r);
+        g.fillOval(cx - r , cy - r , 2*r, 2*r);
     }
 
     @Override
-    public void drawText(String text, int x, int y) {
+    public void drawText(Font font, String text, int x, int y) {
 
     }
 
     @Override
     public int getWidth() {
-        return 0;
+        return jf.getWidth();
     }
 
     @Override
     public int getHeight() {
-        return 0;
+        return jf.getHeight();
     }
 
     @Override
@@ -65,7 +65,7 @@ public class GraphicsPC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics
     }
 
     @Override
-    public void scale() {
+    public void scale(float sx, float sy) {
 
     }
 
