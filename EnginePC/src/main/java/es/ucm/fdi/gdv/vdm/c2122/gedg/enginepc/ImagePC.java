@@ -9,7 +9,6 @@ public class ImagePC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image {
     ImagePC() {
     }
 
-    @Override
     public void setPosition(int x, int y) {
 
     }

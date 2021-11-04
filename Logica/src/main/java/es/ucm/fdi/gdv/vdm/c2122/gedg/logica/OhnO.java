@@ -64,7 +64,6 @@ public class OhnO implements Application {
     public void render() {
         switch (currState_) {
             case START:
-                System.out.println("Render");
                 eng_.getGraphics().setColor(new Color(0,255,0,255));
                 eng_.getGraphics().fillCircle(300,200, 50);
                 break;

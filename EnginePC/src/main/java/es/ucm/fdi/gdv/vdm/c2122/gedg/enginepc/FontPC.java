@@ -22,6 +22,11 @@ public class FontPC extends java.awt.Font implements Font {
     }
 
     @Override
+    public void setBold(boolean isBold) {
+
+    }
+
+    @Override
     public Color getColor() {
         return new Color();
     }
