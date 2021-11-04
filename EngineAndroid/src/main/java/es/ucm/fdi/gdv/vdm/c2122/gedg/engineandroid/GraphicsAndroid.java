@@ -1,8 +1,14 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 
 import android.content.Context;
+import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
+
+import java.io.InputStream;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.*;
 
@@ -19,13 +25,20 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
     }
 
     @Override
-    public Image newImage(String name) {
-        return null;
+    public Image newImage(String filename) {
+        try {
+            InputStream stream = context_.getAssets().open(filename);
+            Bitmap sprite = BitmapFactory.decodeStream(stream);
+            return new ImageAndroid(sprite);
+        }
+        catch(Exception e) {
+            return null;
+        }
     }
 
     @Override
-    public Font newFont(String filename, Color color, int size) {
-        return new FontAndroid(context_, filename, color, size);
+    public Font newFont(String filename, Color color, int size, boolean isBold) {
+        return new FontAndroid(context_, filename, color, size, isBold);
     }
 
     @Override
@@ -35,7 +48,10 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
 
     @Override
     public void drawImage(Image image, int x, int y, int width, int height) {
-
+        ImageAndroid img = (ImageAndroid) image;
+        Rect src = new Rect(0, 0, img.getWidth(), img.getHeight());
+        Rect dst = new Rect(x, y, width, height);
+        canvas_.drawBitmap(img.getBitmap(), src, dst, paint_);
     }
 
     @Override
