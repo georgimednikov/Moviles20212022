@@ -18,6 +18,7 @@ public class OhnO implements Application {
 
     int contMistakes = 0; //Número de celdas mal puestas
     private Cell[][] board;
+    private Cell[][] solBoard;
     private Vector<Cell> fixedBlueCells = new Vector<Cell>();
     private boolean solved = false;
 
@@ -140,7 +141,9 @@ public class OhnO implements Application {
             else {
                 fixedCells = readFromConsole(mat);
             }
-            Cell[][] matAux = copyBoard(board);
+            // Se crea la solucion en solBoard
+            contMistakes = size * size - fixedCells;
+            solBoard = copyBoard(board);
             //showInConsole(board); // DEBUG
             int placedCells = 0;
             boolean tryAgain = true;
@@ -148,10 +151,10 @@ public class OhnO implements Application {
             // Intenta rellenar la matriz auxiliar con las pistas, si no es capaz, no es resoluble
             tries:
             while (tryAgain && attempts++ < 99) {
-                hint = giveHint(matAux);
+                hint = giveHint(solBoard);
                 tryAgain = hint != null;
                 if(tryAgain) {
-                    matAux[hint.x_][hint.y_].applyHint(hint);
+                    solBoard[hint.x_][hint.y_].applyHint(hint);
                     placedCells++;
                     //showInConsole(matAux); // DEBUG
                 }
@@ -159,7 +162,7 @@ public class OhnO implements Application {
                     // Comprueba que los numeros tienen sentido, si no, reinicia
                     for(int i = 0; i < fixedBlueCells.size(); ++i) {
                         Cell c = fixedBlueCells.get(i);
-                        if(calculateNumber(matAux, c.getX(), c.getY()) != c.getNumber()){
+                        if(calculateNumber(solBoard, c.getX(), c.getY()) != c.getNumber()){
                             hint = null;
                             //showInConsole(matAux); // DEBUG
                             break tries;
@@ -202,7 +205,7 @@ public class OhnO implements Application {
             for (int j = 0; j < orig[0].length; ++j) {
                 copy[i][j] = new Cell(orig[i][j].getX(), orig[i][j].getY());
                 if (orig[i][j].isFixed())
-                    copy[i][j].fixCell(orig[i][j].getSolState(), orig[i][j].getNumber());
+                    copy[i][j].fixCell(orig[i][j].getCurrState(), orig[i][j].getNumber());
             }
         }
         return copy;
@@ -270,16 +273,15 @@ public class OhnO implements Application {
     }
 
     //Cambia el estado de una celda. Si ha resuelto el nivel, devuelve true
-    public boolean changeCell(int i, int j) {
-        if (!board[i][j].isFixed()) {
-            if (board[i][j].isRight()) {
+    public boolean changeCell(int x, int y) {
+        if (!board[x][y].isFixed()) {
+            board[x][y].changeState();
+            if(board[x][y] != solBoard[x][y]){
                 contMistakes++;
-            }
-            if (board[i][j].changeState()) {
+            } else{
                 contMistakes--;
-                if (contMistakes == 0) solved = true;
             }
-            return true;
+            return contMistakes == 0;
         }
         return false;
     }
