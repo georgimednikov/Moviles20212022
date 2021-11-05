@@ -18,5 +18,4 @@ public class LauncherPC {
         pc.setApplication(g);
         pc.run();
     }
-
 }

@@ -20,7 +20,7 @@ public class EngineAndroid extends SurfaceView implements Engine, Runnable {
 
     public EngineAndroid(Context context) {
         super(context);
-        input_ = new InputAndroid(context);
+        input_ = new InputAndroid();
         //TODO: No tengo nada claro que graphics tenga que tener el holder
         graphics_ = new GraphicsAndroid(context, getHolder());
     }
