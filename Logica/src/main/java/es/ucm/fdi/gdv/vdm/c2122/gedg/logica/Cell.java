@@ -13,7 +13,6 @@ public class Cell {
     private int y_;
     private int number_; //Número de la celda
     private STATE currState_; //Color actual de la celda
-    private STATE solState_; //Color correcto de la celda
 
     public Cell(int x, int y){
         x_ = x;
@@ -23,7 +22,7 @@ public class Cell {
 
     //Solo fija la celda (para cuando es roja) y java no permite parámetros por defecto
     public void fixCell(STATE solution) {
-        currState_ = solState_ = solution;
+        currState_ = solution;
         fixed_ = true;
     }
     //Fija la celda y le asigna el número de celdas contiguas azules
@@ -38,7 +37,7 @@ public class Cell {
 
     public void resetCell(){
         number_ = -1;
-        currState_ = solState_ = STATE.GREY;
+        currState_ = STATE.GREY;
         fixed_ = false;
     }
 
@@ -57,7 +56,7 @@ public class Cell {
     }
 
     //Cicla el color de la celda siguiendo el orden, para el juego
-    public boolean changeState() {
+    public void changeState() {
         switch (currState_)
         {
             case RED:
@@ -67,17 +66,9 @@ public class Cell {
             case GREY:
                 currState_ = STATE.BLUE;
         }
-        return currState_ == solState_;
-    }
-
-    //Pone la casilla gris
-    public void setGrey() {
-        if (!fixed_) currState_ = STATE.GREY;
     }
 
     public boolean isFixed() { return fixed_; }
-    public boolean isRight() { return currState_ == solState_; }
-    public STATE getSolState() { return solState_; }
     public STATE getCurrState() { return currState_; }
     public int getNumber() { return number_; }
     public int getX() { return x_; }
