@@ -1,6 +1,5 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.engine;
 
-
 public class TouchEvent {
     public int x;
     public int y;

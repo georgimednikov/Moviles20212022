@@ -2,11 +2,17 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 import java.util.Random;
 import java.util.*;
 
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Application;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 
-public class Game {
 
+public class OhnO implements Application {
+
+    private enum State {START, LEVEL_SELECTION, GAME}
+    Engine eng_;
     private final boolean DEBUG = false;
-
+    private State currState_ = State.START;
     private final float blueProb = 0.7f; //Probabilidad de que una celda sea azul en vez de roja en la solución
     private final float fixedProb = 0.5f; //Probabilidad de que una celda sea fija
 
@@ -16,15 +22,62 @@ public class Game {
     private Vector<Cell> fixedBlueCells = new Vector<Cell>();
     private boolean solved = false;
 
-    public Game(int size, char[][] mat) {
+    public OhnO(int size, char[][] mat) {
         createBoard(size, mat);
         showInConsole(board);
+    }
+
+    public OhnO(int size) {
+        createBoard(size, null);
+        showInConsole(board);
+    }
+    @Override
+    public void setEngine(Engine eng) {
+        this.eng_ = eng;
     }
 
     static private Random rand = new Random(System.currentTimeMillis());
     static private boolean getRandomBoolean(float p){
         assert p > 1.0f && p < 0.0f: String.format("getRandomBoolean recibe un número entre 0 y 1: (%d)", p);
         return rand.nextFloat() < p;
+    }
+
+
+    @Override
+    public boolean init() {
+        createBoard(4, null);
+        return true;
+    }
+
+    @Override
+    public void update() {
+        switch (currState_) {
+            case START:
+                break;
+            case LEVEL_SELECTION:
+                break;
+            case GAME:
+                break;
+        }
+    }
+
+    @Override
+    public void render() {
+        switch (currState_) {
+            case START:
+                eng_.getGraphics().setColor(new Color(0,255,0,255));
+                eng_.getGraphics().fillCircle(300,200, 50);
+                break;
+            case LEVEL_SELECTION:
+                break;
+            case GAME:
+                break;
+        }
+    }
+
+    @Override
+    public boolean close() {
+        return false;
     }
 
     public void showInConsole(Cell[][] mat){
@@ -432,6 +485,7 @@ public class Game {
         hint.type_ = Hint.HintType.BLUE_BUT_ISOLATED;
         return true;
     }
+
     //endregion
 //endregion
 }

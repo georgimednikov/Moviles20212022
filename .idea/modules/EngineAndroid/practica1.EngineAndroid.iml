@@ -27,13 +27,14 @@
     </facet>
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
-    <output url="file://$MODULE_DIR$/../../../EngineAndroid/build/intermediates/javac/debug/classes" />
-    <output-test url="file://$MODULE_DIR$/../../../EngineAndroid/build/intermediates/javac/debugUnitTest/classes" />
+    <output url="file://$MODULE_DIR$/../../../Engineandroid/build/intermediates/javac/debug/classes" />
+    <output-test url="file://$MODULE_DIR$/../../../Engineandroid/build/intermediates/javac/debugUnitTest/classes" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../../EngineAndroid">
       <sourceFolder url="file://$MODULE_DIR$/../../../EngineAndroid/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../../EngineAndroid/src/androidTest/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../../EngineAndroid/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../EngineAndroid/src/main/res" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/../../../EngineAndroid/.gradle" />
       <excludeFolder url="file://$MODULE_DIR$/../../../EngineAndroid/build" />
     </content>

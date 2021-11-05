@@ -1,21 +1,22 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 
+import android.graphics.Bitmap;
+
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 
 public class ImageAndroid implements Image {
 
-    private int x_;
-    private int y_;
+    private Bitmap sprite_;
     private int width_;
     private int height_;
 
-    public ImageAndroid(String filename, int x, int y, int width, int height) {
-        x_ = x; y_ = y;
-        width_ = width; height_ = height;
+    public ImageAndroid(Bitmap sprite) {
+        sprite_ = sprite;
+        width_ = sprite_.getWidth(); height_ = sprite_.getHeight();
     }
 
-    @Override
-    public void setPosition(int x, int y) { x_ = x; y_ = y; }
+    public Bitmap getBitmap() { return sprite_; }
+
     @Override
     public void setSize(int width, int height) { width_ = width; height_ = height; }
     @Override

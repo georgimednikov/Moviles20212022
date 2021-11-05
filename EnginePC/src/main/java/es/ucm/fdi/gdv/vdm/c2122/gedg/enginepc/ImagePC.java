@@ -10,6 +10,11 @@ public class ImagePC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image {
     }
 
     @Override
+    public void setSize(int width, int height) {
+
+    }
+
+    @Override
     public int getWidth() {
         return 0;
     }

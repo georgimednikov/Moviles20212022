@@ -13,20 +13,29 @@ public class FontAndroid implements Font {
     private Typeface font_;
     private Color color_;
     private int size_;
+    private boolean isBold_;
 
-    public FontAndroid(Context context, String filename, Color color, int size) {
+    public FontAndroid(Typeface font, Color color, int size, boolean isBold) {
         paint_ = new Paint();
-        font_ = Typeface.createFromAsset(context.getAssets(), filename); paint_.setTypeface(font_);
+        font_ = font; paint_.setTypeface(font_);
         color_ = color; paint_.setARGB(color_.a, color_.r, color_.g, color_.b);
         size_ = size; paint_.setTextSize(size_);
+        isBold_ = isBold; paint_.setFakeBoldText(isBold_);
     }
 
+    public boolean isLoaded() {
+        return font_ != null;
+    }
+    public Paint getPaint() { return paint_; }
+
     @Override
-    public void setColor(Color color) { paint_.setARGB(color_.a, color_.r, color_.g, color_.b); }
+    public void setColor(Color color) { color_ = color; paint_.setARGB(color_.a, color_.r, color_.g, color_.b); }
     @Override
     public void setSize(int size) {
-        paint_.setTextSize(size_);
+        size_ = size; paint_.setTextSize(size_);
     }
+    @Override
+    public void setBold(boolean isBold) { isBold_ = isBold; paint_.setFakeBoldText(isBold_); }
     @Override
     public Color getColor() {
         return color_;
