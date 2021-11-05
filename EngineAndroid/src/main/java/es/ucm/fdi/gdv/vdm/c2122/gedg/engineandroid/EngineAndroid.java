@@ -1,14 +1,15 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 
 import android.content.Context;
-import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Application;
 
-public class EngineAndroid implements Engine, Runnable {
+//TODO: No tengo nada claro que tenga que extendear SurfaceView
+public class EngineAndroid extends SurfaceView implements Engine, Runnable {
 
     private Thread renderThread_;
     private boolean running_;
@@ -18,8 +19,10 @@ public class EngineAndroid implements Engine, Runnable {
     private Application app_;
 
     public EngineAndroid(Context context) {
-        input_ = new InputAndroid();
-        graphics_ = new GraphicsAndroid(context);
+        super(context);
+        input_ = new InputAndroid(context);
+        //TODO: No tengo nada claro que graphics tenga que tener el holder
+        graphics_ = new GraphicsAndroid(context, getHolder());
     }
 
     public void setApplication(Application a) {
@@ -72,4 +75,6 @@ public class EngineAndroid implements Engine, Runnable {
     public Input getInput() {
         return input_;
     }
+    @Override
+    public boolean close() { return false; }
 }

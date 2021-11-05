@@ -22,8 +22,9 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
     private Paint paint_; //Paint para cada elemento visual que lo utilice
     private int saveCalled = 0; //Contador para que no se pueda llamar mas veces a restore que a save
 
-    public GraphicsAndroid(Context context) {
+    public GraphicsAndroid(Context context, SurfaceHolder holder) {
         context_ = context;
+        holder_ = holder;
         paint_ = new Paint();
     }
 
