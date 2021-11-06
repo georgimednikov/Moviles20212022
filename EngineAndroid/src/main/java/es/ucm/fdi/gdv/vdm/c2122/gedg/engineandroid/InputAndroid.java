@@ -1,12 +1,13 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 
+import android.view.MotionEvent;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.awt.event.*;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
-public class InputAndroid implements MouseListener, Input {
+public class InputAndroid implements Input {
 
     private final int startingEvents = 5;
     private List<TouchEvent> events_;
@@ -25,18 +26,42 @@ public class InputAndroid implements MouseListener, Input {
     synchronized private TouchEvent getEvent() {
         TouchEvent e;
         if (freeEvents_.isEmpty()) e = new TouchEvent();
-        else e = freeEvents_.get(0);
+        else {
+            e = freeEvents_.remove(0);
+        }
         return e;
     }
 
-    private void passEvent(MouseEvent e, TouchEvent.TouchType type){
+    public boolean createTouchEvent(MotionEvent e) {
+        TouchEvent event = getEvent();
+        switch (e.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                event.type = TouchEvent.TouchType.PRESS;
+                break;
+            case MotionEvent.ACTION_UP:
+                event.type = TouchEvent.TouchType.LIFT;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                event.type = TouchEvent.TouchType.DRAG;
+                break;
+        }
+        event.finger = e.getPointerId(0);
+        addEvent(event);
+        return true;
+    }
+    @Override
+    public List<TouchEvent> getTouchEvents() {
+        return events_;
+    }
+}
+
+/*    private void passEvent(MouseEvent e, TouchEvent.TouchType type){
         TouchEvent event = getEvent();
         event.type = type;
-        event.finger = e.getPointerId(0); //TODO: NO SE SI LA ID ESTA BIEN (?)
+        event.finger = e.getPointerId(0);
         event.x = (int)e.getX(event.finger); event.y = (int)e.getY(event.finger);
         addEvent(event);
     }
-
     @Override
     public void mousePressed(MouseEvent e) {
         passEvent(e, TouchEvent.TouchType.PRESS);
@@ -48,9 +73,4 @@ public class InputAndroid implements MouseListener, Input {
     @Override
     public void mouseDragged(MouseEvent e) {
         passEvent(e, TouchEvent.TouchType.DRAG);
-    }
-    @Override
-    public List<TouchEvent> getTouchEvents() {
-        return events_;
-    }
-}
+    }*/
