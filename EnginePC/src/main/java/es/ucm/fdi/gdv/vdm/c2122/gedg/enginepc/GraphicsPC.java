@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.*;
 
@@ -61,15 +62,19 @@ public class GraphicsPC extends GraphicsCommon {
 
     @Override
     public void drawText(Font font, String text, int x, int y, boolean centered) {
+
         FontPC f = (FontPC) font;
         g_.setFont(f.getFont());
-        FontRenderContext frc = new FontRenderContext(new AffineTransform(), true, true);
-        int verticalOffset, horizontalOffset; verticalOffset = horizontalOffset = 0;
-        if (centered) {
-            verticalOffset = (int)(f.getFont().getStringBounds(text, frc).getHeight()) / 2;
-            horizontalOffset = (int)(f.getFont().getStringBounds(text, frc).getWidth()) / 2;
-        }
-        g_.drawString(text, x - horizontalOffset, y - verticalOffset);
+        //Stack Overflow me susurró que hiciera esto
+        FontRenderContext frc = new FontRenderContext(null, true, true);
+        Rectangle2D r2D = f.getFont().getStringBounds(text, frc);
+        int rWidth = (int)Math.round(r2D.getWidth());
+        int rHeight = (int)Math.round(r2D.getHeight());
+        int tX = (int)Math.round(r2D.getX());
+        int tY = (int)Math.round(r2D.getY());
+        int a = (int)(x - (rWidth / 2) - tX);
+        int b = (int)(y - (rHeight / 2) - tY);
+        g_.drawString(text, a, b);
     }
 
     @Override

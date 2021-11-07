@@ -24,7 +24,17 @@ public class Hint {
         //NOT_ENOUGH_BLUES
     }
 
-    public HintType type_;
-    public int x_ = -1, y_ = -1;
+    public String[] hintText = {
+            "VISIBLE_CELLS_COVERED",
+            "CANNOT_SURPASS_LIMIT",
+            "MUST_PLACE_BLUE",
+            "TOO_MANY_ADJACENT",
+            "NOT_ENOUGH_BUT_CLOSED",
+            "BLUE_BUT_ISOLATED",
+            "ISOLATED_AND_EMPTY"
+    };
+
+    public HintType type;
+    public int x = -1, y = -1;
 }
 
