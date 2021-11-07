@@ -1,5 +1,7 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.enginepc;
 import javax.swing.JFrame;
+
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
@@ -71,7 +73,7 @@ public class GraphicsPC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics
 
     @Override
     public void scale(float sx, float sy) {
-
+        jf.getContentPane().setPreferredSize(new Dimension((int)sx, (int)sy));
     }
 
     @Override
