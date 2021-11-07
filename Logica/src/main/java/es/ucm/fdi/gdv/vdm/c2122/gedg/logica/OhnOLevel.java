@@ -19,6 +19,9 @@ public class OhnOLevel implements Application {
     private final float blueProb = 0.7f; //Probabilidad de que una celda sea azul en vez de roja en la solución
     private final float fixedProb = 0.5f; //Probabilidad de que una celda sea fija
 
+    int boardSize;
+    int numCells;
+    int coloredCells = 0;
     int contMistakes = 0; //Número de celdas mal puestas
     private Cell[][] board;
     private Cell[][] solBoard;
@@ -48,7 +51,10 @@ public class OhnOLevel implements Application {
 
     //Textos
     private String infoText;
+    private String progressText;
+    private int progressPosY = 0;
     private Color black = new Color(0, 0, 0, 255);
+    private Color grey = new Color(150, 150, 150, 255);
 
     //DEBUG
     public OhnOLevel(int size, char[][] mat) {
@@ -69,7 +75,7 @@ public class OhnOLevel implements Application {
     }
 
     //Cambia el estado de una celda. Si ha resuelto el nivel, devuelve true
-    public void changeCell(int x, int y) {
+    public boolean changeCell(int x, int y) {
         resetInterface();
         if (!board[x][y].isFixed()) {
             board[x][y].changeState();
@@ -81,6 +87,7 @@ public class OhnOLevel implements Application {
             }
             solved = contMistakes == 0;
         }
+        return board[x][y].getCurrState() != Cell.STATE.GREY;
     }
 
     private void undoMove() {
@@ -122,13 +129,17 @@ public class OhnOLevel implements Application {
         while (!events.isEmpty()) {
             event = events.remove(0);
             if (event.type != TouchEvent.TouchType.PRESS) continue;
-            for (int i = 0; i < board.length; ++i) {
-                for (int j = 0; j < board.length; ++j) {
+            for (int i = 0; i < boardSize; ++i) {
+                for (int j = 0; j < boardSize; ++j) {
                     if (checkCollisionCircle(
                             boardOffsetX + cellRadius * (i + 1) + cellSeparation * i,
                             boardOffsetY + cellRadius * (j + 1) + cellSeparation * j,
                             cellRadius, event.x, event.y)) {
-                        if (!board[i][j].isFixed()) changeCell(i, j);
+                        if (!board[i][j].isFixed()) {
+                            if (changeCell(i, j)) coloredCells++;
+                            else coloredCells--;
+                            progressText = (coloredCells / numCells * 100) + "%";
+                        }
                         else fixedTapped = true;
                         continue;
                     }
@@ -169,6 +180,8 @@ public class OhnOLevel implements Application {
         //g.clear(new Color(50, 0, 200, 0));
         Font info = g.newFont("assets/fonts/JosefinSans-Bold.ttf", black, 50, false);
         g.drawText(info, infoText, g.getWidth() / 2, g.getHeight() / 8, true);
+        Font progress = g.newFont("assets/fonts/JosefinSans-Bold.ttf", grey, 25, false);
+        g.drawText(progress, progressText, g.getWidth() / 2, progressPosY, true);
         Color blue = new Color(0, 0, 255, 255);
         Color grey = new Color(120, 120, 120, 255);
         Color red = new Color(255, 0, 0, 255);
@@ -176,8 +189,8 @@ public class OhnOLevel implements Application {
             g.setColor(new Color(0, 0, 0, 255));
             g.fillCircle(highlightPosX, highlightPosY, highlightRadius);
         }
-        for (int i = 0; i < board.length; ++i) {
-            for (int j = 0; j < board.length; ++j) {
+        for (int i = 0; i < boardSize; ++i) {
+            for (int j = 0; j < boardSize; ++j) {
                 switch (board[i][j].getCurrState()) {
                     case BLUE:
                         g.setColor(blue);
@@ -233,8 +246,8 @@ public class OhnOLevel implements Application {
     //region Auxiliary Methods
     private int readFromConsole(char[][] mat) {
         int fixedCells = 0;
-        for (int i = 0; i < board.length; ++i) {
-            for (int j = 0; j < board.length; ++j) {
+        for (int i = 0; i < boardSize; ++i) {
+            for (int j = 0; j < boardSize; ++j) {
                 char c = mat[i][j];
 
                 switch (c) {
@@ -266,10 +279,11 @@ public class OhnOLevel implements Application {
                 board[i][j] = new Cell(i, j);
             }
         }
-
-        int totalCells = size * size;
+        boardSize = size;
+        numCells = size * size;
         Hint hint = null;
         while (hint == null) {
+            coloredCells = 0;
             fixedBlueCells = new Vector<Cell>();
             int fixedCells = 0;
             if (!DEBUG) {
@@ -277,6 +291,7 @@ public class OhnOLevel implements Application {
                 for (int i = 0; i < size; ++i) {
                     for (int j = 0; j < size; ++j) {
                         board[i][j].resetCell(); //Por si ha habido un intento anterior
+                        coloredCells++;
                         if (getRandomBoolean(fixedProb)) {
                             if (getRandomBoolean(blueProb)) {
                                 board[i][j].fixCell(Cell.STATE.BLUE);
@@ -310,13 +325,12 @@ public class OhnOLevel implements Application {
                     placedCells++;
                     //showInConsole(matAux); // DEBUG
                 }
-                if (fixedCells + placedCells == totalCells) {
+                if (fixedCells + placedCells == numCells) {
                     // Comprueba que los numeros tienen sentido, si no, reinicia
                     for (int i = 0; i < fixedBlueCells.size(); ++i) {
                         Cell c = fixedBlueCells.get(i);
                         if (calculateNumber(solBoard, c.getX(), c.getY()) != c.getNumber()) {
                             hint = null;
-                            //showInConsole(matAux); // DEBUG
                             break tries;
                         }
                     }
@@ -324,6 +338,7 @@ public class OhnOLevel implements Application {
                 }
             }
         }
+        progressText = (coloredCells / numCells * 100) + "%";
     }
 
     private Cell[][] copyBoard(Cell[][] orig) {
@@ -411,7 +426,7 @@ public class OhnOLevel implements Application {
     }
 
     private void resetInterface() {
-        infoText = board.length + " x " + board.length;
+        infoText = boardSize + " x " + boardSize;
         fixedTapped = givingHint = false;
     }
     //endregion
@@ -472,8 +487,8 @@ public class OhnOLevel implements Application {
             if (getHintFixedCell(hint, board, fixedBlueCells.get(i))) return hint;
         }
         //Pistas basadas en celdas ordinarias
-        for (int i = 0; i < board.length; ++i) {
-            for (int j = 0; j < board[0].length; ++j) {
+        for (int i = 0; i < boardSize; ++i) {
+            for (int j = 0; j < boardSize; ++j) {
                 if (board[i][j].isFixed()) continue;
                 if (getHintRegularCell(hint, board, board[i][j])) return hint;
             }
