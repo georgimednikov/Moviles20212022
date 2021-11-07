@@ -27,7 +27,6 @@ public class GraphicsPC extends GraphicsCommon {
         return new FontPC(filename, size, isBold);
     }
 
-
     @Override
     public void clear(Color color) {
         setColor(color);
@@ -36,8 +35,7 @@ public class GraphicsPC extends GraphicsCommon {
 
     @Override
     public void drawImage(Image image, int x, int y, int width, int height) {
-        image.setSize(width,height);
-        g_.drawImage(((ImagePC)image).getImage(), x, y, width, height, ((ImagePC)image).getObserver());
+        g_.drawImage(((ImagePC)image).getImage(), x, y, width, height, null);
     }
 
     @Override
