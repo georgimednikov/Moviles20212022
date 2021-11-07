@@ -45,7 +45,10 @@ public class OhnOLevel implements Application {
     private int highlightRadius = 0;
     private int highlightPosX = 0;
     private int highlightPosY = 0;
+
+    //Textos
     private String infoText;
+    private Color black = new Color(0, 0, 0, 255);
 
     //DEBUG
     public OhnOLevel(int size, char[][] mat) {
@@ -164,7 +167,7 @@ public class OhnOLevel implements Application {
     public void render() {
         Graphics g = eng_.getGraphics();
         //g.clear(new Color(50, 0, 200, 0));
-        Font info = g.newFont("assets/fonts/JosefinSans-Bold.ttf", 50, false);
+        Font info = g.newFont("assets/fonts/JosefinSans-Bold.ttf", black, 50, false);
         g.drawText(info, infoText, g.getWidth() / 2, g.getHeight() / 8, true);
         Color blue = new Color(0, 0, 255, 255);
         Color grey = new Color(120, 120, 120, 255);

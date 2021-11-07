@@ -71,7 +71,7 @@ public class OhnO implements Application {
         switch (currState_) {
             case START:
                 //Image logo = g.newImage("assets/sprites/q42.png"); g.drawImage(logo, g.getWidth() / 2, g.getHeight() / 2, 50, 75, true);
-                Font ohno = g.newFont("assets/fonts/Molle-Regular.ttf", 100, false); g.drawText(ohno, "Oh nO", g.getWidth() / 2, g.getHeight() / 2, true);
+                Font ohno = g.newFont("assets/fonts/Molle-Regular.ttf", new Color(255, 0, 0, 255), 100, false); g.drawText(ohno, "Oh nO", g.getWidth() / 2, g.getHeight() / 2, true);
                 //Font jugar = g.newFont("assets/fonts/JosefinSans-Bold.ttf", 60, true); g.drawText(jugar, "Jugar", g.getWidth() / 2, g.getHeight() / 2, true);
                 break;
             case LEVEL_SELECTION:

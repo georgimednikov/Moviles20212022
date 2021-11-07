@@ -26,8 +26,8 @@ public class GraphicsPC extends GraphicsCommon {
     }
 
     @Override
-    public Font newFont(String filename, int size, boolean isBold) {
-        return new FontPC(filename, size, isBold);
+    public Font newFont(String filename, Color color, int size, boolean isBold) {
+        return new FontPC(filename, color, size, isBold);
     }
 
     @Override
@@ -62,9 +62,13 @@ public class GraphicsPC extends GraphicsCommon {
 
     @Override
     public void drawText(Font font, String text, int x, int y, boolean centered) {
-
         FontPC f = (FontPC) font;
         g_.setFont(f.getFont());
+        setColor(f.getColor());
+        if (!centered) {
+            g_.drawString(text, x, y);
+            return;
+        }
         //Stack Overflow me susurró que hiciera esto
         FontRenderContext frc = new FontRenderContext(null, true, true);
         Rectangle2D r2D = f.getFont().getStringBounds(text, frc);

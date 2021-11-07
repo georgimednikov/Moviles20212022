@@ -50,9 +50,9 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
     }
 
     @Override
-    public Font newFont(String filename, int size, boolean isBold) {
+    public Font newFont(String filename, Color color, int size, boolean isBold) {
         Typeface font = Typeface.createFromAsset(context_.getAssets(), filename);
-        return new FontAndroid(font, size, isBold);
+        return new FontAndroid(font, color, size, isBold);
     }
 
     @Override
