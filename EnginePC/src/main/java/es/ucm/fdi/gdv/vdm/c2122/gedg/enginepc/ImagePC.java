@@ -1,6 +1,7 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.enginepc;
 
-import java.awt.image.ImageObserver;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 
@@ -8,7 +9,6 @@ import javax.imageio.ImageIO;
 
 public class ImagePC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image {
     private java.awt.Image image_;
-    private ImageObserver observer_;
     private int x_, y_;
 
     ImagePC(String name) {
@@ -29,21 +29,17 @@ public class ImagePC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image {
 
     @Override
     public void setSize(int width, int height) {
-        observer_.imageUpdate(image_, 0, x_, y_, width, height);
+        image_ = image_.getScaledInstance(width,height, Image.SCALE_DEFAULT);
     }
 
     @Override
     public int getWidth() {
-        return image_.getWidth(observer_);
+        return image_.getWidth(null);
     }
 
     @Override
     public int getHeight() {
-        return image_.getHeight(observer_);
-    }
-
-    public ImageObserver getObserver(){
-        return observer_;
+        return image_.getHeight(null);
     }
 
     public java.awt.Image getImage(){

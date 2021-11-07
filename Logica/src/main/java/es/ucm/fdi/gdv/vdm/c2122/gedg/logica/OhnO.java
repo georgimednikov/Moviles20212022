@@ -44,7 +44,6 @@ public class OhnO implements Application {
         return rand.nextFloat() < p;
     }
 
-
     @Override
     public boolean init() {
         createBoard(4, null);
