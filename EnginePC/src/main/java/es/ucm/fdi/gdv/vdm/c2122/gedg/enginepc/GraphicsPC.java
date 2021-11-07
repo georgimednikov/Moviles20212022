@@ -27,7 +27,6 @@ public class GraphicsPC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics
         return new FontPC(filename, size, isBold);
     }
 
-
     @Override
     public void clear(Color color) {
         setColor(color);
@@ -36,8 +35,7 @@ public class GraphicsPC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics
 
     @Override
     public void drawImage(Image image, int x, int y, int width, int height) {
-        image.setSize(width,height);
-        g.drawImage(((ImagePC)image).getImage(), x, y, width, height, ((ImagePC)image).getObserver());
+        g.drawImage(((ImagePC)image).getImage(), x, y, width, height, null);
     }
 
     @Override
@@ -52,8 +50,8 @@ public class GraphicsPC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics
 
     @Override
     public void drawText(Font font, String text, int x, int y) {
-        ((Graphics2D)g).setFont(((FontPC)font).getFont());
-        ((Graphics2D)g).drawString(text, x, y);
+        g.setFont(((FontPC)font).getFont());
+        g.drawString(text, x, y);
     }
 
     @Override
