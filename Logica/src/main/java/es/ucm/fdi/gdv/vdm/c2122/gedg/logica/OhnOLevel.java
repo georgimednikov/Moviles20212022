@@ -12,7 +12,7 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
 
-public class OhnO implements Application {
+public class OhnOLevel implements Application {
 
     Engine eng_;
     private final boolean DEBUG = false;
@@ -48,12 +48,12 @@ public class OhnO implements Application {
     private String infoText;
 
     //DEBUG
-    public OhnO(int size, char[][] mat) {
+    public OhnOLevel(int size, char[][] mat) {
         createBoard(size, mat);
         showInConsole(board);
     }
 
-    public OhnO(int size) {
+    public OhnOLevel(int size) {
         createBoard(size, null);
         showInConsole(board);
     }

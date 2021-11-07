@@ -137,7 +137,7 @@ public class OhnO implements Application {
                 hint = giveHint(solBoard);
                 tryAgain = hint != null;
                 if(tryAgain) {
-                    solBoard[hint.x_][hint.y_].applyHint(hint);
+                    solBoard[hint.x][hint.y].applyHint(hint);
                     placedCells++;
                     //showInConsole(matAux); // DEBUG
                 }
@@ -345,7 +345,7 @@ public class OhnO implements Application {
         switch (state) {
             case GREY:
                 if (hint_BLUE_BUT_ISOLATED(hint, mat, cell)) {
-                    hint.type_ = Hint.HintType.ISOLATED_AND_EMPTY;
+                    hint.type = Hint.HintType.ISOLATED_AND_EMPTY;
                     return true;
                 }
             case BLUE:
@@ -383,9 +383,9 @@ public class OhnO implements Application {
         int[] newPos = nextDiffColor(mat, cell.getX(), cell.getY(), i, j, Cell.STATE.BLUE);
         //Busca en la direccion i j la siguiente casilla no azul; si es gris, esta abierta y hay que cerrarla
         if (mat[newPos[0]][newPos[1]].getCurrState() == Cell.STATE.GREY) {
-            hint.type_ = Hint.HintType.VISIBLE_CELLS_COVERED;
-            hint.x_ = newPos[0];
-            hint.y_ = newPos[1];
+            hint.type = Hint.HintType.VISIBLE_CELLS_COVERED;
+            hint.x = newPos[0];
+            hint.y = newPos[1];
             return true;
         }
         return false;
@@ -406,9 +406,9 @@ public class OhnO implements Application {
             else newCont = distanceBetweenPos(newPos[0], newPos[1], newNewPos[0], newNewPos[1]);
             //Si poner la casilla gris en azul supera el numero correcto
             if(cont + newCont > cell.getNumber()){
-                hint.type_ = Hint.HintType.CANNOT_SURPASS_LIMIT;
-                hint.x_ = newPos[0];
-                hint.y_ = newPos[1];
+                hint.type = Hint.HintType.CANNOT_SURPASS_LIMIT;
+                hint.x = newPos[0];
+                hint.y = newPos[1];
                 return true;
             }
         }
@@ -446,9 +446,9 @@ public class OhnO implements Application {
             if(mat[thisFirstGrey[0]][thisFirstGrey[1]].getCurrState() != Cell.STATE.GREY){
                 return false;
             }
-            hint.x_ = thisFirstGrey[0];
-            hint.y_ = thisFirstGrey[1];
-            hint.type_ = Hint.HintType.MUST_PLACE_BLUE;
+            hint.x = thisFirstGrey[0];
+            hint.y = thisFirstGrey[1];
+            hint.type = Hint.HintType.MUST_PLACE_BLUE;
             return true;
         }
         return false;
@@ -458,9 +458,9 @@ public class OhnO implements Application {
     //region Regular Hints
     private boolean hint_TOO_MANY_ADJACENT(Hint hint, Cell[][] mat, Cell cell) {
         if (calculateNumber(mat, cell.getX(), cell.getY()) <= cell.getNumber()) return false;
-        hint.x_ = cell.getX();
-        hint.y_ = cell.getY();
-        hint.type_ = Hint.HintType.TOO_MANY_ADJACENT;
+        hint.x = cell.getX();
+        hint.y = cell.getY();
+        hint.type = Hint.HintType.TOO_MANY_ADJACENT;
         return true;
     }
 
@@ -481,9 +481,9 @@ public class OhnO implements Application {
         }
         //Si ve las que tiene que ver esta pista no aplica
         if (blueVisible >= cell.getNumber()) return false;
-        hint.x_ = cell.getX();
-        hint.y_ = cell.getY();
-        hint.type_ = Hint.HintType.NOT_ENOUGH_BUT_CLOSED;
+        hint.x = cell.getX();
+        hint.y = cell.getY();
+        hint.type = Hint.HintType.NOT_ENOUGH_BUT_CLOSED;
         return true;
     }
 
@@ -502,9 +502,9 @@ public class OhnO implements Application {
                 }
             }
         }
-        hint.x_ = cell.getX();
-        hint.y_ = cell.getY();
-        hint.type_ = Hint.HintType.BLUE_BUT_ISOLATED;
+        hint.x = cell.getX();
+        hint.y = cell.getY();
+        hint.type = Hint.HintType.BLUE_BUT_ISOLATED;
         return true;
     }
 
