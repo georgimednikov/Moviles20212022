@@ -15,7 +15,7 @@ public class GraphicsPC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics
 
     @Override
     public Image newImage(String name) {
-        return new ImagePC();
+        return new ImagePC(name);
     }
 
     @Override
@@ -32,7 +32,8 @@ public class GraphicsPC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics
 
     @Override
     public void drawImage(Image image, int x, int y, int width, int height) {
-
+        image.setSize(width,height);
+        g.drawImage(((ImagePC)image).getImage(), x, y, width, height, ((ImagePC)image).getObserver());
     }
 
     @Override
