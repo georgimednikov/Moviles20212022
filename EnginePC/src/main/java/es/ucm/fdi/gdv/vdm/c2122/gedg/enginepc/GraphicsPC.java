@@ -1,6 +1,8 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.enginepc;
 import javax.swing.JFrame;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.*;
 
 public class GraphicsPC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics  {
@@ -48,7 +50,8 @@ public class GraphicsPC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics
 
     @Override
     public void drawText(Font font, String text, int x, int y) {
-
+        ((Graphics2D)g).setFont(((FontPC)font).getFont());
+        ((Graphics2D)g).drawString(text, x, y);
     }
 
     @Override
