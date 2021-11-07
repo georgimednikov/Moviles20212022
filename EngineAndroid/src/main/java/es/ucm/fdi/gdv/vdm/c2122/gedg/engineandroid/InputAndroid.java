@@ -15,8 +15,8 @@ public class InputAndroid implements Input {
 
     public InputAndroid() {
         events_ = new ArrayList<>();
-        for (int i = 0; i < startingEvents; ++i) events_.add(new TouchEvent());
         freeEvents_ = new ArrayList<>();
+        for (int i = 0; i < startingEvents; ++i) freeEvents_.add(new TouchEvent());
     }
 
     synchronized private void addEvent(TouchEvent e) {
@@ -45,7 +45,9 @@ public class InputAndroid implements Input {
                 event.type = TouchEvent.TouchType.DRAG;
                 break;
         }
-        event.finger = e.getPointerId(0);
+        event.finger = 0; //TODO: Esto esta mal fijo pero no se como va
+        event.x = (int)e.getX(event.finger);
+        event.y = (int)e.getY(event.finger);
         addEvent(event);
         return true;
     }
@@ -54,23 +56,3 @@ public class InputAndroid implements Input {
         return events_;
     }
 }
-
-/*    private void passEvent(MouseEvent e, TouchEvent.TouchType type){
-        TouchEvent event = getEvent();
-        event.type = type;
-        event.finger = e.getPointerId(0);
-        event.x = (int)e.getX(event.finger); event.y = (int)e.getY(event.finger);
-        addEvent(event);
-    }
-    @Override
-    public void mousePressed(MouseEvent e) {
-        passEvent(e, TouchEvent.TouchType.PRESS);
-    }
-    @Override
-    public void mouseReleased(MouseEvent e) {
-        passEvent(e, TouchEvent.TouchType.LIFT);
-    }
-    @Override
-    public void mouseDragged(MouseEvent e) {
-        passEvent(e, TouchEvent.TouchType.DRAG);
-    }*/
