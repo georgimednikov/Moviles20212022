@@ -6,6 +6,7 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Application;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 
 
@@ -64,12 +65,13 @@ public class OhnO implements Application {
 
     @Override
     public void render() {
+        Graphics g = eng_.getGraphics();
+        //g.clear(new Color(50, 0, 200, 0));
         switch (currState_) {
             case START:
-                Image logo = eng_.getGraphics().newImage("assets/sprites/q42.png");
-                eng_.getGraphics().drawImage(logo, 0, 31, 100, 100);
-                Font text = eng_.getGraphics().newFont("assets/fonts/Molle-Regular.ttf", 50, false);
-                eng_.getGraphics().drawText(text, "TEXTO", 0, 70);
+                //Image logo = g.newImage("assets/sprites/q42.png"); g.drawImage(logo, g.getWidth() / 2, g.getHeight() / 5 * 4, 50, 75, true);
+                Font ohno = g.newFont("assets/fonts/Molle-Regular.ttf", 100, false); g.drawText(ohno, "Oh nO", g.getWidth() / 2, g.getHeight() / 2, true);
+                Font jugar = g.newFont("assets/fonts/JosefinSans-Bold.ttf", 60, true); g.drawText(jugar, "Jugar", g.getWidth() / 2, g.getHeight() / 2, true);
                 break;
             case LEVEL_SELECTION:
                 break;

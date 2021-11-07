@@ -1,10 +1,8 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.enginepc;
 
 import java.awt.FontFormatException;
-import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
 
 public class FontPC implements Font {

@@ -1,6 +1,5 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.enginepc;
 
-import java.awt.Graphics;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;

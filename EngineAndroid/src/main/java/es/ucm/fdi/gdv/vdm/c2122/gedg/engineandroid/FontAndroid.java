@@ -2,10 +2,8 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 
 import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.content.Context;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 
 public class FontAndroid implements Font {
 
