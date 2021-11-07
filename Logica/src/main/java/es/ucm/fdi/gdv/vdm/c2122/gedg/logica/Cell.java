@@ -67,6 +67,17 @@ public class Cell {
                 currState_ = STATE.BLUE;
         }
     }
+    public void revertState() {
+        switch (currState_)
+        {
+            case RED:
+                currState_ = STATE.BLUE;
+            case BLUE:
+                currState_ = STATE.GREY;
+            case GREY:
+                currState_ = STATE.RED;
+        }
+    }
 
     public boolean isFixed() { return fixed_; }
     public STATE getCurrState() { return currState_; }

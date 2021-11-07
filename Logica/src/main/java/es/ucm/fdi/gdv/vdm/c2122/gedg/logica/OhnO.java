@@ -22,7 +22,8 @@ public class OhnO implements Application {
     int contMistakes = 0; //Número de celdas mal puestas
     private Cell[][] board;
     private Cell[][] solBoard;
-    private Vector<Cell> fixedBlueCells = new Vector<Cell>();
+    private List<Cell> fixedBlueCells = new ArrayList<>(); //ESTO ERA UN VECTOR NO CREO HABER ROTO NADA PERO POR SI AK
+    private List<Cell> previousMoves = new ArrayList<>();
     private boolean solved = false;
 
     public OhnO(int size, char[][] mat) {
@@ -69,9 +70,9 @@ public class OhnO implements Application {
         //g.clear(new Color(50, 0, 200, 0));
         switch (currState_) {
             case START:
-                //Image logo = g.newImage("assets/sprites/q42.png"); g.drawImage(logo, g.getWidth() / 2, g.getHeight() / 5 * 4, 50, 75, true);
+                //Image logo = g.newImage("assets/sprites/q42.png"); g.drawImage(logo, g.getWidth() / 2, g.getHeight() / 2, 50, 75, true);
                 Font ohno = g.newFont("assets/fonts/Molle-Regular.ttf", 100, false); g.drawText(ohno, "Oh nO", g.getWidth() / 2, g.getHeight() / 2, true);
-                Font jugar = g.newFont("assets/fonts/JosefinSans-Bold.ttf", 60, true); g.drawText(jugar, "Jugar", g.getWidth() / 2, g.getHeight() / 2, true);
+                //Font jugar = g.newFont("assets/fonts/JosefinSans-Bold.ttf", 60, true); g.drawText(jugar, "Jugar", g.getWidth() / 2, g.getHeight() / 2, true);
                 break;
             case LEVEL_SELECTION:
                 break;
@@ -83,29 +84,6 @@ public class OhnO implements Application {
     @Override
     public boolean close() {
         return false;
-    }
-
-    public void showInConsole(Cell[][] mat){
-        for (int i = 0; i < mat.length; ++i) {
-            for (int j = 0; j < mat[0].length; ++j) {
-                Cell.STATE s = mat[i][j].getCurrState();
-                switch (s) {
-                    case RED:
-                        System.out.print("r ");
-                        break;
-                    case BLUE:
-                        if(mat[i][j].isFixed())
-                            System.out.print(mat[i][j].getNumber() + " ");
-                        else System.out.print("b ");
-                        break;
-                    case GREY:
-                        System.out.print("0 ");
-                        break;
-                }
-            }
-            System.out.println();
-        }
-        System.out.println();
     }
 
     //Crea la matriz que representa el nivel de un tamaño dado
@@ -179,6 +157,44 @@ public class OhnO implements Application {
         }
     }
 
+    private void doMove(Cell cell) {
+        previousMoves.add(cell);
+        cell.changeState();
+    }
+
+    private boolean undoMove() {
+        if (previousMoves.isEmpty()) return false;
+        Cell cell = previousMoves.remove(previousMoves.size() - 1);
+        cell.revertState();
+        return true;
+    }
+
+    //region DEBUG
+    public void showInConsole(Cell[][] mat){
+        for (int i = 0; i < mat.length; ++i) {
+            for (int j = 0; j < mat[0].length; ++j) {
+                Cell.STATE s = mat[i][j].getCurrState();
+                switch (s) {
+                    case RED:
+                        System.out.print("r ");
+                        break;
+                    case BLUE:
+                        if(mat[i][j].isFixed())
+                            System.out.print(mat[i][j].getNumber() + " ");
+                        else System.out.print("b ");
+                        break;
+                    case GREY:
+                        System.out.print("0 ");
+                        break;
+                }
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+    //endregion
+
+    //region Auxiliary Methods
     private int readFromConsole(char[][] mat){
         int fixedCells = 0;
         for(int i = 0; i < board.length; ++i){
@@ -290,6 +306,7 @@ public class OhnO implements Application {
         }
         return false;
     }
+    //endregion
 
 //region Hints
     public Hint giveHint(Cell[][] mat) {
