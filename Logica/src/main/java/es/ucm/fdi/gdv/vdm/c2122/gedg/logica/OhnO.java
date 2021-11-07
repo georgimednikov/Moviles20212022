@@ -5,6 +5,8 @@ import java.util.*;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Application;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 
 
 public class OhnO implements Application {
@@ -65,8 +67,10 @@ public class OhnO implements Application {
     public void render() {
         switch (currState_) {
             case START:
-                eng_.getGraphics().setColor(new Color(0,255,0,255));
-                eng_.getGraphics().fillCircle(300,200, 50);
+                Image logo = eng_.getGraphics().newImage("assets/sprites/q42.png");
+                eng_.getGraphics().drawImage(logo, 0, 31, 100, 100);
+                Font text = eng_.getGraphics().newFont("assets/fonts/Molle-Regular.ttf", 50, false);
+                eng_.getGraphics().drawText(text, "TEXTO", 0, 70);
                 break;
             case LEVEL_SELECTION:
                 break;

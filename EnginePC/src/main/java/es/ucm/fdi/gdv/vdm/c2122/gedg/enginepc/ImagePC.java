@@ -1,8 +1,6 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.enginepc;
 
-import java.awt.Graphics;
 import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
 import java.io.File;
 import java.io.IOException;
 
@@ -11,7 +9,7 @@ import javax.imageio.ImageIO;
 public class ImagePC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image {
     private java.awt.Image image_;
     private ImageObserver observer_;
-    public int x, y;
+    private int x_, y_;
 
     ImagePC(String name) {
         try {
@@ -25,9 +23,13 @@ public class ImagePC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image {
         }
     }
 
+    public void setPos(int x, int y) {
+        x_ = x; y_ = y;
+    }
+
     @Override
     public void setSize(int width, int height) {
-        observer_.imageUpdate(image_, 0, x, y, width, height);
+        observer_.imageUpdate(image_, 0, x_, y_, width, height);
     }
 
     @Override
