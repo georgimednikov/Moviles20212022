@@ -103,16 +103,6 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
     }
 
     @Override
-    public int getPosX() {
-        return curPosX - jf_.getX();
-    }
-
-    @Override
-    public int getPosY() {
-        return curPosY - jf_.getY();
-    }
-
-    @Override
     public int getTextWidth(Font font, String text) {
         FontRenderContext frc = new FontRenderContext(null, true, true);
         Rectangle2D r2D = ((FontPC)font).getFont().getStringBounds(text, frc);

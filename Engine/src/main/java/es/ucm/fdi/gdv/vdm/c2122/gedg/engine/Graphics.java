@@ -12,8 +12,6 @@ public interface Graphics {
     int getHeight();
     int getTextWidth(Font font, String string);
     int getTextHeight(Font font, String string);
-    int getPosX();
-    int getPosY();
     void translate(int dx, int dy);
     void scale(float sx, float sy);
     void save();

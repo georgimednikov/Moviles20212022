@@ -102,18 +102,6 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
         paint_.setTextAlign(Paint.Align.LEFT);
         canvas_.drawText(text, x, y, f.getPaint());
     }
-    /*@Override
-    public void drawText(Font font, String text, int x, int y, boolean centered) {
-        FontAndroid f = (FontAndroid) font;
-        Rect bounds = new Rect(); f.getPaint().getTextBounds(text, 0, text.length(), bounds);
-        if (!f.isLoaded()) return;
-        int verticalOffset, horizontalOffset; verticalOffset = horizontalOffset = 0;
-        if (centered) {
-            verticalOffset = bounds.height() / 2;
-            horizontalOffset = bounds.width() / 2;
-        }
-        canvas_.drawText(text, x - horizontalOffset, y - verticalOffset, f.getPaint());
-    }*/
 
     @Override
     public int getWidth() {
@@ -136,16 +124,6 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
         Rect bounds = new Rect();
         ((FontAndroid) font).getPaint().getTextBounds(text, 0, text.length(), bounds);
         return bounds.height();
-    }
-
-    @Override
-    public int getPosX() {
-        return 0;
-    }
-
-    @Override
-    public int getPosY() {
-        return 0;
     }
 
     @Override
