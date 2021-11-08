@@ -61,10 +61,14 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
     }
 
     @Override
-    public void drawImage(Image image, int x, int y, int width, int height) {
+    public void drawImage(Image image, int x, int y, int width, int height, boolean centered) {
         ImageAndroid img = (ImageAndroid) image;
         Rect src = new Rect(0, 0, img.getWidth(), img.getHeight());
         Rect dst = new Rect(x, y, width, height);
+        if (centered) {
+            dst.left -= width / 2;
+            dst.top -= height / 2;
+        }
         canvas_.drawBitmap(img.getBitmap(), src, dst, paint_);
     }
 
@@ -80,9 +84,16 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
     }
 
     @Override
-    public void drawText(Font font, String text, int x, int y) {
+    public void drawText(Font font, String text, int x, int y, boolean centered) {
         FontAndroid f = (FontAndroid) font;
-        if (f.isLoaded()) canvas_.drawText(text, x, y, f.getPaint());
+        Rect bounds = new Rect(); f.getPaint().getTextBounds(text, 0, text.length(), bounds);
+        if (!f.isLoaded()) return;
+        int verticalOffset, horizontalOffset; verticalOffset = horizontalOffset = 0;
+        if (centered) {
+            verticalOffset = bounds.height() / 2;
+            horizontalOffset = bounds.width() / 2;
+        }
+        canvas_.drawText(text, x - horizontalOffset, y - verticalOffset, f.getPaint());
     }
 
     @Override

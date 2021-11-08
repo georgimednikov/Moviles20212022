@@ -42,7 +42,7 @@ public class Cell {
     }
 
     public void applyHint(Hint h){
-        switch (h.type_){
+        switch (h.type){
             case VISIBLE_CELLS_COVERED:
             case CANNOT_SURPASS_LIMIT:
             case ISOLATED_AND_EMPTY:
@@ -66,6 +66,17 @@ public class Cell {
             case GREY:
                 currState_ = STATE.BLUE;
         }
+    }
+    public Cell.STATE revertState() {
+        switch (currState_) {
+            case RED:
+                currState_ = STATE.BLUE;
+            case BLUE:
+                currState_ = STATE.GREY;
+            case GREY:
+                currState_ = STATE.RED;
+        }
+        return currState_;
     }
 
     public boolean isFixed() { return fixed_; }

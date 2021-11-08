@@ -1,9 +1,6 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.enginepc;
 
-import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
 import java.io.File;
 import java.io.IOException;
 
@@ -11,7 +8,7 @@ import javax.imageio.ImageIO;
 
 public class ImagePC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image {
     private java.awt.Image image_;
-    public int x, y;
+    private int x_, y_;
 
     ImagePC(String name) {
         try {
@@ -23,6 +20,10 @@ public class ImagePC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image {
             System.out.println("Current working directory : " + workingDir);
             e.printStackTrace();
         }
+    }
+
+    public void setPos(int x, int y) {
+        x_ = x; y_ = y;
     }
 
     @Override

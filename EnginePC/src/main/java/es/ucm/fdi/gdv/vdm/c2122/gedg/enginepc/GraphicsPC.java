@@ -8,6 +8,9 @@ import java.awt.Shape;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.image.BufferStrategy;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.*;
 
@@ -31,23 +34,32 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
 
     @Override
     public Font newFont(String filename, Color color, int size, boolean isBold) {
-        return new FontPC(filename, size, isBold);
+        return new FontPC(filename, color, size, isBold);
     }
 
     @Override
     public void clear(Color color) {
+        java.awt.Color c = g_.getColor();
         setColor(color);
         g_.fillRect(0,0, getWidth(), getHeight());
+        g_.setColor(c);
     }
 
     @Override
-    public void drawImage(Image image, int x, int y, int width, int height) {
-        g_.drawImage(((ImagePC)image).getImage(), x, y, width, height, null);
+    public void drawImage(Image image, int x, int y, int width, int height, boolean centered) {
+        ImagePC img = (ImagePC) image;
+        img.setPos(x, y);
+        int verticalOffset, horizontalOffset; verticalOffset = horizontalOffset = 0;
+        if (centered) {
+            verticalOffset = height / 2;
+            horizontalOffset = width / 2;
+        }
+        g_.drawImage(img.getImage(), x - horizontalOffset, y - verticalOffset, width, height, null);
     }
 
     @Override
     public void setColor(Color color) {
-    g_.setColor(new java.awt.Color(color.r, color.g, color.b, color.a ));
+        g_.setColor(new java.awt.Color(color.r, color.g, color.b, color.a ));
     }
 
     @Override
@@ -57,9 +69,24 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
     }
 
     @Override
-    public void drawText(Font font, String text, int x, int y) {
-        g_.setFont(((FontPC)font).getFont());
-        g_.drawString(text, x, y);
+    public void drawText(Font font, String text, int x, int y, boolean centered) {
+        FontPC f = (FontPC) font;
+        g_.setFont(f.getFont());
+        setColor(f.getColor());
+        if (!centered) {
+            g_.drawString(text, x, y);
+            return;
+        }
+        //Stack Overflow me susurró que hiciera esto
+        FontRenderContext frc = new FontRenderContext(null, true, true);
+        Rectangle2D r2D = f.getFont().getStringBounds(text, frc);
+        int rWidth = (int)Math.round(r2D.getWidth());
+        int rHeight = (int)Math.round(r2D.getHeight());
+        int tX = (int)Math.round(r2D.getX());
+        int tY = (int)Math.round(r2D.getY());
+        int a = (int)(x - (rWidth / 2) - tX);
+        int b = (int)(y - (rHeight / 2) - tY);
+        g_.drawString(text, a, b);
     }
 
     public void setGraphics(Graphics g){
