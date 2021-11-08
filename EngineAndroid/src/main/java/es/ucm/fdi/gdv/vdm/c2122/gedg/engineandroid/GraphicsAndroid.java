@@ -133,8 +133,12 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
 
     @Override
     public int getTextHeight(Font font, String text) {
-        Rect bounds = new Rect(); ((FontAndroid)font).getPaint().getTextBounds(text, 0, text.length(), bounds);
+        Rect bounds = new Rect();
+        ((FontAndroid) font).getPaint().getTextBounds(text, 0, text.length(), bounds);
         return bounds.height();
+    }
+
+    @Override
     public int getPosX() {
         return 0;
     }

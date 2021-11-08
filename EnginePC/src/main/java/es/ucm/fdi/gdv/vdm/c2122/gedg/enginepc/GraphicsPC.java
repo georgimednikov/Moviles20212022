@@ -3,13 +3,10 @@ import javax.swing.JFrame;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.image.BufferStrategy;
 import java.awt.font.FontRenderContext;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.*;
