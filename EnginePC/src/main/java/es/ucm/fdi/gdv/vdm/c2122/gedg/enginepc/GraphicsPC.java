@@ -92,7 +92,7 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
     public void setGraphics(Graphics g){
         g_ = g;
         translate(curPosX, curPosY);
-        g_.setClip(curPosX, curPosY, curSizeX, curSizeY);
+        g_.setClip(0, 0, curSizeX, curSizeY); // Ya se ha trasladado, su 0, 0 esta movido ya
     }
 
     @Override

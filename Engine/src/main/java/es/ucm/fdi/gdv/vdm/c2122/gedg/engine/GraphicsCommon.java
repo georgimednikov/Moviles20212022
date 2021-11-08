@@ -26,14 +26,14 @@ public abstract class GraphicsCommon implements Graphics {
             // Barras en X
             curSizeX = refSizeX * y / refSizeY;
             curSizeY = y;
-            curPosX = (x - curSizeX) / 4;
+            curPosX = (x - curSizeX) / 2;
             curPosY = 0;
         } else {
             // Barras en Y
             curSizeX = x;
             curSizeY = refSizeY * x / refSizeX;
             curPosX = 0;
-            curPosY = (y - curSizeY) / 4;
+            curPosY = (y - curSizeY) / 2;
         }
     }
 
