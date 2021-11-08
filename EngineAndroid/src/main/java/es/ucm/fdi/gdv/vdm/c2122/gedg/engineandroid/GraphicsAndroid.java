@@ -96,6 +96,16 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
     }
 
     @Override
+    public int getPosX() {
+        return 0;
+    }
+
+    @Override
+    public int getPosY() {
+        return 0;
+    }
+
+    @Override
     public void translate(int dx, int dy) { canvas_.translate(dx, dy); }
 
     @Override

@@ -1,6 +1,6 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.enginepc;
 
-import java.awt.Color;
+import java.awt.image.BufferStrategy;
 
 import javax.swing.JFrame;
 
@@ -14,6 +14,8 @@ public class EnginePC implements Engine {
     JFrame jf_;
     Application a_;
     GraphicsPC g_;
+    java.awt.Graphics Jgraphics_;
+    BufferStrategy strategy_;
     boolean running;
     public EnginePC(){
         init();
@@ -33,8 +35,11 @@ public class EnginePC implements Engine {
                 break;
             }
             catch(Exception e) {
+                e.printStackTrace();
+                return false;
             }
         }
+        strategy_ = jf_.getBufferStrategy();
         g_ = new GraphicsPC(jf_);
         running = true;
         return true;
@@ -67,17 +72,18 @@ public class EnginePC implements Engine {
             a_.update();
             do {
                 do {
-                    java.awt.Graphics graphics = jf_.getBufferStrategy().getDrawGraphics();
+                    Jgraphics_ = strategy_.getDrawGraphics();
+                    g_.setGraphics(Jgraphics_);
 
                     try {
                         a_.render();
                     }
                     finally {
-                        graphics.dispose();
+                        Jgraphics_.dispose();
                     }
-                } while(jf_.getBufferStrategy().contentsRestored());
-                jf_.getBufferStrategy().show();
-            } while(jf_.getBufferStrategy().contentsLost());
+                } while(strategy_.contentsRestored());
+                strategy_.show();
+            } while(strategy_.contentsLost());
         }
         a_.close();
     }

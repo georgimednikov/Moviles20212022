@@ -62,10 +62,11 @@ public class OhnO implements Application {
 
     @Override
     public void render() {
+        //eng_.getGraphics().clear(new Color(255,255,255,255));
         switch (currState_) {
             case START:
                 eng_.getGraphics().setColor(new Color(0,255,0,255));
-                eng_.getGraphics().fillCircle(300,200, 50);
+                eng_.getGraphics().fillCircle(0,400, 50000);
                 break;
             case LEVEL_SELECTION:
                 break;
