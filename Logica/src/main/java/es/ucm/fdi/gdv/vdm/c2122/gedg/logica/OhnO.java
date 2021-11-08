@@ -40,18 +40,6 @@ public class OhnO implements Application {
         this.eng_ = eng;
     }
 
-    static private Random rand = new Random(System.currentTimeMillis());
-    static private boolean getRandomBoolean(float p){
-        assert p > 1.0f && p < 0.0f: String.format("getRandomBoolean recibe un número entre 0 y 1: (%d)", p);
-        return rand.nextFloat() < p;
-    }
-
-    @Override
-    public boolean init() {
-        createBoard(4, null);
-        return true;
-    }
-
     @Override
     public void update() {
         switch (currState_) {
@@ -82,8 +70,16 @@ public class OhnO implements Application {
     }
 
     @Override
+    public boolean init() { return true; }
+    @Override
     public boolean close() {
-        return false;
+        return true;
+    }
+
+    static private Random rand = new Random(System.currentTimeMillis());
+    static private boolean getRandomBoolean(float p){
+        assert p > 1.0f && p < 0.0f: String.format("getRandomBoolean recibe un número entre 0 y 1: (%d)", p);
+        return rand.nextFloat() < p;
     }
 
     //Crea la matriz que representa el nivel de un tamaño dado

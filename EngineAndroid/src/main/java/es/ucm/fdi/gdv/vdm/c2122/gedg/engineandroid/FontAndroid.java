@@ -10,16 +10,13 @@ public class FontAndroid implements Font {
 
     private Paint paint_;
     private Typeface font_;
-    private Color color_;
-    private int size_;
-    private boolean isBold_;
 
     public FontAndroid(Typeface font, Color color, int size, boolean isBold) {
         paint_ = new Paint();
         font_ = font; paint_.setTypeface(font_);
-        color_ = color; paint_.setARGB(color_.a, color_.r, color_.g, color_.b);
-        size_ = size; paint_.setTextSize(size_);
-        isBold_ = isBold; paint_.setFakeBoldText(isBold_);
+        paint_.setARGB(color.a, color.r, color.g, color.b);
+        paint_.setTextSize(size);
+        paint_.setFakeBoldText(isBold);
     }
 
     public boolean isLoaded() {
@@ -29,16 +26,14 @@ public class FontAndroid implements Font {
 
     @Override
     public void setColor(Color color) {
-        color_ = color; paint_.setARGB(color_.a, color_.r, color_.g, color_.b);
+        paint_.setARGB(color.a, color.r, color.g, color.b);
     }
     @Override
     public void setSize(int size) {
-        size_ = size; paint_.setTextSize(size_);
+        paint_.setTextSize(size);
     }
     @Override
-    public void setBold(boolean isBold) { isBold_ = isBold; paint_.setFakeBoldText(isBold_); }
+    public void setBold(boolean isBold) { paint_.setFakeBoldText(isBold); }
     @Override
-    public int getSize() {
-        return size_;
-    }
+    public int getSize() { return (int)paint_.getTextSize(); }
 }

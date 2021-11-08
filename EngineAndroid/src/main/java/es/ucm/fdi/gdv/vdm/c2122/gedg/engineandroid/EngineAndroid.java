@@ -25,6 +25,7 @@ public class EngineAndroid extends SurfaceView implements Engine, Runnable {
         graphics_ = new GraphicsAndroid(context, getHolder());
     }
 
+    @Override
     public void setApplication(Application a) {
         app_ = a;
         app_.init();
@@ -76,5 +77,7 @@ public class EngineAndroid extends SurfaceView implements Engine, Runnable {
         return input_;
     }
     @Override
-    public boolean close() { return false; }
+    public boolean init() { return true; }
+    @Override
+    public boolean close() { return true; }
 }

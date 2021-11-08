@@ -92,6 +92,20 @@ public class GraphicsPC extends GraphicsCommon {
     }
 
     @Override
+    public int getTextWidth(Font font, String text) {
+        FontRenderContext frc = new FontRenderContext(null, true, true);
+        Rectangle2D r2D = ((FontPC)font).getFont().getStringBounds(text, frc);
+        return (int)Math.round(r2D.getWidth());
+    }
+
+    @Override
+    public int getTextHeight(Font font, String text) {
+        FontRenderContext frc = new FontRenderContext(null, true, true);
+        Rectangle2D r2D = ((FontPC)font).getFont().getStringBounds(text, frc);
+        return (int)Math.round(r2D.getHeight());
+    }
+
+    @Override
     public void translate(int dx, int dy) {
         g_.translate(dx, dy);
     }

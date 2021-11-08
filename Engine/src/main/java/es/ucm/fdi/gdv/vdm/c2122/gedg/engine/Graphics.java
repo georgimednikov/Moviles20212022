@@ -10,6 +10,8 @@ public interface Graphics {
     void drawText(Font font, String text, int x, int y, boolean centered);
     int getWidth();
     int getHeight();
+    int getTextWidth(Font font, String string);
+    int getTextHeight(Font font, String string);
     void translate(int dx, int dy);
     void scale(float sx, float sy);
     void save();

@@ -15,10 +15,12 @@ public class EnginePC implements Engine {
     Application a_;
     GraphicsPC g_;
     boolean running;
+
     public EnginePC(){
         init();
     }
 
+    @Override
     public boolean init() {
         jf_ = new JFrame("Dolor");
         jf_.setSize(600,400);
@@ -44,24 +46,21 @@ public class EnginePC implements Engine {
     public Graphics getGraphics() {
         return g_;
     }
-
-
     @Override
     public Input getInput() {
         return null;
     }
-
+    @Override
     public void setApplication(Application a) {
         this.a_ = a;
         a_.init();
     }
-
     @Override
     public boolean close(){
         running = false;
         return true;
     }
-
+    @Override
     public void run() {
         while(running){
             a_.update();

@@ -66,9 +66,15 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
         Rect src = new Rect(0, 0, img.getWidth(), img.getHeight());
         Rect dst = new Rect(x, y, width, height);
         if (centered) {
-            dst.left -= width / 2;
-            dst.top -= height / 2;
+            //Paint.Align prevAlign = paint_.getTextAlign();
+            paint_.setTextAlign(Paint.Align.CENTER);
+            canvas_.drawBitmap(img.getBitmap(), src, dst, paint_);
+            //paint_.setTextAlign(prevAlign);
+            return;
+            //dst.left -= width / 2;
+            //dst.top -= height / 2;
         }
+        paint_.setTextAlign(Paint.Align.LEFT);
         canvas_.drawBitmap(img.getBitmap(), src, dst, paint_);
     }
 
@@ -88,13 +94,26 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
         FontAndroid f = (FontAndroid) font;
         Rect bounds = new Rect(); f.getPaint().getTextBounds(text, 0, text.length(), bounds);
         if (!f.isLoaded()) return;
+        if (centered) {
+            paint_.setTextAlign(Paint.Align.CENTER);
+            canvas_.drawText(text, x, y, f.getPaint());
+            return;
+        }
+        paint_.setTextAlign(Paint.Align.LEFT);
+        canvas_.drawText(text, x, y, f.getPaint());
+    }
+    /*@Override
+    public void drawText(Font font, String text, int x, int y, boolean centered) {
+        FontAndroid f = (FontAndroid) font;
+        Rect bounds = new Rect(); f.getPaint().getTextBounds(text, 0, text.length(), bounds);
+        if (!f.isLoaded()) return;
         int verticalOffset, horizontalOffset; verticalOffset = horizontalOffset = 0;
         if (centered) {
             verticalOffset = bounds.height() / 2;
             horizontalOffset = bounds.width() / 2;
         }
         canvas_.drawText(text, x - horizontalOffset, y - verticalOffset, f.getPaint());
-    }
+    }*/
 
     @Override
     public int getWidth() {
@@ -104,6 +123,18 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
     @Override
     public int getHeight() {
         return canvas_.getHeight();
+    }
+
+    @Override
+    public int getTextWidth(Font font, String text) {
+        Rect bounds = new Rect(); ((FontAndroid)font).getPaint().getTextBounds(text, 0, text.length(), bounds);
+        return bounds.width();
+    }
+
+    @Override
+    public int getTextHeight(Font font, String text) {
+        Rect bounds = new Rect(); ((FontAndroid)font).getPaint().getTextBounds(text, 0, text.length(), bounds);
+        return bounds.height();
     }
 
     @Override

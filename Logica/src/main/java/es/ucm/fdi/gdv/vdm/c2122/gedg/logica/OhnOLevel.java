@@ -50,11 +50,18 @@ public class OhnOLevel implements Application {
     private int highlightPosY = 0;
 
     //Textos
+    private Font infoFont;
+    private Font progressFont;
     private String infoText;
     private String progressText;
+    private int infoPosY = 0;
     private int progressPosY = 0;
     private Color black = new Color(0, 0, 0, 255);
     private Color grey = new Color(150, 150, 150, 255);
+    private Image quitImage;
+    private Image undoImage;
+    private Image hintImage;
+    private Image lockImage;
 
     //DEBUG
     public OhnOLevel(int size, char[][] mat) {
@@ -65,13 +72,6 @@ public class OhnOLevel implements Application {
     public OhnOLevel(int size) {
         createBoard(size, null);
         showInConsole(board);
-    }
-
-    static private Random rand = new Random(System.currentTimeMillis());
-
-    static private boolean getRandomBoolean(float p) {
-        assert p > 1.0f && p < 0.0f : String.format("getRandomBoolean recibe un número entre 0 y 1: (%d)", p);
-        return rand.nextFloat() < p;
     }
 
     //Cambia el estado de una celda. Si ha resuelto el nivel, devuelve true
@@ -113,12 +113,13 @@ public class OhnOLevel implements Application {
     @Override
     public void setEngine(Engine eng) {
         this.eng_ = eng;
-    }
-
-    @Override
-    public boolean init() {
-        createBoard(4, null);
-        return true;
+        Graphics g = eng_.getGraphics(); //TODO: ESTO NO DEBERIA IR AQUI CREO
+        infoFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", black, 50, false);
+        progressFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", grey, 25, false);
+        quitImage = g.newImage("assets/sprites/close.png");
+        undoImage = g.newImage("assets/sprites/history.png");
+        hintImage = g.newImage("assets/sprites/eye.png");
+        lockImage = g.newImage("assets/sprites/lock.png");
     }
 
     @Override
@@ -128,7 +129,7 @@ public class OhnOLevel implements Application {
         List<TouchEvent> events = eng_.getInput().getTouchEvents();
         while (!events.isEmpty()) {
             event = events.remove(0);
-            if (event.type != TouchEvent.TouchType.PRESS) continue;
+            if (event.type != TouchEvent.TouchType.PRESS) continue; //TODO: ESTO NO DEBERIA SER ASI (?)
             for (int i = 0; i < boardSize; ++i) {
                 for (int j = 0; j < boardSize; ++j) {
                     if (checkCollisionCircle(
@@ -140,8 +141,8 @@ public class OhnOLevel implements Application {
                             else coloredCells--;
                             progressText = (coloredCells / numCells * 100) + "%";
                         }
-                        else fixedTapped = true;
-                        continue;
+                        else fixedTapped = !fixedTapped;
+                        continue; //TODO: NO TIENE QUE PASAR EN EL FOR TIENE QUE PASAR EN EL WHILE
                     }
                 }
             }
@@ -152,7 +153,7 @@ public class OhnOLevel implements Application {
                         cellRadius, event.x, event.y)) {
                     switch (i) {
                         case 0:
-                            //Salir
+                            eng_.setApplication(new OhnOMenu());
                             break;
                         case 1:
                             undoMove();
@@ -178,10 +179,8 @@ public class OhnOLevel implements Application {
     public void render() {
         Graphics g = eng_.getGraphics();
         //g.clear(new Color(50, 0, 200, 0));
-        Font info = g.newFont("assets/fonts/JosefinSans-Bold.ttf", black, 50, false);
-        g.drawText(info, infoText, g.getWidth() / 2, g.getHeight() / 8, true);
-        Font progress = g.newFont("assets/fonts/JosefinSans-Bold.ttf", grey, 25, false);
-        g.drawText(progress, progressText, g.getWidth() / 2, progressPosY, true);
+        g.drawText(infoFont, infoText, g.getWidth() / 2, infoPosY, true);
+        g.drawText(progressFont, progressText, g.getWidth() / 2, progressPosY, true);
         Color blue = new Color(0, 0, 255, 255);
         Color grey = new Color(120, 120, 120, 255);
         Color red = new Color(255, 0, 0, 255);
@@ -191,7 +190,10 @@ public class OhnOLevel implements Application {
         }
         for (int i = 0; i < boardSize; ++i) {
             for (int j = 0; j < boardSize; ++j) {
-                switch (board[i][j].getCurrState()) {
+                int posX = boardOffsetX + cellRadius * (i + 1) + cellSeparation * i;
+                int posY = boardOffsetY + cellRadius * (j + 1) + cellSeparation * j;
+                Cell.STATE cellState = board[i][j].getCurrState();
+                switch (cellState) {
                     case BLUE:
                         g.setColor(blue);
                         break;
@@ -202,20 +204,21 @@ public class OhnOLevel implements Application {
                         g.setColor(red);
                         break;
                 }
-                g.fillCircle(boardOffsetX + cellRadius * (i + 1) + cellSeparation * i, boardOffsetY + cellRadius * (j + 1) + cellSeparation * j, cellRadius);
+                g.fillCircle(posX, posY, cellRadius);
+                if (fixedTapped && cellState == Cell.STATE.RED)
+                    g.drawImage(lockImage, posX, posY, cellRadius, cellRadius, true);
             }
         }
-        Image icon1 = g.newImage("assets/sprites/close.png");
-        g.drawImage(icon1, buttonOffsetX, buttonOffsetY, 50, 50, false);
-        Image icon2 = g.newImage("assets/sprites/history.png");
-        g.drawImage(icon2, buttonOffsetX + (buttonSize + buttonSeparation), buttonOffsetY, 50, 50, false);
-        Image icon3 = g.newImage("assets/sprites/eye.png");
-        g.drawImage(icon3, buttonOffsetX + (buttonSize + buttonSeparation) * 2, buttonOffsetY, 50, 50, false);
+        g.drawImage(quitImage, buttonOffsetX, buttonOffsetY, buttonSize, buttonSize, false);
+        g.drawImage(undoImage, buttonOffsetX + (buttonSize + buttonSeparation), buttonOffsetY, buttonSize, buttonSize, false);
+        g.drawImage(hintImage, buttonOffsetX + (buttonSize + buttonSeparation) * 2, buttonOffsetY, buttonSize, buttonSize, false);
     }
 
     @Override
+    public boolean init() { return true; }
+    @Override
     public boolean close() {
-        return false;
+        return true;
     }
 
     //region DEBUG
@@ -244,6 +247,13 @@ public class OhnOLevel implements Application {
     //endregion
 
     //region Auxiliary Methods
+    static private Random rand = new Random(System.currentTimeMillis());
+
+    static private boolean getRandomBoolean(float p) {
+        assert p > 1.0f && p < 0.0f : String.format("getRandomBoolean recibe un número entre 0 y 1: (%d)", p);
+        return rand.nextFloat() < p;
+    }
+
     private int readFromConsole(char[][] mat) {
         int fixedCells = 0;
         for (int i = 0; i < boardSize; ++i) {
@@ -414,14 +424,9 @@ public class OhnOLevel implements Application {
         return Math.abs(x1 - x2) + Math.abs(y1 - y2);
     }
 
-    private boolean checkCollisionBox(int x, int y, int w, int h, int eventX, int eventY) {
-        return (eventX >= x && eventX <= (x + w) &&
-                eventY >= y && eventY <= (y + h));
-    }
-
-    private boolean checkCollisionCircle(int x, int y, int radius, int eventX, int eventY) {
-        int vecX = Math.abs(x - eventX);
-        int vecY = Math.abs(y - eventY);
+    private boolean checkCollisionCircle(int centerX, int centerY, int radius, int eventX, int eventY) {
+        int vecX = Math.abs(centerX - eventX);
+        int vecY = Math.abs(centerY - eventY);
         return (Math.pow(vecX, 2) + Math.pow(vecY, 2) <= Math.pow(radius, 2));
     }
 
