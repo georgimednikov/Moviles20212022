@@ -124,7 +124,10 @@ public class OhnOLevel implements Application {
 
     @Override
     public void update() {
-        if (solved) return;
+        if (solved) {
+            eng_.setApplication(new OhnOMenu());
+            return;
+        }
         TouchEvent event;
         List<TouchEvent> events = eng_.getInput().getTouchEvents();
         while (!events.isEmpty()) {

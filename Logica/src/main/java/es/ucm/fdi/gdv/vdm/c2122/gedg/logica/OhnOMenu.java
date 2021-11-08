@@ -63,7 +63,7 @@ public class OhnOMenu implements Application {
             event = events.remove(0);
             if (event.type != TouchEvent.TouchType.PRESS) continue; //TODO: ESTO NO DEBERIA SER ASI (?)
             if (checkCollisionCircle(eng_.getGraphics().getWidth() / 2, quitPosY, buttonSize, event.x, event.y)) {
-                eng_.setApplication(new OhnO(0, null));
+                eng_.setApplication(new OhnOIntro());
                 continue;
             }
             for (int i = 0; i < rows; ++i) {
