@@ -2,8 +2,8 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.engine;
 
 public abstract class GraphicsCommon implements Graphics {
 
-    private int refSizeX = 400;
-    private int refSizeY = 600;
+    protected int refSizeX = 400;
+    protected int refSizeY = 600;
 
     protected int curSizeX;
     protected int curSizeY;

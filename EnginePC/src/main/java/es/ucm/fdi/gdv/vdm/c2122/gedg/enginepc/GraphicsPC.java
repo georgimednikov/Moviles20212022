@@ -3,21 +3,28 @@ import javax.swing.JFrame;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.image.BufferStrategy;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.*;
 
-public class GraphicsPC extends GraphicsCommon {
+public class GraphicsPC extends GraphicsCommon implements ComponentListener {
 
     private JFrame jf_;
     private Graphics g_;
     private Graphics save_;
     GraphicsPC(JFrame jf){
         jf_ = jf;
-        while(jf.getBufferStrategy() == null) {}
-        g_ = jf.getBufferStrategy().getDrawGraphics();
+        BufferStrategy strategy = jf.getBufferStrategy();
+        while(strategy == null) { strategy = jf.getBufferStrategy(); }
+        g_ = strategy.getDrawGraphics();
+        jf.addComponentListener(this);
     }
 
     @Override
@@ -57,6 +64,7 @@ public class GraphicsPC extends GraphicsCommon {
 
     @Override
     public void fillCircle(int cx, int cy, int r) {
+        //scale(curSizeX, curSizeY);
         g_.fillOval(cx - r , cy - r , 2*r, 2*r);
     }
 
@@ -81,14 +89,30 @@ public class GraphicsPC extends GraphicsCommon {
         g_.drawString(text, a, b);
     }
 
+    public void setGraphics(Graphics g){
+        g_ = g;
+        translate(curPosX, curPosY);
+        g_.setClip(0, 0, curSizeX, curSizeY); // Ya se ha trasladado, su 0, 0 esta movido ya
+    }
+
     @Override
     public int getWidth() {
-        return jf_.getWidth();
+        return curSizeX;
     }
 
     @Override
     public int getHeight() {
-        return jf_.getHeight();
+        return curSizeY;
+    }
+
+    @Override
+    public int getPosX() {
+        return curPosX - jf_.getX();
+    }
+
+    @Override
+    public int getPosY() {
+        return curPosY - jf_.getY();
     }
 
     @Override
@@ -113,9 +137,7 @@ public class GraphicsPC extends GraphicsCommon {
     @Override
     public void scale(float sx, float sy) {
         super.scale((int)sx, (int)sy);
-        translate(curPosX, curPosY);
         jf_.setSize((int)sx, (int)sy);
-        jf_.getContentPane().setPreferredSize(new Dimension((int)sx, (int)sy));
     }
 
     @Override
@@ -126,5 +148,26 @@ public class GraphicsPC extends GraphicsCommon {
     @Override
     public void restore() {
         g_ = save_.create();
+    }
+
+    @Override
+    public void componentResized(ComponentEvent componentEvent) {
+        Dimension dim = componentEvent.getComponent().getSize();
+        scale(dim.width, dim.height);
+    }
+
+    @Override
+    public void componentMoved(ComponentEvent componentEvent) {
+
+    }
+
+    @Override
+    public void componentShown(ComponentEvent componentEvent) {
+
+    }
+
+    @Override
+    public void componentHidden(ComponentEvent componentEvent) {
+
     }
 }
