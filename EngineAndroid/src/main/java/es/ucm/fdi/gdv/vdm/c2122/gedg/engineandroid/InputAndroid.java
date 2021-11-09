@@ -1,22 +1,24 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 
 import android.view.MotionEvent;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
-public class InputAndroid implements Input {
+public class InputAndroid implements Input, View.OnTouchListener {
 
     private final int startingEvents = 5;
     private List<TouchEvent> events_;
     private List<TouchEvent> freeEvents_;
 
-    public InputAndroid() {
+    public InputAndroid(GraphicsAndroid g) {
         events_ = new ArrayList<>();
         freeEvents_ = new ArrayList<>();
         for (int i = 0; i < startingEvents; ++i) freeEvents_.add(new TouchEvent());
+        g.getSurfaceView().setOnTouchListener(this);
     }
 
     synchronized private void addEvent(TouchEvent e) {
@@ -31,8 +33,8 @@ public class InputAndroid implements Input {
         }
         return e;
     }
-
-    public boolean createTouchEvent(MotionEvent e) {
+    @Override
+    public boolean onTouch(View view, MotionEvent e) {
         TouchEvent event = getEvent();
         switch (e.getAction()) {
             case MotionEvent.ACTION_DOWN:

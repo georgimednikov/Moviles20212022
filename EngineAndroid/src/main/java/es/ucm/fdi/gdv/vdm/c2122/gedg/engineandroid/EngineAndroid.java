@@ -18,9 +18,8 @@ public class EngineAndroid implements Engine, Runnable {
     private Application app_;
 
     public EngineAndroid(Context context) {
-        input_ = new InputAndroid();
-        //TODO: No tengo nada claro que graphics tenga que tener el holder
         graphics_ = new GraphicsAndroid(context);
+        input_ = new InputAndroid(graphics_);
     }
 
     public SurfaceView getSurfaceView() {
