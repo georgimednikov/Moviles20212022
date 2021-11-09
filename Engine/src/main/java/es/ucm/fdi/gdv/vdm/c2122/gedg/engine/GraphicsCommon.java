@@ -11,8 +11,8 @@ public abstract class GraphicsCommon implements Graphics {
     protected int curPosX;
     protected int curPosY;
 
-    public int toRealX(int a) { return a * curSizeX / refSizeX; }
-    public int toRealY(int a) { return a * curSizeY / refSizeY; }
+    public int toRealX(int a) { return (int)((float)a * curSizeX / refSizeX); }
+    public int toRealY(int a) { return (int)((float)a * curSizeY / refSizeY); }
     public int toVirtualX(int a) { return (int)((float)a / curSizeX * refSizeX - curPosX); }
     public int toVirtualY(int a) { return (int)((float)a / curSizeY * refSizeY - curPosY); }
 

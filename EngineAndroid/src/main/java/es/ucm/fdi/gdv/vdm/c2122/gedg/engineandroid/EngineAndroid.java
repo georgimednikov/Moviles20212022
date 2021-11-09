@@ -3,6 +3,7 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 import android.content.Context;
 import android.view.SurfaceView;
 
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
@@ -55,7 +56,7 @@ public class EngineAndroid implements Engine, Runnable {
         if (gameThread_ != Thread.currentThread()) {
             throw new RuntimeException("run() should not be called directly");
         }
-        while(running_ && !graphics_.init());
+        while(running_ && graphics_.init());
         while(running_) {
             app_.update();
             graphics_.lock();

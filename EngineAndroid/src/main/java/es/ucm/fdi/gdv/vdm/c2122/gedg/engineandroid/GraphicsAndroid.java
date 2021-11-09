@@ -70,18 +70,16 @@ public class GraphicsAndroid extends GraphicsCommon {
     @Override
     public void drawImage(Image image, int x, int y, int width, int height, boolean centered) {
         ImageAndroid img = (ImageAndroid) image;
+        x = toRealX(x);
+        y = toRealY(y);
+        width = toRealX(width);
+        height = toRealY(height);
         Rect src = new Rect(0, 0, img.getWidth(), img.getHeight());
-        Rect dst = new Rect(x, y, width, height);
-        if (centered) {
-            //Paint.Align prevAlign = paint_.getTextAlign();
-            paint_.setTextAlign(Paint.Align.CENTER);
-            canvas_.drawBitmap(img.getBitmap(), src, dst, paint_);
-            //paint_.setTextAlign(prevAlign);
-            return;
-            //dst.left -= width / 2;
-            //dst.top -= height / 2;
-        }
-        paint_.setTextAlign(Paint.Align.LEFT);
+        Rect dst;
+        if (centered)
+            dst = new Rect(x - width / 2, y - height / 2, x + width / 2, y + height / 2);
+        else
+            dst = new Rect(x, y, x + width, y + height);
         canvas_.drawBitmap(img.getBitmap(), src, dst, paint_);
     }
 
@@ -100,28 +98,27 @@ public class GraphicsAndroid extends GraphicsCommon {
 
     @Override
     public void drawText(Font font, String text, int x, int y, boolean centered) {
-        x = toReal(x);
-        y = toReal(y);
+        x = toRealX(x);
+        y = toRealY(y);
         FontAndroid f = (FontAndroid) font;
         Rect bounds = new Rect(); f.getPaint().getTextBounds(text, 0, text.length(), bounds);
         if (!f.isLoaded()) return;
-        if (centered) {
-            paint_.setTextAlign(Paint.Align.CENTER);
-            canvas_.drawText(text, x, y, f.getPaint());
-            return;
-        }
-        paint_.setTextAlign(Paint.Align.LEFT);
+        if (centered)
+            f.getPaint().setTextAlign(Paint.Align.CENTER);
+        else
+            f.getPaint().setTextAlign(Paint.Align.LEFT);
+        f.setRenderSize(toRealY(f.originalSize_));
         canvas_.drawText(text, x, y, f.getPaint());
     }
 
     @Override
     public int getWidth() {
-        return canvas_.getWidth();
+        return refSizeX;
     }
 
     @Override
     public int getHeight() {
-        return canvas_.getHeight();
+        return refSizeY;
     }
 
     @Override
@@ -139,8 +136,8 @@ public class GraphicsAndroid extends GraphicsCommon {
 
     @Override
     public void translate(int dx, int dy) {
-        dx = toReal(dx);
-        dy = toReal(dy);
+        dx = toRealX(dx);
+        dy = toRealY(dy);
         canvas_.translate(dx, dy);
     }
 
@@ -159,6 +156,9 @@ public class GraphicsAndroid extends GraphicsCommon {
     }
 
     public boolean init() {
-        return canvas_ == null;
+        curSizeX = view_.getWidth();
+        curSizeY = view_.getHeight();
+        adjustToWindowSize(view_.getWidth(), view_.getHeight());
+        return curSizeX == 0;
     }
 }
