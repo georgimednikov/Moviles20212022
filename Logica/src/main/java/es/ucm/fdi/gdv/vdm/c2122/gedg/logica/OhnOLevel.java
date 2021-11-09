@@ -255,7 +255,7 @@ public class OhnOLevel implements Application {
     static private Random rand = new Random(System.currentTimeMillis());
 
     static private boolean getRandomBoolean(float p) {
-        assert p > 1.0f && p < 0.0f : String.format("getRandomBoolean recibe un número entre 0 y 1: (%d)", p);
+        //assert p > 1.0f && p < 0.0f : String.format("getRandomBoolean recibe un número entre 0 y 1: (%d)", p);
         return rand.nextFloat() < p;
     }
 

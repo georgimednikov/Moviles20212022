@@ -26,7 +26,7 @@ public class EnginePC implements Engine {
 
     @Override
     public boolean init() {
-        jf_ = new JFrame("Dolor");
+        jf_ = new JFrame("0hn0");
         jf_.setSize(600,400);
         jf_.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jf_.setIgnoreRepaint(true);

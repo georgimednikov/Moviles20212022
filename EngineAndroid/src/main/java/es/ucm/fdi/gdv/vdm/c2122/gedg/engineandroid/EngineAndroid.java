@@ -3,7 +3,6 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 import android.content.Context;
 import android.view.SurfaceView;
 
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
@@ -60,6 +59,7 @@ public class EngineAndroid implements Engine, Runnable {
         while(running_) {
             app_.update();
             graphics_.lock();
+            graphics_.setGamePosition();
             app_.render();
             graphics_.unlock();
         }

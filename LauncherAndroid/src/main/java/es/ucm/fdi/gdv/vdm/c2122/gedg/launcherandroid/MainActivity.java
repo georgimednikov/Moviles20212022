@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid.EngineAndroid;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.logica.OhnOIntro;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.logica.OhnOLevel;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.logica.OhnOMenu;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -16,19 +18,9 @@ public class MainActivity extends AppCompatActivity {
 
         eng = new EngineAndroid(this);
         setContentView(eng.getSurfaceView());
-        OhnOIntro g = new OhnOIntro();
+        OhnOLevel g = new OhnOLevel(4);
         eng.setApplication(g);
         g.setEngine(eng);
-
-        //eng.run();
-
-        /*binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
     }
 
     @Override

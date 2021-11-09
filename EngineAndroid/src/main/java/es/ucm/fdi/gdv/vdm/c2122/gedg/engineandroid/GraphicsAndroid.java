@@ -44,6 +44,12 @@ public class GraphicsAndroid extends GraphicsCommon {
         return view_;
     }
 
+    public void setGamePosition(){
+        clear(new Color(255,255,255,255));
+        canvas_.translate(curPosX, curPosY);
+        canvas_.clipRect(0, 0, curSizeX, curSizeY); // Ya se ha trasladado, su 0, 0 esta movido ya
+    }
+
     @Override
     public Image newImage(String filename) {
         try {
@@ -102,13 +108,16 @@ public class GraphicsAndroid extends GraphicsCommon {
         y = toRealY(y);
         FontAndroid f = (FontAndroid) font;
         Rect bounds = new Rect(); f.getPaint().getTextBounds(text, 0, text.length(), bounds);
+        int height = 0;
         if (!f.isLoaded()) return;
-        if (centered)
+        if (centered) {
             f.getPaint().setTextAlign(Paint.Align.CENTER);
+            height = bounds.height();
+        }
         else
             f.getPaint().setTextAlign(Paint.Align.LEFT);
         f.setRenderSize(toRealY(f.originalSize_));
-        canvas_.drawText(text, x, y, f.getPaint());
+        canvas_.drawText(text, x, y + height / 2, f.getPaint());
     }
 
     @Override
