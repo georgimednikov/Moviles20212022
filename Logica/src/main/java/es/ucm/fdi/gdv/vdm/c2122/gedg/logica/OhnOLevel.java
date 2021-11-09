@@ -196,7 +196,6 @@ public class OhnOLevel implements Application {
     @Override
     public void render() {
         Graphics g = eng_.getGraphics();
-        g.clear(white);
         g.drawText(infoFont, infoText, g.getWidth() / 2, infoPosY, true);
         g.drawText(progressFont, progressText, g.getWidth() / 2, progressPosY, true);
         if (givingHint) {

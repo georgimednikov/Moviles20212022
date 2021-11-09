@@ -42,7 +42,7 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
     public void clear(Color color) {
         java.awt.Color c = g_.getColor();
         setColor(color);
-        g_.fillRect(0,0, curSizeX, curSizeY);
+        g_.fillRect(0,0, jf_.getWidth(), jf_.getHeight());
         g_.setColor(c);
     }
 
@@ -102,6 +102,7 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
 
     public void setGraphics(Graphics g){
         g_ = g;
+        clear(new Color(255,255,255,255));
         g.translate(curPosX, curPosY);
         g_.setClip(0, 0, curSizeX, curSizeY); // Ya se ha trasladado, su 0, 0 esta movido ya
     }

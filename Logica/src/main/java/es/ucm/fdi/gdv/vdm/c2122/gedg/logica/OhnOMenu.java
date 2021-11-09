@@ -33,7 +33,6 @@ public class OhnOMenu implements Application {
     private Font textFont;
     private Font numberFont;
     private Image quitImage;
-    private Color white = new Color(255, 255, 255, 255);
     private Color blue = new Color(72, 193, 228, 255);
     private Color red = new Color(245, 53, 73, 255);
 
@@ -94,7 +93,6 @@ public class OhnOMenu implements Application {
     @Override
     public void render() {
         Graphics g = eng_.getGraphics();
-        g.clear(white);
         g.drawText(logoFont, "Oh nO", g.getWidth() / 2, logoPosY, true);
         g.drawText(textFont, "Elija el tamaño a jugar", g.getWidth() / 2, textPosY, true);
         int cont = firstSize;
