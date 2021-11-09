@@ -29,7 +29,6 @@ public class OhnOIntro implements Application {
     private Font logoFont;
     private Font playFont;
     private Font creditFont;
-    private Color white = new Color(255, 255, 255, 255);
 
     public OhnOIntro() {
     }
@@ -72,7 +71,6 @@ public class OhnOIntro implements Application {
     @Override
     public void render() {
         Graphics g = eng_.getGraphics();
-        g.clear(white);
         g.drawText(logoFont, "Oh nO", g.getWidth() / 2, logoPosY, true);
         g.drawText(playFont, playText, g.getWidth() / 2, playPosY, true);
         g.drawText(creditFont, "Un juego copiado a Q42", g.getWidth() / 2, firstCreditPosY, true);
