@@ -92,9 +92,9 @@ public class GraphicsAndroid extends GraphicsCommon {
 
     @Override
     public void fillCircle(int cx, int cy, int r) {
-        cx = toReal(cx);
-        cy = toReal(cy);
-        r = toReal(r);
+        cx = toRealX(cx);
+        cy = toRealY(cy);
+        r = toRealY(r);
         canvas_.drawCircle(cx, cy, r, paint_);
     }
 
