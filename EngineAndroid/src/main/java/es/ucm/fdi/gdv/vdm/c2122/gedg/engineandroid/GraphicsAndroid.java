@@ -16,7 +16,6 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.*;
 
 public class GraphicsAndroid extends GraphicsCommon {
 
-
     private SurfaceView view_;
     private SurfaceHolder holder_;
     private Context context_;
