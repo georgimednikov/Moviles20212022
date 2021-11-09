@@ -10,15 +10,17 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
 public class InputAndroid implements Input, View.OnTouchListener {
 
-    private final int startingEvents = 5;
+    private GraphicsAndroid g_;
     private List<TouchEvent> events_;
     private List<TouchEvent> freeEvents_;
+    private int startingEvents = 5;
 
     public InputAndroid(GraphicsAndroid g) {
         events_ = new ArrayList<>();
         freeEvents_ = new ArrayList<>();
         for (int i = 0; i < startingEvents; ++i) freeEvents_.add(new TouchEvent());
-        g.getSurfaceView().setOnTouchListener(this);
+        g_ = g;
+        g_.getSurfaceView().setOnTouchListener(this);
     }
 
     synchronized private void addEvent(TouchEvent e) {
@@ -48,8 +50,8 @@ public class InputAndroid implements Input, View.OnTouchListener {
                 break;
         }
         event.finger = 0; //TODO: Esto esta mal fijo pero no se como va
-        event.x = (int)e.getX(event.finger);
-        event.y = (int)e.getY(event.finger);
+        event.x = g_.toVirtualX((int)e.getX(event.finger));
+        event.y = g_.toVirtualX((int)e.getY(event.finger));
         addEvent(event);
         return true;
     }

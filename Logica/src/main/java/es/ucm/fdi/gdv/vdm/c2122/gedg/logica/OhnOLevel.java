@@ -146,7 +146,6 @@ public class OhnOLevel implements Application {
         next:
         while (!events.isEmpty()) {
             event = events.remove(0);
-            eng_.getGraphics().fillCircle(event.x, event.y, 10);
             if (event.type != TouchEvent.TouchType.PRESS) continue; //TODO: ESTO NO DEBERIA SER ASI (?)
             for (int i = 0; i < boardSize; ++i) {
                 for (int j = 0; j < boardSize; ++j) {
@@ -155,9 +154,9 @@ public class OhnOLevel implements Application {
                             boardOffsetY + cellRadius * (j + 1) + (cellSeparation + cellRadius) * j,
                             cellRadius, event.x, event.y)) {
                         if (!board[j][i].isFixed()) {
-                            Cell.STATE oldstate = board[j][i].getCurrState();
+                            Cell.STATE oldState = board[j][i].getCurrState();
                             changeCell(j, i);
-                            if (oldstate == Cell.STATE.GREY) coloredCells++;
+                            if (oldState == Cell.STATE.GREY) coloredCells++;
                             else if (board[j][i].getCurrState() == Cell.STATE.GREY) coloredCells--;
                             progressText = Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%";
                         }
