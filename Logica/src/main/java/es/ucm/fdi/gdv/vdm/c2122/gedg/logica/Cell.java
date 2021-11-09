@@ -59,22 +59,28 @@ public class Cell {
     public void changeState() {
         switch (currState_)
         {
-            case RED:
-                currState_ = STATE.GREY;
-            case BLUE:
-                currState_ = STATE.RED;
             case GREY:
                 currState_ = STATE.BLUE;
+                break;
+            case BLUE:
+                currState_ = STATE.RED;
+                break;
+            case RED:
+                currState_ = STATE.GREY;
+                break;
         }
     }
     public Cell.STATE revertState() {
         switch (currState_) {
             case RED:
                 currState_ = STATE.BLUE;
+                break;
             case BLUE:
                 currState_ = STATE.GREY;
+                break;
             case GREY:
                 currState_ = STATE.RED;
+                break;
         }
         return currState_;
     }

@@ -15,20 +15,21 @@ public class OhnOIntro implements Application {
 
     Engine eng_;
 
-    private int logoPosY = 0;
-    private int playPosY = 0;
-    private int firstCreditPosY = 0;
-    private int secondCreditPosY = 0;
-    private int imagePosY = 0;
-    private int imageWidth = 0;
-    private int imageHeight = 0;
+    private int logoPosY = 130;
+    private int playPosY = 250;
+    private int firstCreditPosY = 380;
+    private int secondCreditPosY = 415;
+    private int imagePosY = 530;
+    private int imageWidth = 40;
+    private int imageHeight = 60;
     private String playText = "Jugar";
 
     //Render
-    Image q42Image;
-    Font logoFont;
-    Font playFont;
-    Font creditFont;
+    private Image q42Image;
+    private Font logoFont;
+    private Font playFont;
+    private Font creditFont;
+    private Color white = new Color(255, 255, 255, 255);
 
     public OhnOIntro() {
     }
@@ -44,9 +45,9 @@ public class OhnOIntro implements Application {
     public void setEngine(Engine eng) {
         this.eng_ = eng;
         Graphics g = eng_.getGraphics();
-        logoFont = g.newFont("assets/fonts/Molle-Regular.ttf", new Color(0, 0, 0, 255), 75, false);
+        logoFont = g.newFont("assets/fonts/Molle-Regular.ttf", new Color(0, 0, 0, 255), 85, false);
         playFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(0, 0, 0, 255), 60, false);
-        creditFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(150, 150, 150, 255), 30, false);
+        creditFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(150, 150, 150, 255), 25, false);
         q42Image = g.newImage("assets/sprites/q42.png");
     }
     @Override
@@ -61,14 +62,17 @@ public class OhnOIntro implements Application {
                     playPosY,
                     eng_.getGraphics().getTextWidth(playFont, playText),
                     eng_.getGraphics().getTextHeight(playFont, playText),
-                    event.x, event.y,true))
-                eng_.setApplication(new OhnOMenu());
+                    event.x, event.y,true)) {
+                OhnOMenu app = new OhnOMenu();
+                eng_.setApplication(app);
+                app.setEngine(eng_);
+            }
         }
     }
     @Override
     public void render() {
         Graphics g = eng_.getGraphics();
-        //g.clear(new Color(50, 0, 200, 0));
+        g.clear(white);
         g.drawText(logoFont, "Oh nO", g.getWidth() / 2, logoPosY, true);
         g.drawText(playFont, playText, g.getWidth() / 2, playPosY, true);
         g.drawText(creditFont, "Un juego copiado a Q42", g.getWidth() / 2, firstCreditPosY, true);

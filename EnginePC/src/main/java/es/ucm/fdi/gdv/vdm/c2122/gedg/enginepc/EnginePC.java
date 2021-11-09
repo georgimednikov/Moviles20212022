@@ -14,6 +14,7 @@ public class EnginePC implements Engine {
     JFrame jf_;
     Application a_;
     GraphicsPC g_;
+    Input i_;
     java.awt.Graphics Jgraphics_;
     BufferStrategy strategy_;
     boolean running;
@@ -43,7 +44,10 @@ public class EnginePC implements Engine {
         }
         strategy_ = jf_.getBufferStrategy();
         g_ = new GraphicsPC(jf_);
+        i_ = new InputPC(g_);
+
         running = true;
+
         return true;
     }
 
@@ -53,7 +57,7 @@ public class EnginePC implements Engine {
     }
     @Override
     public Input getInput() {
-        return null;
+        return i_;
     }
     @Override
     public void setApplication(Application a) {

@@ -24,7 +24,7 @@ public class Hint {
         //NOT_ENOUGH_BLUES
     }
 
-    public String[] hintText = {
+    public static String[] hintText = {
             "VISIBLE_CELLS_COVERED",
             "CANNOT_SURPASS_LIMIT",
             "MUST_PLACE_BLUE",

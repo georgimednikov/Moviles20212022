@@ -24,6 +24,10 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
         jf.addComponentListener(this);
     }
 
+    public JFrame getJFrame() {
+        return jf_;
+    }
+
     @Override
     public Image newImage(String name) {
         return new ImagePC(name);
@@ -38,12 +42,16 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
     public void clear(Color color) {
         java.awt.Color c = g_.getColor();
         setColor(color);
-        g_.fillRect(0,0, getWidth(), getHeight());
+        g_.fillRect(0,0, curSizeX, curSizeY);
         g_.setColor(c);
     }
 
     @Override
     public void drawImage(Image image, int x, int y, int width, int height, boolean centered) {
+        x = toReal(x);
+        y = toReal(y);
+        width = toReal(width);
+        height = toReal(height);
         ImagePC img = (ImagePC) image;
         img.setPos(x, y);
         int verticalOffset, horizontalOffset; verticalOffset = horizontalOffset = 0;
@@ -61,13 +69,19 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
 
     @Override
     public void fillCircle(int cx, int cy, int r) {
-        //scale(curSizeX, curSizeY);
-        g_.fillOval(cx - r , cy - r , 2*r, 2*r);
+        cx = toReal(cx);
+        cy = toReal(cy);
+        int rx = toReal(r);
+        int ry = toReal(r);
+        g_.fillOval(cx - rx , cy - ry, 2*rx, 2*ry);
     }
 
     @Override
     public void drawText(Font font, String text, int x, int y, boolean centered) {
+        x = toReal(x);
+        y = toReal(y);
         FontPC f = (FontPC) font;
+        font.setSize(toReal(f.originalSize_));
         g_.setFont(f.getFont());
         setColor(f.getColor());
         if (!centered) {
@@ -88,36 +102,38 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
 
     public void setGraphics(Graphics g){
         g_ = g;
-        translate(curPosX, curPosY);
+        g.translate(curPosX, curPosY);
         g_.setClip(0, 0, curSizeX, curSizeY); // Ya se ha trasladado, su 0, 0 esta movido ya
     }
 
     @Override
     public int getWidth() {
-        return curSizeX;
+        return refSizeX;
     }
 
     @Override
     public int getHeight() {
-        return curSizeY;
+        return refSizeY;
     }
 
     @Override
     public int getTextWidth(Font font, String text) {
         FontRenderContext frc = new FontRenderContext(null, true, true);
         Rectangle2D r2D = ((FontPC)font).getFont().getStringBounds(text, frc);
-        return (int)Math.round(r2D.getWidth());
+        return toReal((int)Math.round(r2D.getWidth()));
     }
 
     @Override
     public int getTextHeight(Font font, String text) {
         FontRenderContext frc = new FontRenderContext(null, true, true);
         Rectangle2D r2D = ((FontPC)font).getFont().getStringBounds(text, frc);
-        return (int)Math.round(r2D.getHeight());
+        return toReal((int)Math.round(r2D.getHeight()));
     }
 
     @Override
     public void translate(int dx, int dy) {
+        dx = toReal(dx);
+        dy = toReal(dy);
         g_.translate(dx, dy);
     }
 

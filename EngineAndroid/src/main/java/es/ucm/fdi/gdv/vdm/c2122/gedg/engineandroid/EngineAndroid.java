@@ -8,44 +8,40 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Application;
 
-//TODO: No tengo nada claro que tenga que extendear SurfaceView
-public class EngineAndroid extends SurfaceView implements Engine, Runnable {
+public class EngineAndroid implements Engine, Runnable {
 
-    private Thread renderThread_;
-    private boolean running_;
+    private Thread gameThread_;
+    private volatile boolean running_;
 
     private InputAndroid input_;
     private GraphicsAndroid graphics_;
     private Application app_;
 
     public EngineAndroid(Context context) {
-        super(context);
         input_ = new InputAndroid();
         //TODO: No tengo nada claro que graphics tenga que tener el holder
-        graphics_ = new GraphicsAndroid(context, getHolder());
+        graphics_ = new GraphicsAndroid(context);
     }
 
-    @Override
-    public void setApplication(Application a) {
-        app_ = a;
-        app_.init();
+    public SurfaceView getSurfaceView() {
+        return graphics_.getSurfaceView();
     }
 
-    public void resume() {
+    public void onResume() {
         if (!running_) {
             running_ = true;
-            renderThread_ = new Thread(this);
-            renderThread_.start();
+            gameThread_ = new Thread(this); // Esto es el run
+            gameThread_.start();
         }
     }
 
-    public void pause() {
+    public void onPause() {
         if (running_) {
             running_ = false;
             while (true) {
                 try {
-                    renderThread_.join();
-                    renderThread_ = null;
+                    gameThread_.join();
+                    gameThread_ = null;
                     break;
                 } catch (InterruptedException ie) {
                     //No deberia pasar
@@ -56,10 +52,10 @@ public class EngineAndroid extends SurfaceView implements Engine, Runnable {
 
     @Override
     public void run() {
-        if (renderThread_ != Thread.currentThread()) {
+        if (gameThread_ != Thread.currentThread()) {
             throw new RuntimeException("run() should not be called directly");
         }
-        while(running_ && graphics_.getWidth() == 0);
+        while(running_ && !graphics_.init());
         while(running_) {
             app_.update();
             graphics_.lock();
@@ -67,6 +63,11 @@ public class EngineAndroid extends SurfaceView implements Engine, Runnable {
             graphics_.unlock();
         }
         app_.close();
+    }
+    @Override
+    public void setApplication(Application a) {
+        app_ = a;
+        app_.init();
     }
     @Override
     public Graphics getGraphics() {

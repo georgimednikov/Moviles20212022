@@ -9,11 +9,14 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
 
 public class FontPC implements Font {
 
+    int originalSize_;
     private java.awt.Font font;
     private Color color_;
+    private boolean bold_;
 
     public FontPC(String name, Color color, int size, boolean isBold) {
         color_ = color;
+        originalSize_ = size;
         try {
             font = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, new File(name)).deriveFont((isBold) ? java.awt.Font.BOLD : java.awt.Font.PLAIN, size);
         }
@@ -36,10 +39,13 @@ public class FontPC implements Font {
     }
     @Override
     public void setSize(int size) {
-        font = font.deriveFont(size);
+        if(font.getSize() == size) return;
+        font = font.deriveFont((float) size);
     }
     @Override
     public void setBold(boolean isBold) {
+        if(bold_ == isBold) return;
+        bold_ = isBold;
         font = font.deriveFont((isBold) ? java.awt.Font.BOLD : java.awt.Font.PLAIN);
     }
     @Override

@@ -1,7 +1,6 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -9,22 +8,26 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 
 import java.io.InputStream;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.*;
 
-public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics {
+public class GraphicsAndroid extends GraphicsCommon {
 
+
+    private SurfaceView view_;
     private SurfaceHolder holder_;
     private Context context_;
     private Canvas canvas_;
     private Paint paint_; //Paint para cada elemento visual que lo utilice
     private int saveCalled = 0; //Contador para que no se pueda llamar mas veces a restore que a save
 
-    public GraphicsAndroid(Context context, SurfaceHolder holder) {
+    public GraphicsAndroid(Context context) {
         context_ = context;
-        holder_ = holder;
+        view_ = new SurfaceView(context);
+        holder_ = view_.getHolder();
         paint_ = new Paint();
     }
 
@@ -35,6 +38,10 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
 
     public void unlock() {
         holder_.unlockCanvasAndPost(canvas_);
+    }
+
+    public SurfaceView getSurfaceView() {
+        return view_;
     }
 
     @Override
@@ -79,18 +86,22 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
     }
 
     @Override
-    @Deprecated
     public void setColor(Color color) {
         paint_.setARGB(color.a, color.r, color.g, color.b);
     }
 
     @Override
     public void fillCircle(int cx, int cy, int r) {
+        cx = toReal(cx);
+        cy = toReal(cy);
+        r = toReal(r);
         canvas_.drawCircle(cx, cy, r, paint_);
     }
 
     @Override
     public void drawText(Font font, String text, int x, int y, boolean centered) {
+        x = toReal(x);
+        y = toReal(y);
         FontAndroid f = (FontAndroid) font;
         Rect bounds = new Rect(); f.getPaint().getTextBounds(text, 0, text.length(), bounds);
         if (!f.isLoaded()) return;
@@ -127,7 +138,11 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
     }
 
     @Override
-    public void translate(int dx, int dy) { canvas_.translate(dx, dy); }
+    public void translate(int dx, int dy) {
+        dx = toReal(dx);
+        dy = toReal(dy);
+        canvas_.translate(dx, dy);
+    }
 
     @Override
     public void scale(float sx, float sy) { canvas_.scale(sx, sy); }
@@ -141,5 +156,9 @@ public class GraphicsAndroid implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Gra
             canvas_.restore();
             saveCalled--;
         }
+    }
+
+    public boolean init() {
+        return canvas_ == null;
     }
 }
