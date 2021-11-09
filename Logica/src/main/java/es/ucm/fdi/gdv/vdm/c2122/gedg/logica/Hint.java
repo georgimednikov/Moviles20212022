@@ -25,16 +25,17 @@ public class Hint {
     }
 
     public static String[] hintText = {
-            "VISIBLE_CELLS_COVERED",
-            "CANNOT_SURPASS_LIMIT",
-            "MUST_PLACE_BLUE",
-            "TOO_MANY_ADJACENT",
-            "NOT_ENOUGH_BUT_CLOSED",
-            "BLUE_BUT_ISOLATED",
-            "ISOLATED_AND_EMPTY"
+            //                                   |
+            "Está completa, ciérrala",
+            "Superaría el número de otra",
+            "Está en todas las soluciones",
+            "Demasiadas celdas",
+            "Pocas celdas",
+            "Es azul sin azules adyacentes",
+            "Celda gris rodeada de rojas"
     };
 
     public HintType type;
-    public int x = -1, y = -1;
+    public int i = -1, j = -1;
 }
 

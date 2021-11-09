@@ -45,13 +45,15 @@ public class OhnOLevel implements Application {
 
     //Variables de pista
     private boolean givingHint = false;
-    private int highlightRadius = 65;
+    private int highlightRadius = -1; //Asignacion dinamica
     private int highlightPosX = 0;
     private int highlightPosY = 0;
 
     //Textos
     private int infoPosY = 75;
-    private int progressPosY = 490;
+    private int progressPosY = 500;
+    private int infoRegSize = 60;
+    private int infoHintSize = 25;
     private Font infoFont;
     private Font progressFont;
     private Font numberFont;
@@ -90,6 +92,7 @@ public class OhnOLevel implements Application {
     }
 
     private void undoMove() {
+        infoFont.setSize(infoHintSize);
         if (previousMoves.isEmpty()) {
             infoText = "No queda nada por hacer";
             return;
@@ -100,7 +103,7 @@ public class OhnOLevel implements Application {
                 infoText = "Esta celda a vuelto a azul";
                 break;
             case GREY:
-                infoText = "Esta celda a vuelto a su estado desconocido";
+                infoText = "Esta celda a vuelto a gris";
                 break;
             case RED:
                 infoText = "Esta celda a vuelto a rojo";
@@ -118,8 +121,9 @@ public class OhnOLevel implements Application {
         cellSeparation = (int)(paintArea * 0.1) / (boardSize-1);
         int buttonArea = eng_.getGraphics().getWidth() - 2 * buttonOffsetX;
         buttonSeparation = (buttonArea - (buttonSize * numButtons)) / (numButtons - 1);
+        highlightRadius = (int)Math.round(cellRadius * 1.1);
 
-        infoFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", black, 60, true);
+        infoFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", black, infoRegSize, true);
         progressFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", darkGrey, 25, false);
         numberFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", white, cellRadius, false);
         quitImage = g.newImage("assets/sprites/close.png");
@@ -177,13 +181,17 @@ public class OhnOLevel implements Application {
                             undoMove();
                             break;
                         case 2:
-                            if (givingHint) givingHint = false;
+                            if (givingHint) {
+                                givingHint = false;
+                                resetInterface();
+                            }
                             else {
                                 givingHint = true;
                                 Hint hint = giveHint_user();
-                                highlightPosX = hint.x + cellRadius;
-                                highlightPosY = hint.y + cellRadius;
+                                highlightPosX = boardOffsetX + cellRadius * (hint.j + 1) + (cellSeparation + cellRadius) * hint.j;
+                                highlightPosY = boardOffsetY + cellRadius * (hint.i + 1) + (cellSeparation + cellRadius) * hint.i;
                                 infoText = hint.hintText[hint.type.ordinal()];
+                                infoFont.setSize(infoHintSize);
                             }
                             break;
                     }
@@ -321,7 +329,7 @@ public class OhnOLevel implements Application {
                 hint = giveHint(solBoard);
                 tryAgain = hint != null;
                 if (tryAgain) {
-                    solBoard[hint.x][hint.y].applyHint(hint);
+                    solBoard[hint.i][hint.j].applyHint(hint);
                     placedCells++;
                 }
                 if (fixedCells + placedCells == numCells) {
@@ -421,6 +429,7 @@ public class OhnOLevel implements Application {
 
     private void resetInterface() {
         infoText = boardSize + " x " + boardSize;
+        infoFont.setSize(infoRegSize);
         fixedTapped = givingHint = false;
     }
     //endregion
@@ -518,8 +527,8 @@ public class OhnOLevel implements Application {
         //Busca en la direccion i j la siguiente casilla no azul; si es gris, esta abierta y hay que cerrarla
         if (mat[newPos[0]][newPos[1]].getCurrState() == Cell.STATE.GREY) {
             hint.type = Hint.HintType.VISIBLE_CELLS_COVERED;
-            hint.x = newPos[0];
-            hint.y = newPos[1];
+            hint.i = newPos[0];
+            hint.j = newPos[1];
             return true;
         }
         return false;
@@ -540,8 +549,8 @@ public class OhnOLevel implements Application {
             //Si poner la casilla gris en azul supera el numero correcto
             if (cont + newCont > cell.getNumber()) {
                 hint.type = Hint.HintType.CANNOT_SURPASS_LIMIT;
-                hint.x = newPos[0];
-                hint.y = newPos[1];
+                hint.i = newPos[0];
+                hint.j = newPos[1];
                 return true;
             }
         }
@@ -580,8 +589,8 @@ public class OhnOLevel implements Application {
             if (mat[thisFirstGrey[0]][thisFirstGrey[1]].getCurrState() != Cell.STATE.GREY) {
                 return false;
             }
-            hint.x = thisFirstGrey[0];
-            hint.y = thisFirstGrey[1];
+            hint.i = thisFirstGrey[0];
+            hint.j = thisFirstGrey[1];
             hint.type = Hint.HintType.MUST_PLACE_BLUE;
             return true;
         }
@@ -592,8 +601,8 @@ public class OhnOLevel implements Application {
     //region Regular Hints
     private boolean hint_TOO_MANY_ADJACENT(Hint hint, Cell[][] mat, Cell cell) {
         if (calculateNumber(mat, cell.getX(), cell.getY()) <= cell.getNumber()) return false;
-        hint.x = cell.getX();
-        hint.y = cell.getY();
+        hint.i = cell.getX();
+        hint.j = cell.getY();
         hint.type = Hint.HintType.TOO_MANY_ADJACENT;
         return true;
     }
@@ -617,8 +626,8 @@ public class OhnOLevel implements Application {
         }
         //Si ve las que tiene que ver esta pista no aplica
         if (blueVisible >= cell.getNumber()) return false;
-        hint.x = cell.getX();
-        hint.y = cell.getY();
+        hint.i = cell.getX();
+        hint.j = cell.getY();
         hint.type = Hint.HintType.NOT_ENOUGH_BUT_CLOSED;
         return true;
     }
@@ -639,8 +648,8 @@ public class OhnOLevel implements Application {
                 }
             }
         }
-        hint.x = cell.getX();
-        hint.y = cell.getY();
+        hint.i = cell.getX();
+        hint.j = cell.getY();
         hint.type = Hint.HintType.BLUE_BUT_ISOLATED;
         return true;
     }

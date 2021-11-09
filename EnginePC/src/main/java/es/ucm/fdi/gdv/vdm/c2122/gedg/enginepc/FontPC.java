@@ -33,13 +33,18 @@ public class FontPC implements Font {
     }
     Color getColor() { return color_; }
 
+    public void setRenderSize(int size) {
+        if(font.getSize() == size) return;
+        font = font.deriveFont((float) size);
+    }
+
     @Override
     public void setColor(Color color) {
         color_ = color;
     }
     @Override
     public void setSize(int size) {
-        if(font.getSize() == size) return;
+        originalSize_ = size;
         font = font.deriveFont((float) size);
     }
     @Override

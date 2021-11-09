@@ -48,10 +48,10 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
 
     @Override
     public void drawImage(Image image, int x, int y, int width, int height, boolean centered) {
-        x = toReal(x);
-        y = toReal(y);
-        width = toReal(width);
-        height = toReal(height);
+        x = toRealX(x);
+        y = toRealY(y);
+        width = toRealX(width);
+        height = toRealY(height);
         ImagePC img = (ImagePC) image;
         img.setPos(x, y);
         int verticalOffset, horizontalOffset; verticalOffset = horizontalOffset = 0;
@@ -69,19 +69,19 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
 
     @Override
     public void fillCircle(int cx, int cy, int r) {
-        cx = toReal(cx);
-        cy = toReal(cy);
-        int rx = toReal(r);
-        int ry = toReal(r);
+        cx = toRealX(cx);
+        cy = toRealY(cy);
+        int rx = toRealX(r);
+        int ry = toRealY(r);
         g_.fillOval(cx - rx , cy - ry, 2*rx, 2*ry);
     }
 
     @Override
     public void drawText(Font font, String text, int x, int y, boolean centered) {
-        x = toReal(x);
-        y = toReal(y);
+        x = toRealX(x);
+        y = toRealY(y);
         FontPC f = (FontPC) font;
-        font.setSize(toReal(f.originalSize_));
+        f.setRenderSize(toRealY(f.originalSize_));
         g_.setFont(f.getFont());
         setColor(f.getColor());
         if (!centered) {
@@ -121,20 +121,20 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
     public int getTextWidth(Font font, String text) {
         FontRenderContext frc = new FontRenderContext(null, true, true);
         Rectangle2D r2D = ((FontPC)font).getFont().getStringBounds(text, frc);
-        return toReal((int)Math.round(r2D.getWidth()));
+        return toRealX((int)Math.round(r2D.getWidth()));
     }
 
     @Override
     public int getTextHeight(Font font, String text) {
         FontRenderContext frc = new FontRenderContext(null, true, true);
         Rectangle2D r2D = ((FontPC)font).getFont().getStringBounds(text, frc);
-        return toReal((int)Math.round(r2D.getHeight()));
+        return toRealY((int)Math.round(r2D.getHeight()));
     }
 
     @Override
     public void translate(int dx, int dy) {
-        dx = toReal(dx);
-        dy = toReal(dy);
+        dx = toRealX(dx);
+        dy = toRealY(dy);
         g_.translate(dx, dy);
     }
 
@@ -161,17 +161,11 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
     }
 
     @Override
-    public void componentMoved(ComponentEvent componentEvent) {
-
-    }
+    public void componentMoved(ComponentEvent componentEvent) {}
 
     @Override
-    public void componentShown(ComponentEvent componentEvent) {
-
-    }
+    public void componentShown(ComponentEvent componentEvent) {}
 
     @Override
-    public void componentHidden(ComponentEvent componentEvent) {
-
-    }
+    public void componentHidden(ComponentEvent componentEvent) {}
 }

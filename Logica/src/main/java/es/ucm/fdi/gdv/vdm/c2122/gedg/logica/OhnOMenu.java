@@ -19,9 +19,9 @@ public class OhnOMenu implements Application {
     private int firstSize = 4;
 
     private int menuOffsetX = 60;
-    private int menuOffsetY = 300;
-    private int cellSeparation = 5;
-    private int cellRadius = 50;
+    private int menuOffsetY = 270;
+    private int cellSeparation = -1; //Asignacion dinamica
+    private int cellRadius = -1; //Asignacion dinamica
 
     private int logoPosY = 130;
     private int textPosY = 215;
@@ -96,6 +96,15 @@ public class OhnOMenu implements Application {
         g.drawText(logoFont, "Oh nO", g.getWidth() / 2, logoPosY, true);
         g.drawText(textFont, "Elija el tamaño a jugar", g.getWidth() / 2, textPosY, true);
         int cont = firstSize;
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < sizePerRow; ++j) {
+                g.setColor(new Color(0, 255, 0, 255));
+                g.fillCircle(
+                        menuOffsetX + cellRadius * (j + 1) + (cellRadius + cellSeparation) * j,
+                        menuOffsetY + cellRadius * (i + 1) + (cellRadius + cellSeparation) * i,
+                        cellRadius + 3);
+            }
+        }
         for (int i = 0; i < rows; ++i) {
             g.save();
             g.translate(menuOffsetX + cellRadius, menuOffsetY + cellRadius * (i + 1) + (cellRadius + cellSeparation) * i);
