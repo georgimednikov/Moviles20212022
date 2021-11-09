@@ -4,6 +4,7 @@ import java.util.Random;
 import java.util.*;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Application;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.ApplicationCommon;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
@@ -11,9 +12,8 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
-public class OhnOLevel implements Application {
+public class OhnOLevel extends ApplicationCommon {
 
-    Engine eng_;
     private final boolean DEBUG = false;
     private final float blueProb = 0.7f; //Probabilidad de que una celda sea azul en vez de roja en la solución
     private final float fixedProb = 0.5f; //Probabilidad de que una celda sea fija
@@ -111,34 +111,12 @@ public class OhnOLevel implements Application {
         }
     }
 
-    @Override
-    public void setEngine(Engine eng) {
-        this.eng_ = eng;
-        Graphics g = eng_.getGraphics(); //TODO: ESTO NO DEBERIA IR AQUI CREO
-
-        int paintArea = eng_.getGraphics().getWidth() - 2 * boardOffsetX;
-        cellRadius = (int)((paintArea * 0.9) / 2) / boardSize;
-        cellSeparation = (int)(paintArea * 0.1) / (boardSize-1);
-        int buttonArea = eng_.getGraphics().getWidth() - 2 * buttonOffsetX;
-        buttonSeparation = (buttonArea - (buttonSize * numButtons)) / (numButtons - 1);
-        highlightRadius = (int)Math.round(cellRadius * 1.1);
-
-        infoFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", black, infoRegSize, true);
-        progressFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", darkGrey, 25, false);
-        numberFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", white, cellRadius, false);
-        quitImage = g.newImage("assets/sprites/close.png");
-        undoImage = g.newImage("assets/sprites/history.png");
-        hintImage = g.newImage("assets/sprites/eye.png");
-        lockImage = g.newImage("assets/sprites/lock.png");
-        infoText = boardSize + " x " + boardSize;
-    }
 
     @Override
     public void update() {
         if (solved) {
             Application app = new OhnOMenu();
             eng_.setApplication(app);
-            app.setEngine(eng_);
             return;
         }
         TouchEvent event;
@@ -242,6 +220,23 @@ public class OhnOLevel implements Application {
 
     @Override
     public boolean init() {
+        Graphics g = eng_.getGraphics(); //TODO: ESTO NO DEBERIA IR AQUI CREO
+
+        int paintArea = eng_.getGraphics().getWidth() - 2 * boardOffsetX;
+        cellRadius = (int)((paintArea * 0.9) / 2) / boardSize;
+        cellSeparation = (int)(paintArea * 0.1) / (boardSize-1);
+        int buttonArea = eng_.getGraphics().getWidth() - 2 * buttonOffsetX;
+        buttonSeparation = (buttonArea - (buttonSize * numButtons)) / (numButtons - 1);
+        highlightRadius = (int)Math.round(cellRadius * 1.1);
+
+        infoFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", black, infoRegSize, true);
+        progressFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", darkGrey, 25, false);
+        numberFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", white, cellRadius, false);
+        quitImage = g.newImage("assets/sprites/close.png");
+        undoImage = g.newImage("assets/sprites/history.png");
+        hintImage = g.newImage("assets/sprites/eye.png");
+        lockImage = g.newImage("assets/sprites/lock.png");
+        infoText = boardSize + " x " + boardSize;
         createBoard(boardSize);
         return true;
     }

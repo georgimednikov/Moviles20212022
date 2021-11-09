@@ -3,6 +3,7 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 import java.util.List;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Application;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.ApplicationCommon;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
@@ -11,9 +12,8 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
 
-public class OhnOMenu implements Application {
+public class OhnOMenu extends ApplicationCommon {
 
-    Engine eng_;
     private int rows = 2;
     private int sizePerRow = 3;
     private int firstSize = 4;
@@ -46,20 +46,6 @@ public class OhnOMenu implements Application {
     }
 
     @Override
-    public void setEngine(Engine eng) {
-        this.eng_ = eng;
-        Graphics g = eng_.getGraphics();
-
-        int paintArea = g.getWidth() - 2 * menuOffsetX;
-        cellRadius = (int)((paintArea * 0.9) / 2) / sizePerRow;
-        cellSeparation = (int)(paintArea * 0.1) / (sizePerRow-1);
-
-        logoFont = g.newFont("assets/fonts/Molle-Regular.ttf", new Color(0, 0, 0, 255), 85, false);
-        textFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(0, 0, 0, 255), 30, false);
-        numberFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(255, 255, 255, 255), 75, false);
-        quitImage = g.newImage("assets/sprites/close.png");
-    }
-    @Override
     public void update() {
         TouchEvent event;
         List<TouchEvent> events = eng_.getInput().getTouchEvents();
@@ -70,7 +56,6 @@ public class OhnOMenu implements Application {
             if (checkCollisionCircle(eng_.getGraphics().getWidth() / 2, quitPosY, buttonSize, event.x, event.y)) {
                 OhnOIntro app = new OhnOIntro();
                 eng_.setApplication(app);
-                app.setEngine(eng_);
                 continue;
             }
             int cont = firstSize;
@@ -82,7 +67,6 @@ public class OhnOMenu implements Application {
                             cellRadius, event.x, event.y)) {
                         OhnOLevel app = new OhnOLevel(cont);
                         eng_.setApplication(app);
-                        app.setEngine(eng_);
                         continue next;
                     }
                     cont++;
@@ -112,6 +96,16 @@ public class OhnOMenu implements Application {
     }
     @Override
     public boolean init() {
+        Graphics g = eng_.getGraphics();
+
+        int paintArea = g.getWidth() - 2 * menuOffsetX;
+        cellRadius = (int)((paintArea * 0.9) / 2) / sizePerRow;
+        cellSeparation = (int)(paintArea * 0.1) / (sizePerRow-1);
+
+        logoFont = g.newFont("assets/fonts/Molle-Regular.ttf", new Color(0, 0, 0, 255), 85, false);
+        textFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(0, 0, 0, 255), 30, false);
+        numberFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(255, 255, 255, 255), 75, false);
+        quitImage = g.newImage("assets/sprites/close.png");
         return true;
     }
     @Override

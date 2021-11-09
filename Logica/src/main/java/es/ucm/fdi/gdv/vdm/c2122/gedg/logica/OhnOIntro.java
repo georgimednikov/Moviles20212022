@@ -3,6 +3,7 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 import java.util.List;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Application;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.ApplicationCommon;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
@@ -11,9 +12,7 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
 
-public class OhnOIntro implements Application {
-
-    Engine eng_;
+public class OhnOIntro extends ApplicationCommon {
 
     private int logoPosY = 130;
     private int playPosY = 250;
@@ -40,15 +39,7 @@ public class OhnOIntro implements Application {
                 eventY >= (y - h / 2) && eventY <= (y + h / 2));
     }
 
-    @Override
-    public void setEngine(Engine eng) {
-        this.eng_ = eng;
-        Graphics g = eng_.getGraphics();
-        logoFont = g.newFont("assets/fonts/Molle-Regular.ttf", new Color(0, 0, 0, 255), 85, false);
-        playFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(0, 0, 0, 255), 60, false);
-        creditFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(150, 150, 150, 255), 25, false);
-        q42Image = g.newImage("assets/sprites/q42.png");
-    }
+
     @Override
     public void update() {
         TouchEvent event;
@@ -64,7 +55,6 @@ public class OhnOIntro implements Application {
                     event.x, event.y,true)) {
                 OhnOMenu app = new OhnOMenu();
                 eng_.setApplication(app);
-                app.setEngine(eng_);
             }
         }
     }
@@ -79,7 +69,14 @@ public class OhnOIntro implements Application {
         g.drawImage(q42Image, g.getWidth() / 2, imagePosY, imageWidth, imageHeight, true);
     }
     @Override
-    public boolean init() { return true; }
+    public boolean init() {
+        Graphics g = eng_.getGraphics();
+        logoFont = g.newFont("assets/fonts/Molle-Regular.ttf", new Color(0, 0, 0, 255), 85, false);
+        playFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(0, 0, 0, 255), 60, false);
+        creditFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(150, 150, 150, 255), 25, false);
+        q42Image = g.newImage("assets/sprites/q42.png");
+        return true;
+    }
     @Override
     public boolean close() {
         return true;
