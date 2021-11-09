@@ -63,6 +63,7 @@ public class EnginePC implements Engine {
     @Override
     public void setApplication(Application a) {
         this.a_ = a;
+        a.setEngine(this);
         a_.init();
     }
     @Override
