@@ -19,6 +19,8 @@ public class EnginePC implements Engine {
     java.awt.Graphics Jgraphics_;
     BufferStrategy strategy_;
     boolean running;
+    private double deltaTime_;
+    private double lastFrameTime_;
 
     public EnginePC(){
         init();
@@ -52,6 +54,15 @@ public class EnginePC implements Engine {
         return true;
     }
 
+    private void updateDeltaTime() {
+        double currentTime = System.nanoTime();
+        double nanoElapsedTime = currentTime - lastFrameTime_;
+        lastFrameTime_ = currentTime;
+        deltaTime_ = nanoElapsedTime / 1.0E6;
+    }
+
+    @Override
+    public double getDeltaTime() { return deltaTime_; }
     @Override
     public Graphics getGraphics() {
         return g_;
@@ -74,6 +85,8 @@ public class EnginePC implements Engine {
     @Override
     public void run() {
         while(running){
+            lastFrameTime_ = System.nanoTime();
+            updateDeltaTime();
             a_.update();
             do {
                 do {

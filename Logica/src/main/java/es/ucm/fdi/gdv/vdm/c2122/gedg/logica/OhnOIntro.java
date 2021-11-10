@@ -2,17 +2,20 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 
 import java.util.List;
 
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Application;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.ApplicationCommon;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
-
 public class OhnOIntro extends ApplicationCommon {
+
+    private boolean fadeIn = true;
+    private boolean fadeOut = false;
+    private float fadeCurrentDuration = 0f; //Segundos que lleva haciendose un fade
+    private float fadeTotalDuration = 0.25f; //Segundos que duran los fades
+    private float sceneAlpha = 0f; //Alpha de la escena al hacer fade in/out
 
     private int logoPosY = 130;
     private int playPosY = 250;
@@ -29,8 +32,7 @@ public class OhnOIntro extends ApplicationCommon {
     private Font playFont;
     private Font creditFont;
 
-    public OhnOIntro() {
-    }
+    public OhnOIntro() {}
 
     private boolean checkCollisionBox(int x, int y, int w, int h, int eventX, int eventY, boolean centered) {
         if (!centered) return (eventX >= x && eventX <= (x + w) &&
@@ -39,9 +41,30 @@ public class OhnOIntro extends ApplicationCommon {
                 eventY >= (y - h / 2) && eventY <= (y + h / 2));
     }
 
+    private boolean updateFades() {
+        if (fadeIn || fadeOut) {
+            if (fadeCurrentDuration >= fadeTotalDuration) {
+                fadeCurrentDuration = 0;
+                if (fadeIn) fadeIn = false;
+                else if (fadeOut) {
+                    OhnOMenu app = new OhnOMenu();
+                    eng_.setApplication(app);
+                }
+            }
+            else {
+                fadeCurrentDuration += eng_.getDeltaTime();
+                if (fadeIn) sceneAlpha = 1 - Math.min((fadeCurrentDuration / fadeTotalDuration), 1);
+                else if (fadeOut) sceneAlpha = Math.min((fadeCurrentDuration / fadeTotalDuration), 1);
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public void update() {
+        if (updateFades()) return;
+
         TouchEvent event;
         List<TouchEvent> events = eng_.getInput().getTouchEvents();
         while (!events.isEmpty()) {
@@ -53,8 +76,7 @@ public class OhnOIntro extends ApplicationCommon {
                     eng_.getGraphics().getTextWidth(playFont, playText),
                     eng_.getGraphics().getTextHeight(playFont, playText),
                     event.x, event.y,true)) {
-                OhnOMenu app = new OhnOMenu();
-                eng_.setApplication(app);
+                fadeOut = true;
             }
         }
     }
@@ -67,6 +89,10 @@ public class OhnOIntro extends ApplicationCommon {
         g.drawText(creditFont, "Un juego copiado a Q42", g.getWidth() / 2, firstCreditPosY, true);
         g.drawText(creditFont, "Creado por Martin Kool", g.getWidth() / 2, secondCreditPosY, true);
         g.drawImage(q42Image, g.getWidth() / 2, imagePosY, imageWidth, imageHeight, true);
+
+        if (fadeIn ||fadeOut) {
+            g.clear(new Color(255, 255, 255, (int)(255 * sceneAlpha)));
+        }
     }
     @Override
     public boolean init() {

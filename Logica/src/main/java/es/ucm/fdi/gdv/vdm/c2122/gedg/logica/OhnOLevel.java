@@ -3,16 +3,20 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 import java.util.Random;
 import java.util.*;
 
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Application;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.ApplicationCommon;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
 public class OhnOLevel extends ApplicationCommon {
+
+    private boolean fadeIn = true;
+    private boolean fadeOut = false;
+    private float fadeCurrentDuration = 0f; //Segundos que lleva haciendose un fade
+    private float fadeTotalDuration = 0.25f; //Segundos que duran los fades
+    private float sceneAlpha = 0f; //Alpha de la escena al hacer fade in/out
 
     private final boolean DEBUG = false;
     private final float blueProb = 0.7f; //Probabilidad de que una celda sea azul en vez de roja en la solución
@@ -53,72 +57,22 @@ public class OhnOLevel extends ApplicationCommon {
     private int infoPosY = 75;
     private int progressPosY = 500;
     private int infoRegSize = 60;
+    private int infoWinSize = 35;
     private int infoHintSize = 25;
-    private Font infoFont;
-    private Font progressFont;
-    private Font numberFont;
     private String infoText;
     private String progressText;
-    private Color black = new Color(0, 0, 0, 255);
-    private Color blue = new Color(72, 193, 228, 255);
-    private Color grey = new Color(238, 237, 239, 255);
-    private Color darkGrey = new Color(150, 150, 150, 255);
-    private Color red = new Color(245, 53, 73, 255);
-    private Color white = new Color(255, 255, 255, 255);
-    private Image quitImage;
-    private Image undoImage;
-    private Image hintImage;
-    private Image lockImage;
+    private Map<String, Color> colors = new HashMap<>();
+    private Map<String, Font> fonts = new HashMap<>();
+    private Map<String, Image> images = new HashMap<>();
 
     public OhnOLevel(int size) {
         boardSize = size;
     }
 
-    public boolean changeCell(int x, int y) {
-        resetInterface();
-        if (!board[x][y].isFixed()) {
-            Cell.STATE oldState = board[x][y].getCurrState();
-            board[x][y].changeState();
-            previousMoves.add(board[x][y]);
-
-            if (oldState == solBoard[x][y].getCurrState()) {
-                contMistakes++;
-            } else if (board[x][y].getCurrState() == solBoard[x][y].getCurrState()){
-                contMistakes--;
-            }
-            solved = contMistakes == 0;
-        }
-        return board[x][y].getCurrState() != Cell.STATE.GREY;
-    }
-
-    private void undoMove() {
-        infoFont.setSize(infoHintSize);
-        if (previousMoves.isEmpty()) {
-            infoText = "No queda nada por hacer";
-            return;
-        }
-        Cell cell = previousMoves.remove(previousMoves.size() - 1);
-        switch (cell.revertState()) {
-            case BLUE:
-                infoText = "Esta celda a vuelto a azul";
-                break;
-            case GREY:
-                infoText = "Esta celda a vuelto a gris";
-                break;
-            case RED:
-                infoText = "Esta celda a vuelto a rojo";
-                break;
-        }
-    }
-
-
     @Override
     public void update() {
-        if (solved) {
-            Application app = new OhnOMenu();
-            eng_.setApplication(app);
-            return;
-        }
+        if (updateFades()) return;
+
         TouchEvent event;
         List<TouchEvent> events = eng_.getInput().getTouchEvents();
         next:
@@ -151,8 +105,7 @@ public class OhnOLevel extends ApplicationCommon {
                     switch (i) {
                         case 0:
                             OhnOMenu app = new OhnOMenu();
-                            eng_.setApplication(app);
-                            app.setEngine(eng_);
+                            fadeOut = true;
                             break;
                         case 1:
                             undoMove();
@@ -168,7 +121,7 @@ public class OhnOLevel extends ApplicationCommon {
                                 highlightPosX = boardOffsetX + cellRadius * (hint.j + 1) + (cellSeparation + cellRadius) * hint.j;
                                 highlightPosY = boardOffsetY + cellRadius * (hint.i + 1) + (cellSeparation + cellRadius) * hint.i;
                                 infoText = hint.hintText[hint.type.ordinal()];
-                                infoFont.setSize(infoHintSize);
+                                fonts.get("infoFont").setSize(infoHintSize);
                             }
                             break;
                     }
@@ -181,10 +134,10 @@ public class OhnOLevel extends ApplicationCommon {
     @Override
     public void render() {
         Graphics g = eng_.getGraphics();
-        g.drawText(infoFont, infoText, g.getWidth() / 2, infoPosY, true);
-        g.drawText(progressFont, progressText, g.getWidth() / 2, progressPosY, true);
+        g.drawText(fonts.get("infoFont"), infoText, g.getWidth() / 2, infoPosY, true);
+        g.drawText(fonts.get("progressFont"), progressText, g.getWidth() / 2, progressPosY, true);
         if (givingHint) {
-            g.setColor(black);
+            g.setColor(colors.get("black"));
             g.fillCircle(highlightPosX, highlightPosY, highlightRadius);
         }
         for (int i = 0; i < boardSize; ++i) {
@@ -194,33 +147,36 @@ public class OhnOLevel extends ApplicationCommon {
                 Cell.STATE cellState = board[i][j].getCurrState();
                 switch (cellState) {
                     case BLUE:
-                        g.setColor(blue);
+                        g.setColor(colors.get("blue"));
                         break;
                     case GREY:
-                        g.setColor(grey);
+                        g.setColor(colors.get("grey"));
                         break;
                     case RED:
-                        g.setColor(red);
+                        g.setColor(colors.get("red"));
                         break;
                 }
                 g.fillCircle(0, 0, cellRadius);
                 if (fixedTapped && cellState == Cell.STATE.RED)
-                    g.drawImage(lockImage, 0, 0, cellRadius, cellRadius, true);
+                    g.drawImage(images.get("lockImage"), 0, 0, cellRadius, cellRadius, true);
                 if (board[i][j].isFixed() && cellState == Cell.STATE.BLUE)
-                    g.drawText(numberFont, "" + board[i][j].getNumber(), 0, 0, true);
+                    g.drawText(fonts.get("numberFont"), "" + board[i][j].getNumber(), 0, 0, true);
                 g.translate(cellRadius * 2 + cellSeparation, 0);
             }
             g.restore();
         }
-        g.drawImage(quitImage, buttonOffsetX, buttonOffsetY, buttonSize, buttonSize, false);
-        g.drawImage(undoImage, buttonOffsetX + (buttonSize + buttonSeparation), buttonOffsetY, buttonSize, buttonSize, false);
-        g.drawImage(hintImage, buttonOffsetX + (buttonSize + buttonSeparation) * 2, buttonOffsetY, buttonSize, buttonSize, false);
-        g.setColor(black);
+        g.drawImage(images.get("quitImage"), buttonOffsetX, buttonOffsetY, buttonSize, buttonSize, false);
+        g.drawImage(images.get("undoImage"), buttonOffsetX + (buttonSize + buttonSeparation), buttonOffsetY, buttonSize, buttonSize, false);
+        g.drawImage(images.get("hintImage"), buttonOffsetX + (buttonSize + buttonSeparation) * 2, buttonOffsetY, buttonSize, buttonSize, false);
+
+        if (fadeIn ||fadeOut) {
+            g.clear(new Color(255, 255, 255, (int)(255 * sceneAlpha)));
+        }
     }
 
     @Override
     public boolean init() {
-        Graphics g = eng_.getGraphics(); //TODO: ESTO NO DEBERIA IR AQUI CREO
+        Graphics g = eng_.getGraphics();
 
         int paintArea = eng_.getGraphics().getWidth() - 2 * boardOffsetX;
         cellRadius = (int)((paintArea * 0.9) / 2) / boardSize;
@@ -229,13 +185,20 @@ public class OhnOLevel extends ApplicationCommon {
         buttonSeparation = (buttonArea - (buttonSize * numButtons)) / (numButtons - 1);
         highlightRadius = (int)Math.round(cellRadius * 1.1);
 
-        infoFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", black, infoRegSize, true);
-        progressFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", darkGrey, 25, false);
-        numberFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", white, cellRadius, false);
-        quitImage = g.newImage("assets/sprites/close.png");
-        undoImage = g.newImage("assets/sprites/history.png");
-        hintImage = g.newImage("assets/sprites/eye.png");
-        lockImage = g.newImage("assets/sprites/lock.png");
+        colors.put("black", new Color(0, 0, 0, 255));
+        colors.put("blue", new Color(72, 193, 228, 255));
+        colors.put("grey", new Color(238, 237, 239, 255));
+        colors.put("darkGrey", new Color(150, 150, 150, 255));
+        colors.put("red", new Color(245, 53, 73, 255));
+        colors.put("white", new Color(255, 255, 255, 255));
+        fonts.put("infoFont", g.newFont("assets/fonts/JosefinSans-Bold.ttf", colors.get("black"), infoRegSize, true));
+        fonts.put("progressFont", g.newFont("assets/fonts/JosefinSans-Bold.ttf", colors.get("darkGrey"), 25, false));
+        fonts.put("numberFont", g.newFont("assets/fonts/JosefinSans-Bold.ttf", colors.get("white"), cellRadius, false));
+        images.put("quitImage", g.newImage("assets/sprites/close.png"));
+        images.put("undoImage", g.newImage("assets/sprites/history.png"));
+        images.put("hintImage", g.newImage("assets/sprites/eye.png"));
+        images.put("lockImage", g.newImage("assets/sprites/lock.png"));
+
         infoText = boardSize + " x " + boardSize;
         createBoard(boardSize);
         return true;
@@ -245,37 +208,75 @@ public class OhnOLevel extends ApplicationCommon {
         return true;
     }
 
-    //region Auxiliary Methods
-    static private Random rand = new Random(System.currentTimeMillis());
-
-    static private boolean getRandomBoolean(float p) {
-        //assert p > 1.0f && p < 0.0f : String.format("getRandomBoolean recibe un número entre 0 y 1: (%d)", p);
-        return rand.nextFloat() < p;
-    }
-
-    private int readFromConsole(char[][] mat) {
-        int fixedCells = 0;
-        for (int i = 0; i < boardSize; ++i) {
-            for (int j = 0; j < boardSize; ++j) {
-                char c = mat[i][j];
-
-                switch (c) {
-                    case 'r':
-                        board[i][j].fixCell(Cell.STATE.RED);
-                        fixedCells++;
-                        break;
-                    case '0':
-                        break;
-                    default: // numeros
-                        int num = Character.getNumericValue(c);
-                        board[i][j].fixCell(Cell.STATE.BLUE, num);
-                        fixedCells++;
-                        fixedBlueCells.add(board[i][j]);
-                        break;
+    //region RenderMethods
+    private boolean updateFades() {
+        if (fadeIn || fadeOut) {
+            if (fadeCurrentDuration >= fadeTotalDuration) {
+                fadeCurrentDuration = 0;
+                if (fadeIn) fadeIn = false;
+                else if (fadeOut) {
+                    OhnOMenu app = new OhnOMenu();
+                    eng_.setApplication(app);
                 }
             }
+            else {
+                fadeCurrentDuration += eng_.getDeltaTime();
+                if (fadeIn) sceneAlpha = 1 - Math.min((fadeCurrentDuration / fadeTotalDuration), 1);
+                else if (fadeOut) sceneAlpha = Math.min((fadeCurrentDuration / fadeTotalDuration), 1);
+                return true;
+            }
         }
-        return fixedCells;
+        return false;
+    }
+
+    private void resetInterface() {
+        infoText = boardSize + " x " + boardSize;
+        fonts.get("infoFont").setSize(infoRegSize);
+        fixedTapped = givingHint = false;
+    }
+    //endregion
+
+    //region Board Methods
+    public boolean changeCell(int x, int y) {
+        resetInterface();
+        if (!board[x][y].isFixed()) {
+            Cell.STATE oldState = board[x][y].getCurrState();
+            board[x][y].changeState();
+            previousMoves.add(board[x][y]);
+
+            if (oldState == solBoard[x][y].getCurrState()) {
+                contMistakes++;
+            } else if (board[x][y].getCurrState() == solBoard[x][y].getCurrState()){
+                contMistakes--;
+            }
+            if(contMistakes == 0) {
+                fadeOut = true;
+                fonts.get("infoFont").setSize(infoWinSize);
+                fonts.get("infoFont").setBold(true);
+                infoText = "ROCAMBOLESCO";
+            }
+        }
+        return board[x][y].getCurrState() != Cell.STATE.GREY;
+    }
+
+    private void undoMove() {
+        fonts.get("infoFont").setSize(infoHintSize);
+        if (previousMoves.isEmpty()) {
+            infoText = "No queda nada por hacer";
+            return;
+        }
+        Cell cell = previousMoves.remove(previousMoves.size() - 1);
+        switch (cell.revertState()) {
+            case BLUE:
+                infoText = "Esta celda a vuelto a azul";
+                break;
+            case GREY:
+                infoText = "Esta celda a vuelto a gris";
+                break;
+            case RED:
+                infoText = "Esta celda a vuelto a rojo";
+                break;
+        }
     }
 
     //Crea la matriz que representa el nivel de un tamaño dado
@@ -340,6 +341,40 @@ public class OhnOLevel extends ApplicationCommon {
                 }
             }
         }
+    }
+    //endregion
+
+    //region Auxiliary Methods
+    static private Random rand = new Random(System.currentTimeMillis());
+
+    static private boolean getRandomBoolean(float p) {
+        //assert p > 1.0f && p < 0.0f : String.format("getRandomBoolean recibe un número entre 0 y 1: (%d)", p);
+        return rand.nextFloat() < p;
+    }
+
+    private int readFromConsole(char[][] mat) {
+        int fixedCells = 0;
+        for (int i = 0; i < boardSize; ++i) {
+            for (int j = 0; j < boardSize; ++j) {
+                char c = mat[i][j];
+
+                switch (c) {
+                    case 'r':
+                        board[i][j].fixCell(Cell.STATE.RED);
+                        fixedCells++;
+                        break;
+                    case '0':
+                        break;
+                    default: // numeros
+                        int num = Character.getNumericValue(c);
+                        board[i][j].fixCell(Cell.STATE.BLUE, num);
+                        fixedCells++;
+                        fixedBlueCells.add(board[i][j]);
+                        break;
+                }
+            }
+        }
+        return fixedCells;
     }
 
     private Cell[][] copyBoard(Cell[][] orig) {
@@ -419,12 +454,6 @@ public class OhnOLevel extends ApplicationCommon {
         int vecX = eventX - centerX;
         int vecY = eventY - centerY;
         return (Math.pow(vecX, 2) + Math.pow(vecY, 2) <= Math.pow(radius, 2));
-    }
-
-    private void resetInterface() {
-        infoText = boardSize + " x " + boardSize;
-        infoFont.setSize(infoRegSize);
-        fixedTapped = givingHint = false;
     }
     //endregion
 

@@ -6,6 +6,5 @@ public interface Application {
     boolean init();
     void update();
     void render();
-    //void receiveEvents(Event e);
     boolean close();
 }

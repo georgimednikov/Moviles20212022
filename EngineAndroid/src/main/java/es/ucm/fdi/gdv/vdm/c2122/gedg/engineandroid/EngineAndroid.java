@@ -13,6 +13,8 @@ public class EngineAndroid implements Engine, Runnable {
     private Thread gameThread_;
     private volatile boolean running_;
 
+    private double lastFrameTime_;
+    private double deltaTime_;
     private InputAndroid input_;
     private GraphicsAndroid graphics_;
     private Application app_;
@@ -49,13 +51,23 @@ public class EngineAndroid implements Engine, Runnable {
         }
     }
 
+    private void updateDeltaTime() {
+        double currentTime = System.nanoTime();
+        double nanoElapsedTime = currentTime - lastFrameTime_;
+        lastFrameTime_ = currentTime;
+        deltaTime_ = nanoElapsedTime / 1.0E9;
+    }
+    public double getDeltaTime() { return deltaTime_; }
+
     @Override
     public void run() {
         if (gameThread_ != Thread.currentThread()) {
             throw new RuntimeException("run() should not be called directly");
         }
         while(running_ && graphics_.init());
+        lastFrameTime_ = System.nanoTime();
         while(running_) {
+            updateDeltaTime();
             app_.update();
             graphics_.lock();
             graphics_.setGamePosition();
@@ -64,6 +76,7 @@ public class EngineAndroid implements Engine, Runnable {
         }
         app_.close();
     }
+
     @Override
     public void setApplication(Application a) {
         app_ = a;

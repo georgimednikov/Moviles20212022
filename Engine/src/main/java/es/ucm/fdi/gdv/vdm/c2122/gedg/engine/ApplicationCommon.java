@@ -14,14 +14,10 @@ public class ApplicationCommon implements Application{
     }
 
     @Override
-    public void update() {
-
-    }
+    public void update() {}
 
     @Override
-    public void render() {
-
-    }
+    public void render() {}
 
     @Override
     public boolean close() {
