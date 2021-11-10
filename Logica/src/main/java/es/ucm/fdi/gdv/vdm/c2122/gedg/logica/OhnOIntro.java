@@ -41,7 +41,7 @@ public class OhnOIntro extends ApplicationCommon {
                 eventY >= (y - h / 2) && eventY <= (y + h / 2));
     }
 
-    private boolean updateFades() {
+    private boolean updateSceneFades() {
         if (fadeIn || fadeOut) {
             if (fadeCurrentDuration >= fadeTotalDuration) {
                 fadeCurrentDuration = 0;
@@ -63,7 +63,7 @@ public class OhnOIntro extends ApplicationCommon {
 
     @Override
     public void update() {
-        if (updateFades()) return;
+        if (updateSceneFades()) return;
 
         TouchEvent event;
         List<TouchEvent> events = eng_.getInput().getTouchEvents();

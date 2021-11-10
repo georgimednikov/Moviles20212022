@@ -54,7 +54,7 @@ public class OhnOMenu extends ApplicationCommon {
         return (Math.pow(vecX, 2) + Math.pow(vecY, 2) <= Math.pow(radius, 2));
     }
 
-    private boolean updateFades() {
+    private boolean updateSceneFades() {
         if (fadeIn || fadeOut) {
             if (fadeCurrentDuration >= fadeTotalDuration) {
                 fadeCurrentDuration = 0;
@@ -84,7 +84,7 @@ public class OhnOMenu extends ApplicationCommon {
 
     @Override
     public void update() {
-        if (updateFades()) return;
+        if (updateSceneFades()) return;
 
         TouchEvent event;
         List<TouchEvent> events = eng_.getInput().getTouchEvents();

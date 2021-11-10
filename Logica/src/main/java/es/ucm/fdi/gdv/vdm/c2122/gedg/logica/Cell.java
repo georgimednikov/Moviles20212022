@@ -8,11 +8,14 @@ public class Cell {
         BLUE
     }
 
-    private boolean fixed_; //Si se puede modificar el estado
     private int x_; //Posición
     private int y_;
     private int number_; //Número de la celda
+    private float fadeAlpha_;
+    private boolean fixed_; //Si se puede modificar el estado
+    private boolean switching_; //Si esta haciendo fade
     private STATE currState_; //Color actual de la celda
+    private STATE prevState_; //Color actual de la celda
 
     public Cell(int x, int y){
         x_ = x;
@@ -31,14 +34,12 @@ public class Cell {
         fixCell(solution);
     }
 
-    public void setNumber(int number){
-        number_ = number;
-    }
-
     public void resetCell(){
         number_ = -1;
+        fadeAlpha_ = 0;
         currState_ = STATE.GREY;
         fixed_ = false;
+        switching_ = false;
     }
 
     public void applyHint(Hint h){
@@ -57,6 +58,7 @@ public class Cell {
 
     //Cicla el color de la celda siguiendo el orden, para el juego
     public void changeState() {
+        prevState_ = currState_;
         switch (currState_)
         {
             case GREY:
@@ -71,6 +73,7 @@ public class Cell {
         }
     }
     public Cell.STATE revertState() {
+        prevState_ = currState_;
         switch (currState_) {
             case RED:
                 currState_ = STATE.BLUE;
@@ -85,9 +88,18 @@ public class Cell {
         return currState_;
     }
 
-    public boolean isFixed() { return fixed_; }
-    public STATE getCurrState() { return currState_; }
-    public int getNumber() { return number_; }
+    public void setNumber(int number){
+        number_ = number;
+    }
+    public void setFadeAlpha(float alpha) { fadeAlpha_ = alpha; }
+    public void setSwitching(boolean swt) { switching_ = swt; }
+
     public int getX() { return x_; }
     public int getY() { return y_; }
+    public int getNumber() { return number_; }
+    public float getFadeAlpha() { return fadeAlpha_; }
+    public boolean isFixed() { return fixed_; }
+    public boolean isSwitching() { return switching_; }
+    public STATE getCurrState() { return currState_; }
+    public STATE getPrevState() { return prevState_; }
 }

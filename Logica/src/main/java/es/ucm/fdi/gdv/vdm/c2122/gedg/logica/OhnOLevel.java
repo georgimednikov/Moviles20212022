@@ -1,6 +1,5 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 
-import java.util.Random;
 import java.util.*;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.ApplicationCommon;
@@ -12,13 +11,26 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
 public class OhnOLevel extends ApplicationCommon {
 
+    private class CellFadeInfo {
+        int x;
+        int y;
+        float elapsedTime;
+
+        CellFadeInfo(int x, int y) {
+            this.x = x;
+            this.y = y;
+            elapsedTime = 0f;
+        }
+    }
+    private List<CellFadeInfo> cellsFading = new ArrayList<>();
+
     private boolean fadeIn = true;
     private boolean fadeOut = false;
-    private float fadeCurrentDuration = 0f; //Segundos que lleva haciendose un fade
-    private float fadeTotalDuration = 0.25f; //Segundos que duran los fades
+    private float fadeCurrentDuration = 0f; //Segundos que lleva haciendose un fade de la escena
+    private float fadeTotalDuration = 0.25f; //Segundos que duran los fades de la escena
+    private float cellFadeDuration = 0.1f; //Segundos que duran los fades de las celdas
     private float sceneAlpha = 0f; //Alpha de la escena al hacer fade in/out
 
-    private final boolean DEBUG = false;
     private final float blueProb = 0.7f; //Probabilidad de que una celda sea azul en vez de roja en la solución
     private final float fixedProb = 0.5f; //Probabilidad de que una celda sea fija
 
@@ -29,9 +41,8 @@ public class OhnOLevel extends ApplicationCommon {
     int contMistakes = 0; //Número de celdas mal puestas
     private Cell[][] board;
     private Cell[][] solBoard;
-    private List<Cell> fixedBlueCells = new ArrayList<>(); //ESTO ERA UN VECTOR NO CREO HABER ROTO NADA PERO POR SI AK
+    private List<Cell> fixedBlueCells = new ArrayList<>();
     private List<Cell> previousMoves = new ArrayList<>();
-    private boolean solved = false;
 
     //Variables de Cell
     private boolean fixedTapped = false;
@@ -71,7 +82,8 @@ public class OhnOLevel extends ApplicationCommon {
 
     @Override
     public void update() {
-        if (updateFades()) return;
+        updateCellFades();
+        if (updateSceneFades()) return;
 
         TouchEvent event;
         List<TouchEvent> events = eng_.getInput().getTouchEvents();
@@ -81,17 +93,12 @@ public class OhnOLevel extends ApplicationCommon {
             if (event.type != TouchEvent.TouchType.PRESS) continue; //TODO: ESTO NO DEBERIA SER ASI (?)
             for (int i = 0; i < boardSize; ++i) {
                 for (int j = 0; j < boardSize; ++j) {
-                    if (checkCollisionCircle(
+                    if (!board[j][i].isSwitching() && checkCollisionCircle(
                             boardOffsetX + cellRadius * (i + 1) + (cellSeparation + cellRadius) * i,
                             boardOffsetY + cellRadius * (j + 1) + (cellSeparation + cellRadius) * j,
                             cellRadius, event.x, event.y)) {
-                        if (!board[j][i].isFixed()) {
-                            Cell.STATE oldState = board[j][i].getCurrState();
+                        if (!board[j][i].isFixed())
                             changeCell(j, i);
-                            if (oldState == Cell.STATE.GREY) coloredCells++;
-                            else if (board[j][i].getCurrState() == Cell.STATE.GREY) coloredCells--;
-                            progressText = Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%";
-                        }
                         else fixedTapped = !fixedTapped;
                         continue next;
                     }
@@ -144,23 +151,23 @@ public class OhnOLevel extends ApplicationCommon {
             g.save();
             g.translate(boardOffsetX + cellRadius, boardOffsetY + cellRadius * (i + 1) + (cellRadius + cellSeparation) * i);
             for (int j = 0; j < boardSize; ++j) {
-                Cell.STATE cellState = board[i][j].getCurrState();
-                switch (cellState) {
-                    case BLUE:
-                        g.setColor(colors.get("blue"));
-                        break;
-                    case GREY:
-                        g.setColor(colors.get("grey"));
-                        break;
-                    case RED:
-                        g.setColor(colors.get("red"));
-                        break;
+                Cell cell = board[i][j];
+                Cell.STATE currState = cell.getCurrState();
+                Cell.STATE prevState = cell.getPrevState();
+                if (cell.isSwitching()) {
+                    Color prevColor = getColorState(prevState);
+                    g.setColor(prevColor);
+                    g.fillCircle(0, 0, cellRadius);
+                    Color currColor = getColorState(currState);
+                    g.setColor(new Color(currColor.r, currColor.g, currColor.b, (int)(255 * cell.getFadeAlpha())));
                 }
+                else
+                    g.setColor(getColorState(currState));
                 g.fillCircle(0, 0, cellRadius);
-                if (fixedTapped && cellState == Cell.STATE.RED)
-                    g.drawImage(images.get("lockImage"), 0, 0, cellRadius, cellRadius, true);
-                if (board[i][j].isFixed() && cellState == Cell.STATE.BLUE)
-                    g.drawText(fonts.get("numberFont"), "" + board[i][j].getNumber(), 0, 0, true);
+                if (cell.isFixed()) {
+                    if (currState == Cell.STATE.BLUE) g.drawText(fonts.get("numberFont"), "" + cell.getNumber(), 0, 0, true);
+                    else if (fixedTapped) g.drawImage(images.get("lockImage"), 0, 0, cellRadius, cellRadius, true);
+                }
                 g.translate(cellRadius * 2 + cellSeparation, 0);
             }
             g.restore();
@@ -209,7 +216,23 @@ public class OhnOLevel extends ApplicationCommon {
     }
 
     //region RenderMethods
-    private boolean updateFades() {
+    private void updateCellFades() {
+        double deltaTime = eng_.getDeltaTime();
+        for (int i = 0; i < cellsFading.size(); ++i) {
+            CellFadeInfo info = cellsFading.get(i);
+            Cell cell = board[info.x][info.y];
+            if (info.elapsedTime >= cellFadeDuration) {
+                cell.setSwitching(false);
+                cellsFading.remove(i);
+                --i; //Se ha quitado un obejto de la lista, hay que retroceder
+                continue;
+            }
+            info.elapsedTime += deltaTime;
+            cell.setFadeAlpha(Math.min((info.elapsedTime / cellFadeDuration), 1));
+        }
+    }
+
+    private boolean updateSceneFades() {
         if (fadeIn || fadeOut) {
             if (fadeCurrentDuration >= fadeTotalDuration) {
                 fadeCurrentDuration = 0;
@@ -229,34 +252,48 @@ public class OhnOLevel extends ApplicationCommon {
         return false;
     }
 
+    private Color getColorState(Cell.STATE state) {
+        switch (state) {
+            case BLUE:
+                return colors.get("blue");
+            case GREY:
+                return colors.get("grey");
+            case RED:
+                return colors.get("red");
+        }
+        return colors.get("grey"); //Me obliga a poner un return imposible
+    }
+
     private void resetInterface() {
         infoText = boardSize + " x " + boardSize;
         fonts.get("infoFont").setSize(infoRegSize);
-        fixedTapped = givingHint = false;
+        givingHint = false;
     }
     //endregion
 
     //region Board Methods
-    public boolean changeCell(int x, int y) {
+    public void changeCell(int x, int y) {
         resetInterface();
-        if (!board[x][y].isFixed()) {
-            Cell.STATE oldState = board[x][y].getCurrState();
-            board[x][y].changeState();
-            previousMoves.add(board[x][y]);
+        Cell cell = board[x][y];
+        cell.changeState();
+        previousMoves.add(cell);
+        cellsFading.add(new CellFadeInfo(x, y));
+        cell.setSwitching(true);
 
-            if (oldState == solBoard[x][y].getCurrState()) {
-                contMistakes++;
-            } else if (board[x][y].getCurrState() == solBoard[x][y].getCurrState()){
-                contMistakes--;
-            }
-            if(contMistakes == 0) {
-                fadeOut = true;
-                fonts.get("infoFont").setSize(infoWinSize);
-                fonts.get("infoFont").setBold(true);
-                infoText = "ROCAMBOLESCO";
-            }
+        Cell.STATE prevState = cell.getPrevState();
+        Cell.STATE currState = cell.getCurrState();
+        if (prevState == solBoard[x][y].getCurrState()) contMistakes++;
+        else if (currState == solBoard[x][y].getCurrState()) contMistakes--;
+        if(contMistakes == 0) {
+            fadeOut = true;
+            fonts.get("infoFont").setSize(infoWinSize);
+            fonts.get("infoFont").setBold(true);
+            infoText = "ROCAMBOLESCO";
         }
-        return board[x][y].getCurrState() != Cell.STATE.GREY;
+        if (prevState == Cell.STATE.GREY) coloredCells++;
+        else if (currState == Cell.STATE.GREY) coloredCells--;
+
+        progressText = Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%";
     }
 
     private void undoMove() {
@@ -266,6 +303,8 @@ public class OhnOLevel extends ApplicationCommon {
             return;
         }
         Cell cell = previousMoves.remove(previousMoves.size() - 1);
+        cellsFading.add(new CellFadeInfo(cell.getX(), cell.getY()));
+        cell.setSwitching(true);
         switch (cell.revertState()) {
             case BLUE:
                 infoText = "Esta celda a vuelto a azul";
