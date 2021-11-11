@@ -11,15 +11,16 @@ public class Text {
     private boolean switching_;
     private boolean appearing_ = false;
 
-    private boolean centered_ = false;
+    private boolean centered_;
     private int newSize_;
     private Font font_;
     private String text_;
     private String newText_;
 
-    Text(Font font, String text) {
+    Text(Font font, String text, boolean centered) {
         font_ = font;
         text_ = text;
+        centered_ = centered;
     }
 
     public void render(Graphics g) {
@@ -34,14 +35,17 @@ public class Text {
     }
 
     public void updateText(double deltaTime) {
+        if (!switching_) return;
         if (elapsedTime_ >= fadeDuration_) {
             if (appearing_) {
                 switching_ = false;
+                appearing_ = false;
             }
             else {
                 appearing_ = true;
                 font_.setSize(newSize_);
                 text_ = newText_;
+                elapsedTime_ = 0;
             }
         }
         else {

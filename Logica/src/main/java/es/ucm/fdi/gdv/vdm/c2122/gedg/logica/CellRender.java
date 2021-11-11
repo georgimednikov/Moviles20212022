@@ -2,6 +2,7 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 
 public class CellRender {
 
@@ -11,6 +12,8 @@ public class CellRender {
     private Color blue_;
     private Color red_;
     private Color grey_;
+    //private Image lock_;
+    //private boolean locked_;
 
     private float alpha_;
     private float elapsedTime_;
@@ -39,6 +42,7 @@ public class CellRender {
     }
 
     public void updateCellRender(double deltaTime) {
+        if (!switching_) return;
         if (elapsedTime_ >= fadeDuration_) {
             switching_ = false;
         }

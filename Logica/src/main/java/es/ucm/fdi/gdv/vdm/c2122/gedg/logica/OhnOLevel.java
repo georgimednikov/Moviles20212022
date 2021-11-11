@@ -17,7 +17,6 @@ public class OhnOLevel extends ApplicationCommon {
     private boolean fadeOut = false;
     private float fadeCurrentDuration = 0f; //Segundos que lleva haciendose un fade de la escena
     private float fadeTotalDuration = 0.25f; //Segundos que duran los fades de la escena
-    private float objectFadeDuration = 0.1f; //Segundos que duran los fades de las celdas
     private float sceneAlpha = 0f; //Alpha de la escena al hacer fade in/out
 
     private final float blueProb = 0.7f; //Probabilidad de que una celda sea azul en vez de roja en la solución
@@ -98,8 +97,8 @@ public class OhnOLevel extends ApplicationCommon {
         progressFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", darkGrey, 25, false);
         numberFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", white, cellRadius, false);
 
-        infoText = new Text(infoFont, boardSize + " x " + boardSize);
-        progressText = new Text(progressFont, Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%");
+        infoText = new Text(infoFont, boardSize + " x " + boardSize, true);
+        progressText = new Text(progressFont, Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", true);
 
         quitImage = g.newImage("assets/sprites/close.png");
         undoImage = g.newImage("assets/sprites/history.png");
@@ -107,6 +106,7 @@ public class OhnOLevel extends ApplicationCommon {
         lockImage = g.newImage("assets/sprites/lock.png");
 
         createBoard();
+        renderBoard = new CellRender[boardSize][boardSize];
         for (int i = 0; i < boardSize; ++i) {
             for (int j = 0; j < boardSize; ++j) {
                 renderBoard[i][j] = new CellRender(board[i][j], cellRadius);
@@ -181,13 +181,13 @@ public class OhnOLevel extends ApplicationCommon {
     public void render() {
         Graphics g = eng_.getGraphics();
 
-        //TODO: TRANSLATE
+        g.save();
+        g.translate(g.getWidth() / 2, infoPosY);
         infoText.render(g);
+        g.translate(0, progressPosY - infoPosY);
         progressText.render(g);
-        //drawText(g, texts.get("info"), g.getWidth() / 2, infoPosY, true);
-        //drawText(g, texts.get("progress"), g.getWidth() / 2, progressPosY, true);
-        infoText.render(g);
-        progressText.render(g);
+        g.restore();
+
         if (givingHint) {
             g.setColor(black);
             g.fillCircle(highlightPosX, highlightPosY, highlightRadius);
@@ -198,20 +198,21 @@ public class OhnOLevel extends ApplicationCommon {
             for (int j = 0; j < boardSize; ++j) {
                 renderBoard[i][j].render(g);
                 if (board[i][j].isFixed()) {
-                    if (board[i][j].getCurrState() == CellLogic.STATE.BLUE) g.drawText(fonts.get("numberFont"), "" + cellLogic.getNumber(), 0, 0, true);
-                    else if (fixedTapped) g.drawImage(images.get("lockImage"), 0, 0, cellRadius, cellRadius, true);
+                    //if (board[i][j].getCurrState() == CellLogic.STATE.BLUE) g.drawText(fonts.get("numberFont"), "" + cellLogic.getNumber(), 0, 0, true);
+                    //else if (fixedTapped) g.drawImage(images.get("lockImage"), 0, 0, cellRadius, cellRadius, true);
                 }
                 g.translate(cellRadius * 2 + cellSeparation, 0);
             }
             g.restore();
         }
-        //TODO: TRANSLANTE
+        g.save();
+        g.translate(buttonOffsetX, buttonOffsetY);
         g.drawImage(quitImage, 0, 0, buttonSize, buttonSize, false);
+        g.translate(buttonSize + buttonSeparation, 0);
         g.drawImage(undoImage, 0, 0, buttonSize, buttonSize, false);
+        g.translate(buttonSize + buttonSeparation, 0);
         g.drawImage(hintImage, 0, 0, buttonSize, buttonSize, false);
-        //g.drawImage(quitImage, buttonOffsetX, buttonOffsetY, buttonSize, buttonSize, false);
-        //g.drawImage(undoImage, buttonOffsetX + (buttonSize + buttonSeparation), buttonOffsetY, buttonSize, buttonSize, false);
-        //g.drawImage(hintImage, buttonOffsetX + (buttonSize + buttonSeparation) * 2, buttonOffsetY, buttonSize, buttonSize, false);
+        g.restore();
 
         if (fadeIn ||fadeOut) {
             g.clear(new Color(255, 255, 255, (int)(255 * sceneAlpha)));
@@ -262,10 +263,14 @@ public class OhnOLevel extends ApplicationCommon {
             fadeOut = true;
             infoText.fade("ROCAMBOLESCO", infoWinSize);
         }
-        if (prevState == CellLogic.STATE.GREY) coloredCells++;
-        else if (currState == CellLogic.STATE.GREY) coloredCells--;
-
-        progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", progressSize);
+        if (prevState == CellLogic.STATE.GREY) {
+            coloredCells++;
+            progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", progressSize);
+        }
+        else if (currState == CellLogic.STATE.GREY) {
+            coloredCells--;
+            progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", progressSize);
+        }
     }
 
     private void undoMove() {
