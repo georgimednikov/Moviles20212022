@@ -11,24 +11,48 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
 public class OhnOLevel extends ApplicationCommon {
 
-    private class CellFadeInfo {
-        int x;
-        int y;
-        float elapsedTime;
+    private class Text {
+        Font font;
+        String text;
+        Text(Font font, String text) {
+            this.font = font;
+            this.text = text;
+        }
+    }
 
-        CellFadeInfo(int x, int y) {
-            this.x = x;
-            this.y = y;
-            elapsedTime = 0f;
+    private class FadeInfo {
+        Object obj;
+        float alpha;
+        float elapsedTime;
+        FadeInfo(Object obj) { this.obj = obj; alpha = 0; elapsedTime = 0; }
+    }
+    private class CellFadeInfo extends FadeInfo {
+        CellFadeInfo(Cell cell) {
+            super(cell);
+        }
+    }
+    private class TextFadeInfo extends FadeInfo {
+
+        Text text;
+        String newText;
+        boolean appearing;
+        int newSize;
+        TextFadeInfo(Text text, String newText, int size) {
+            super(text);
+            this.newText = newText;
+            appearing = false;
+            newSize = size;
         }
     }
     private List<CellFadeInfo> cellsFading = new ArrayList<>();
+    private List<TextFadeInfo> textsFading = new ArrayList<>();
+    private int ind;
 
     private boolean fadeIn = true;
     private boolean fadeOut = false;
     private float fadeCurrentDuration = 0f; //Segundos que lleva haciendose un fade de la escena
     private float fadeTotalDuration = 0.25f; //Segundos que duran los fades de la escena
-    private float cellFadeDuration = 0.1f; //Segundos que duran los fades de las celdas
+    private float objectFadeDuration = 0.1f; //Segundos que duran los fades de las celdas
     private float sceneAlpha = 0f; //Alpha de la escena al hacer fade in/out
 
     private final float blueProb = 0.7f; //Probabilidad de que una celda sea azul en vez de roja en la solución
@@ -70,10 +94,9 @@ public class OhnOLevel extends ApplicationCommon {
     private int infoRegSize = 60;
     private int infoWinSize = 35;
     private int infoHintSize = 25;
-    private String infoText;
-    private String progressText;
     private Map<String, Color> colors = new HashMap<>();
     private Map<String, Font> fonts = new HashMap<>();
+    private Map<String, Text> texts = new HashMap<>();
     private Map<String, Image> images = new HashMap<>();
 
     public OhnOLevel(int size) {
@@ -82,8 +105,10 @@ public class OhnOLevel extends ApplicationCommon {
 
     @Override
     public void update() {
-        updateCellFades();
-        if (updateSceneFades()) return;
+        double deltaTime = eng_.getDeltaTime();
+        updateCellFades(deltaTime);
+        updateTextFades(deltaTime);
+        if (updateSceneFades(deltaTime)) return;
 
         TouchEvent event;
         List<TouchEvent> events = eng_.getInput().getTouchEvents();
@@ -93,7 +118,7 @@ public class OhnOLevel extends ApplicationCommon {
             if (event.type != TouchEvent.TouchType.PRESS) continue; //TODO: ESTO NO DEBERIA SER ASI (?)
             for (int i = 0; i < boardSize; ++i) {
                 for (int j = 0; j < boardSize; ++j) {
-                    if (!board[j][i].isSwitching() && checkCollisionCircle(
+                    if (getFadingObject(board[j][i]) == -1 && checkCollisionCircle(
                             boardOffsetX + cellRadius * (i + 1) + (cellSeparation + cellRadius) * i,
                             boardOffsetY + cellRadius * (j + 1) + (cellSeparation + cellRadius) * j,
                             cellRadius, event.x, event.y)) {
@@ -111,7 +136,6 @@ public class OhnOLevel extends ApplicationCommon {
                         cellRadius, event.x, event.y)) {
                     switch (i) {
                         case 0:
-                            OhnOMenu app = new OhnOMenu();
                             fadeOut = true;
                             break;
                         case 1:
@@ -127,8 +151,7 @@ public class OhnOLevel extends ApplicationCommon {
                                 Hint hint = giveHint_user();
                                 highlightPosX = boardOffsetX + cellRadius * (hint.j + 1) + (cellSeparation + cellRadius) * hint.j;
                                 highlightPosY = boardOffsetY + cellRadius * (hint.i + 1) + (cellSeparation + cellRadius) * hint.i;
-                                infoText = hint.hintText[hint.type.ordinal()];
-                                fonts.get("infoFont").setSize(infoHintSize);
+                                textsFading.add(new TextFadeInfo(texts.get("info"), hint.hintText[hint.type.ordinal()], infoHintSize));
                             }
                             break;
                     }
@@ -141,8 +164,8 @@ public class OhnOLevel extends ApplicationCommon {
     @Override
     public void render() {
         Graphics g = eng_.getGraphics();
-        g.drawText(fonts.get("infoFont"), infoText, g.getWidth() / 2, infoPosY, true);
-        g.drawText(fonts.get("progressFont"), progressText, g.getWidth() / 2, progressPosY, true);
+        drawText(g, texts.get("info"), g.getWidth() / 2, infoPosY, true);
+        drawText(g, texts.get("progress"), g.getWidth() / 2, progressPosY, true);
         if (givingHint) {
             g.setColor(colors.get("black"));
             g.fillCircle(highlightPosX, highlightPosY, highlightRadius);
@@ -154,12 +177,12 @@ public class OhnOLevel extends ApplicationCommon {
                 Cell cell = board[i][j];
                 Cell.STATE currState = cell.getCurrState();
                 Cell.STATE prevState = cell.getPrevState();
-                if (cell.isSwitching()) {
+                if ((ind = getFadingObject(cell)) > -1) {
                     Color prevColor = getColorState(prevState);
                     g.setColor(prevColor);
                     g.fillCircle(0, 0, cellRadius);
                     Color currColor = getColorState(currState);
-                    g.setColor(new Color(currColor.r, currColor.g, currColor.b, (int)(255 * cell.getFadeAlpha())));
+                    g.setColor(new Color(currColor.r, currColor.g, currColor.b, (int)(255 * cellsFading.get(ind).alpha)));
                 }
                 else
                     g.setColor(getColorState(currState));
@@ -205,8 +228,9 @@ public class OhnOLevel extends ApplicationCommon {
         images.put("undoImage", g.newImage("assets/sprites/history.png"));
         images.put("hintImage", g.newImage("assets/sprites/eye.png"));
         images.put("lockImage", g.newImage("assets/sprites/lock.png"));
+        texts.put("info", new Text(fonts.get("infoFont"), boardSize + " x " + boardSize));
+        texts.put("progress", new Text(fonts.get("progressFont"), Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%"));
 
-        infoText = boardSize + " x " + boardSize;
         createBoard(boardSize);
         return true;
     }
@@ -216,23 +240,65 @@ public class OhnOLevel extends ApplicationCommon {
     }
 
     //region RenderMethods
-    private void updateCellFades() {
-        double deltaTime = eng_.getDeltaTime();
+    private void drawText(Graphics g, Text text, int x, int y, boolean centered) {
+        if ((ind = getFadingObject(text)) > -1) {
+            Color color = text.font.getColor();
+            int originalAlpha = color.a;
+            color.a = (int)(255 * textsFading.get(ind).alpha);
+            g.drawText(text.font, text.text, x, y, centered);
+            color.a = originalAlpha;
+        }
+        else g.drawText(text.font, text.text, x, y, centered);
+    }
+
+    private int getFadingObject(Cell cell) {
+        for (int i = 0; i < cellsFading.size(); ++i) {
+            if (cellsFading.get(i).obj == cell) return i;
+        }
+        return -1;
+    }
+    private int getFadingObject(Text text) {
+        for (int i = 0; i < textsFading.size(); ++i) {
+            if (textsFading.get(i).obj == text) return i;
+        }
+        return -1;
+    }
+
+    private void updateCellFades(double deltaTime) {
         for (int i = 0; i < cellsFading.size(); ++i) {
             CellFadeInfo info = cellsFading.get(i);
-            Cell cell = board[info.x][info.y];
-            if (info.elapsedTime >= cellFadeDuration) {
-                cell.setSwitching(false);
-                cellsFading.remove(i);
-                --i; //Se ha quitado un obejto de la lista, hay que retroceder
+            if (info.elapsedTime >= objectFadeDuration) {
+                cellsFading.remove(i); --i; //Se ha quitado un objeto de la lista, hay que retroceder
                 continue;
             }
             info.elapsedTime += deltaTime;
-            cell.setFadeAlpha(Math.min((info.elapsedTime / cellFadeDuration), 1));
+            info.alpha = Math.min((info.elapsedTime / objectFadeDuration), 1);
+        }
+    }
+    private void updateTextFades(double deltaTime) {
+        for (int i = 0; i < textsFading.size(); ++i) {
+            TextFadeInfo info = textsFading.get(i);
+            if (info.elapsedTime >= objectFadeDuration) {
+                if (!info.appearing) {
+                    textsFading.remove(i);
+                    --i; //Se ha quitado un obejto de la lista, hay que retroceder
+                }
+                else {
+                    info.appearing = true;
+                    Text textInfo = (Text)info.obj;
+                    textInfo.font.setSize(info.newSize);
+                    texts.get("info").text = textInfo.text;
+                    info.elapsedTime = 0;
+                }
+                continue;
+            }
+            info.elapsedTime += deltaTime;
+            if (!info.appearing) info.alpha = 1 - Math.min((info.elapsedTime / objectFadeDuration), 1);
+            else info.alpha = Math.min((info.elapsedTime / objectFadeDuration), 1);
         }
     }
 
-    private boolean updateSceneFades() {
+    private boolean updateSceneFades(double deltaTime) {
         if (fadeIn || fadeOut) {
             if (fadeCurrentDuration >= fadeTotalDuration) {
                 fadeCurrentDuration = 0;
@@ -243,7 +309,7 @@ public class OhnOLevel extends ApplicationCommon {
                 }
             }
             else {
-                fadeCurrentDuration += eng_.getDeltaTime();
+                fadeCurrentDuration += deltaTime;
                 if (fadeIn) sceneAlpha = 1 - Math.min((fadeCurrentDuration / fadeTotalDuration), 1);
                 else if (fadeOut) sceneAlpha = Math.min((fadeCurrentDuration / fadeTotalDuration), 1);
                 return true;
@@ -265,8 +331,9 @@ public class OhnOLevel extends ApplicationCommon {
     }
 
     private void resetInterface() {
-        infoText = boardSize + " x " + boardSize;
-        fonts.get("infoFont").setSize(infoRegSize);
+        Text infoText = texts.get("info");
+        infoText.text = boardSize + " x " + boardSize;
+        infoText.font.setSize(infoRegSize);
         givingHint = false;
     }
     //endregion
@@ -277,8 +344,7 @@ public class OhnOLevel extends ApplicationCommon {
         Cell cell = board[x][y];
         cell.changeState();
         previousMoves.add(cell);
-        cellsFading.add(new CellFadeInfo(x, y));
-        cell.setSwitching(true);
+        cellsFading.add(new CellFadeInfo(cell));
 
         Cell.STATE prevState = cell.getPrevState();
         Cell.STATE currState = cell.getCurrState();
@@ -286,36 +352,36 @@ public class OhnOLevel extends ApplicationCommon {
         else if (currState == solBoard[x][y].getCurrState()) contMistakes--;
         if(contMistakes == 0) {
             fadeOut = true;
-            fonts.get("infoFont").setSize(infoWinSize);
-            fonts.get("infoFont").setBold(true);
-            infoText = "ROCAMBOLESCO";
+            textsFading.add(new TextFadeInfo(texts.get("info"), "ROCAMBOLESCO", infoWinSize));
         }
         if (prevState == Cell.STATE.GREY) coloredCells++;
         else if (currState == Cell.STATE.GREY) coloredCells--;
 
-        progressText = Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%";
+        texts.get("progress").text = Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%";
     }
 
     private void undoMove() {
-        fonts.get("infoFont").setSize(infoHintSize);
+        String text = "";
         if (previousMoves.isEmpty()) {
-            infoText = "No queda nada por hacer";
+            text = "No queda nada por hacer";
             return;
         }
-        Cell cell = previousMoves.remove(previousMoves.size() - 1);
-        cellsFading.add(new CellFadeInfo(cell.getX(), cell.getY()));
-        cell.setSwitching(true);
-        switch (cell.revertState()) {
-            case BLUE:
-                infoText = "Esta celda a vuelto a azul";
-                break;
-            case GREY:
-                infoText = "Esta celda a vuelto a gris";
-                break;
-            case RED:
-                infoText = "Esta celda a vuelto a rojo";
-                break;
+        else {
+            Cell cell = previousMoves.remove(previousMoves.size() - 1);
+            cellsFading.add(new CellFadeInfo(cell));
+            switch (cell.revertState()) {
+                case BLUE:
+                    text = "Esta celda a vuelto a azul";
+                    break;
+                case GREY:
+                    text = "Esta celda a vuelto a gris";
+                    break;
+                case RED:
+                    text = "Esta celda a vuelto a rojo";
+                    break;
+            }
         }
+        textsFading.add(new TextFadeInfo(texts.get("info"), text, infoHintSize));
     }
 
     //Crea la matriz que representa el nivel de un tamaño dado
@@ -375,7 +441,7 @@ public class OhnOLevel extends ApplicationCommon {
                             break tries;
                         }
                     }
-                    progressText = Math.round((float)coloredCells / (float)numCells * 100) + "%";
+                    texts.get("progress").text = Math.round((float)coloredCells / (float)numCells * 100) + "%";
                     return;
                 }
             }

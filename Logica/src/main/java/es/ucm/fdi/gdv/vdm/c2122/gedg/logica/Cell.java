@@ -11,9 +11,7 @@ public class Cell {
     private int x_; //Posición
     private int y_;
     private int number_; //Número de la celda
-    private float fadeAlpha_;
     private boolean fixed_; //Si se puede modificar el estado
-    private boolean switching_; //Si esta haciendo fade
     private STATE currState_; //Color actual de la celda
     private STATE prevState_; //Color actual de la celda
 
@@ -36,10 +34,8 @@ public class Cell {
 
     public void resetCell(){
         number_ = -1;
-        fadeAlpha_ = 0;
         currState_ = STATE.GREY;
         fixed_ = false;
-        switching_ = false;
     }
 
     public void applyHint(Hint h){
@@ -91,15 +87,11 @@ public class Cell {
     public void setNumber(int number){
         number_ = number;
     }
-    public void setFadeAlpha(float alpha) { fadeAlpha_ = alpha; }
-    public void setSwitching(boolean swt) { switching_ = swt; }
 
     public int getX() { return x_; }
     public int getY() { return y_; }
     public int getNumber() { return number_; }
-    public float getFadeAlpha() { return fadeAlpha_; }
     public boolean isFixed() { return fixed_; }
-    public boolean isSwitching() { return switching_; }
     public STATE getCurrState() { return currState_; }
     public STATE getPrevState() { return prevState_; }
 }

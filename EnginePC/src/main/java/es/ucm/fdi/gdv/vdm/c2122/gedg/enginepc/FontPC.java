@@ -31,7 +31,6 @@ public class FontPC implements Font {
     java.awt.Font getFont(){
         return font;
     }
-    Color getColor() { return color_; }
 
     public void setRenderSize(int size) {
         if(font.getSize() == size) return;
@@ -56,5 +55,9 @@ public class FontPC implements Font {
     @Override
     public int getSize() {
         return font.getSize();
+    }
+    @Override
+    public Color getColor() {
+        return color_;
     }
 }

@@ -5,4 +5,5 @@ public interface Font {
     void setSize(int size);
     void setBold(boolean isBold);
     int	getSize();
+    Color getColor();
 }
