@@ -32,7 +32,6 @@ public class OhnOLevel extends ApplicationCommon {
         }
     }
     private class TextFadeInfo extends FadeInfo {
-        Text text;
         String newText;
         boolean appearing;
         int newSize;
@@ -284,9 +283,9 @@ public class OhnOLevel extends ApplicationCommon {
                 }
                 else {
                     info.appearing = true;
-                    Text textInfo = (Text)info.obj;
-                    textInfo.font.setSize(info.newSize);
-                    texts.get("info").text = textInfo.text;
+                    Text infoText = texts.get("info");
+                    infoText.font.setSize(info.newSize);
+                    infoText.text = info.newText;
                     info.elapsedTime = 0;
                 }
                 continue;
@@ -361,7 +360,6 @@ public class OhnOLevel extends ApplicationCommon {
         String text = "";
         if (previousMoves.isEmpty()) {
             text = "No queda nada por hacer";
-            return;
         }
         else {
             Cell cell = previousMoves.remove(previousMoves.size() - 1);
@@ -396,7 +394,7 @@ public class OhnOLevel extends ApplicationCommon {
         Hint hint = null;
         while (hint == null) {
             fixedCells = 0;
-            fixedBlueCells = new Vector<Cell>();
+            fixedBlueCells = new Vector<>();
             //Se fijan ciertas celdas con valores aleatorios
             for (int i = 0; i < size; ++i) {
                 for (int j = 0; j < size; ++j) {
@@ -450,7 +448,6 @@ public class OhnOLevel extends ApplicationCommon {
     static private Random rand = new Random(System.currentTimeMillis());
 
     static private boolean getRandomBoolean(float p) {
-        //assert p > 1.0f && p < 0.0f : String.format("getRandomBoolean recibe un número entre 0 y 1: (%d)", p);
         return rand.nextFloat() < p;
     }
 
