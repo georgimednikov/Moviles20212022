@@ -58,7 +58,7 @@ public class EnginePC implements Engine {
         double currentTime = System.nanoTime();
         double nanoElapsedTime = currentTime - lastFrameTime_;
         lastFrameTime_ = currentTime;
-        deltaTime_ = nanoElapsedTime / 1.0E6;
+        deltaTime_ = nanoElapsedTime / 1.0E9;
     }
 
     @Override
@@ -86,7 +86,6 @@ public class EnginePC implements Engine {
     public void run() {
         while(running){
             lastFrameTime_ = System.nanoTime();
-            updateDeltaTime();
             a_.update();
             do {
                 do {
@@ -101,6 +100,7 @@ public class EnginePC implements Engine {
                 } while(strategy_.contentsRestored());
                 strategy_.show();
             } while(strategy_.contentsLost());
+            updateDeltaTime();
         }
         a_.close();
     }
