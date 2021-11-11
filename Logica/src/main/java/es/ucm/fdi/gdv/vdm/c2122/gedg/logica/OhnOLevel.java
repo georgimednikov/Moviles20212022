@@ -286,9 +286,9 @@ public class OhnOLevel extends ApplicationCommon {
                 }
                 else {
                     info.appearing = true;
-                    Text infoText = texts.get("info");
-                    infoText.font.setSize(info.newSize);
-                    infoText.text = info.newText;
+                    Text text = (Text)info.obj;
+                    text.font.setSize(info.newSize);
+                    text.text = info.newText;
                     info.elapsedTime = 0;
                 }
                 continue;
@@ -371,12 +371,14 @@ public class OhnOLevel extends ApplicationCommon {
                     text = "Esta celda a vuelto a azul";
                     break;
                 case GREY:
+                    coloredCells--;
                     text = "Esta celda a vuelto a gris";
                     break;
                 case RED:
                     text = "Esta celda a vuelto a rojo";
                     break;
             }
+            textsFading.add(new TextFadeInfo(texts.get("progress"), Math.round((float)coloredCells / (float)numCells * 100) + "%", 25));
         }
         textsFading.add(new TextFadeInfo(texts.get("info"), text, infoHintSize));
         infoReset = true;
