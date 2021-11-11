@@ -15,12 +15,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         eng = new EngineAndroid(this);
         setContentView(eng.getSurfaceView());
-        OhnOLevel g = new OhnOLevel(4);
+        OhnOIntro g = new OhnOIntro();
         eng.setApplication(g);
-        g.setEngine(eng);
     }
 
     @Override

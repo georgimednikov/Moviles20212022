@@ -104,7 +104,6 @@ public class OhnOLevel extends ApplicationCommon {
     @Override
     public void update() {
         double deltaTime = eng_.getDeltaTime();
-        System.out.println(deltaTime);
         updateCellFades(deltaTime);
         updateTextFades(deltaTime);
         if (updateSceneFades(deltaTime)) return;

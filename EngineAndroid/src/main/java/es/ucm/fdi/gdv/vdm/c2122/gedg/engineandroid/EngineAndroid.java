@@ -80,6 +80,7 @@ public class EngineAndroid implements Engine, Runnable {
     @Override
     public void setApplication(Application a) {
         app_ = a;
+        a.setEngine(this);
         app_.init();
     }
     @Override

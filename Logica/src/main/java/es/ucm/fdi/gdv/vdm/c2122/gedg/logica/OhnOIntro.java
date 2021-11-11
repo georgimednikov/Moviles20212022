@@ -32,6 +32,8 @@ public class OhnOIntro extends ApplicationCommon {
     private Font playFont;
     private Font creditFont;
 
+    private int evx;
+    private int evy;
     public OhnOIntro() {}
 
     private boolean checkCollisionBox(int x, int y, int w, int h, int eventX, int eventY, boolean centered) {
@@ -78,6 +80,8 @@ public class OhnOIntro extends ApplicationCommon {
                     event.x, event.y,true)) {
                 fadeOut = true;
             }
+            evx = event.x;
+            evy = event.y;
         }
     }
     @Override
@@ -89,7 +93,8 @@ public class OhnOIntro extends ApplicationCommon {
         g.drawText(creditFont, "Un juego copiado a Q42", g.getWidth() / 2, firstCreditPosY, true);
         g.drawText(creditFont, "Creado por Martin Kool", g.getWidth() / 2, secondCreditPosY, true);
         g.drawImage(q42Image, g.getWidth() / 2, imagePosY, imageWidth, imageHeight, true);
-
+        g.setColor(new Color(0, 0, 0, 255));
+        g.fillCircle(evx, evy, 30);
         if (fadeIn ||fadeOut) {
             g.clear(new Color(255, 255, 255, (int)(255 * sceneAlpha)));
         }

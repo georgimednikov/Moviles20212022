@@ -37,7 +37,7 @@ task copyData(type: Copy) {
     from(fromDir) {
         include "**"
     }
-    into 'src/main/assets/assets' // TODO: mirar si esto esta bien
+    into 'src/main/assets/assets'
 }
 
 preBuild.dependsOn copyData
