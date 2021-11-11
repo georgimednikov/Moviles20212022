@@ -11,17 +11,40 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
 public class OhnOLevel extends ApplicationCommon {
 
-    private boolean infoReset = true;
+    //Textos
+    private final int INFO_POS_Y = 75;
+    private final int PROGRESS_POS_Y = 500;
+    private final int INFO_REG_SIZE = 60;
+    private final int INFO_WIN_SIZE = 35;
+    private final int INFO_HINT_SIZE = 25;
+    private final int PROGRESS_SIZE = 25;
+    //Posiciones
+    private final int BOARD_OFFSET_X = 30;
+    private final int BOARD_OFFSET_Y = 130;
+    private final int BUTTON_OFFSET_X = 75;
+    private final int BUTTON_OFFSET_Y = 530;
+    private final int BUTTON_SIZE = 40;
+    private final int NUM_BUTTONS = 3;
+    //Tiempos
+    private final float FADE_TOTAL_DURATION = 0.25f; //Segundos que duran los fades de la escena
+    private final float TIME_AFTER_WIN = 2f;
+    //Probabilidades
+    private final float BLUE_PROB = 0.7f; //Probabilidad de que una celda sea azul en vez de roja en la solución
+    private final float FIXED_PROB = 0.5f; //Probabilidad de que una celda sea fija
+    //Asignacion dinamica
+    private int cellSeparation = -1;
+    private int cellRadius = -1;
+    private int buttonSeparation = -1;
 
+
+    //Variables de transicion
+    private boolean gameOver = false;
     private boolean fadeIn = true;
     private boolean fadeOut = false;
-    private float fadeCurrentDuration = 0f; //Segundos que lleva haciendose un fade de la escena
-    private float fadeTotalDuration = 0.25f; //Segundos que duran los fades de la escena
+    private float currentDuration = 0f; //Segundos que lleva haciendose un fade de la escena
     private float sceneAlpha = 0f; //Alpha de la escena al hacer fade in/out
 
-    private final float blueProb = 0.7f; //Probabilidad de que una celda sea azul en vez de roja en la solución
-    private final float fixedProb = 0.5f; //Probabilidad de que una celda sea fija
-
+    //Variables de creacion de tablero
     int boardSize;
     int numCells;
     int coloredCells = 0;
@@ -30,37 +53,17 @@ public class OhnOLevel extends ApplicationCommon {
     private CellLogic[][] solBoard;
     private CellLogic[][] board;
     private CellRender[][] renderBoard;
-    private List<CellLogic> fixedBlueCellLogics = new ArrayList<>();
     private List<CellLogic> previousMoves = new ArrayList<>();
+    private List<CellLogic> fixedBlueCells = new ArrayList<>();
+    private List<CellRender> lockCells = new ArrayList<>();
 
-    //Variables de Cell
-    private boolean fixedTapped = false;
-    private int boardOffsetX = 30;
-    private int boardOffsetY = 130;
-    private int cellSeparation = -1; //Asignacion dinamica
-    private int cellRadius = -1; //Asignacion dinamica
-
-    //Variables de boton
-    private int buttonOffsetX = 75;
-    private int buttonOffsetY = 530;
-    private int buttonSeparation = -1; //Asignacion dinamica
-    private int buttonSize = 40;
-    private int numButtons = 3;
-
-    //Variables de pista
+    //Variables relacionadas con pistas
     private boolean givingHint = false;
     private int highlightRadius = -1; //Asignacion dinamica
     private int highlightPosX = 0;
     private int highlightPosY = 0;
 
-    //Textos
-    private int infoPosY = 75;
-    private int progressPosY = 500;
-    private int infoRegSize = 60;
-    private int infoWinSize = 35;
-    private int infoHintSize = 25;
-    private int progressSize = 25;
-
+    //Objetos de la escena y variables relacionadas
     private Color black;
     private Color white;
     private Color darkGrey;
@@ -73,6 +76,8 @@ public class OhnOLevel extends ApplicationCommon {
     private Font numberFont;
     private Text infoText;
     private Text progressText;
+    private boolean infoReset = true;
+    private String infoRegContent;
 
     public OhnOLevel(int size) {
         boardSize = size;
@@ -82,22 +87,23 @@ public class OhnOLevel extends ApplicationCommon {
     public boolean init() {
         Graphics g = eng_.getGraphics();
 
-        int paintArea = eng_.getGraphics().getWidth() - 2 * boardOffsetX;
+        int paintArea = eng_.getGraphics().getWidth() - 2 * BOARD_OFFSET_X;
         cellRadius = (int)((paintArea * 0.9) / 2) / boardSize;
         cellSeparation = (int)(paintArea * 0.1) / (boardSize-1);
-        int buttonArea = eng_.getGraphics().getWidth() - 2 * buttonOffsetX;
-        buttonSeparation = (buttonArea - (buttonSize * numButtons)) / (numButtons - 1);
+        int buttonArea = eng_.getGraphics().getWidth() - 2 * BUTTON_OFFSET_X;
+        buttonSeparation = (buttonArea - (BUTTON_SIZE * NUM_BUTTONS)) / (NUM_BUTTONS - 1);
         highlightRadius = (int)Math.round(cellRadius * 1.1);
 
         black = new Color(0, 0, 0, 255);
         darkGrey = new Color(150, 150, 150, 255);
         white = new Color(255, 255, 255, 255);
 
-        infoFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", black, infoRegSize, true);
+        infoFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", black, INFO_REG_SIZE, true);
         progressFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", darkGrey, 25, false);
         numberFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", white, cellRadius, false);
 
-        infoText = new Text(infoFont, boardSize + " x " + boardSize, true);
+        infoRegContent = boardSize + " x " + boardSize;
+        infoText = new Text(infoFont, infoRegContent, true);
         progressText = new Text(progressFont, Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", true);
 
         quitImage = g.newImage("assets/sprites/close.png");
@@ -105,13 +111,8 @@ public class OhnOLevel extends ApplicationCommon {
         hintImage = g.newImage("assets/sprites/eye.png");
         lockImage = g.newImage("assets/sprites/lock.png");
 
-        createBoard();
-        renderBoard = new CellRender[boardSize][boardSize];
-        for (int i = 0; i < boardSize; ++i) {
-            for (int j = 0; j < boardSize; ++j) {
-                renderBoard[i][j] = new CellRender(board[i][j], cellRadius);
-            }
-        }
+        createLogicBoard();
+        createRenderBoard();
 
         return true;
     }
@@ -121,7 +122,8 @@ public class OhnOLevel extends ApplicationCommon {
         double deltaTime = eng_.getDeltaTime();
         infoText.updateText(deltaTime);
         progressText.updateText(deltaTime);
-        if (updateSceneFades(deltaTime)) return;
+        updateCellRenders(deltaTime);
+        if (updateScene(deltaTime)) return;
 
         TouchEvent event;
         List<TouchEvent> events = eng_.getInput().getTouchEvents();
@@ -131,22 +133,23 @@ public class OhnOLevel extends ApplicationCommon {
             if (event.type != TouchEvent.TouchType.PRESS) continue;
             for (int i = 0; i < boardSize; ++i) {
                 for (int j = 0; j < boardSize; ++j) {
-                    renderBoard[j][i].updateCellRender(deltaTime);
                     if (checkCollisionCircle(
-                            boardOffsetX + cellRadius * (i + 1) + (cellSeparation + cellRadius) * i,
-                            boardOffsetY + cellRadius * (j + 1) + (cellSeparation + cellRadius) * j,
+                            BOARD_OFFSET_X + cellRadius * (i + 1) + (cellSeparation + cellRadius) * i,
+                            BOARD_OFFSET_Y + cellRadius * (j + 1) + (cellSeparation + cellRadius) * j,
                             cellRadius, event.x, event.y)) {
                         if (!board[j][i].isFixed())
                             changeCell(j, i);
-                        else fixedTapped = !fixedTapped;
+                        else
+                            for (int k = 0; k < lockCells.size(); ++k)
+                                lockCells.get(k).cycleLock();
                         continue next;
                     }
                 }
             }
-            for (int i = 0; i < numButtons; ++i) {
+            for (int i = 0; i < NUM_BUTTONS; ++i) {
                 if (checkCollisionCircle(
-                        buttonOffsetX + cellRadius * (i + 1) + buttonSeparation * i,
-                        buttonOffsetY,
+                        BUTTON_OFFSET_X + cellRadius * (i + 1) + buttonSeparation * i,
+                        BUTTON_OFFSET_Y,
                         cellRadius, event.x, event.y)) {
                     switch (i) {
                         case 0:
@@ -158,15 +161,15 @@ public class OhnOLevel extends ApplicationCommon {
                         case 2:
                             if (givingHint) {
                                 givingHint = false;
-                                infoText.fade(boardSize + " x " + boardSize, infoRegSize);
+                                infoText.fade(infoRegContent, INFO_REG_SIZE, false);
                                 infoReset = true;
                             }
                             else {
                                 givingHint = true;
                                 Hint hint = giveHint_user();
-                                highlightPosX = boardOffsetX + cellRadius * (hint.j + 1) + (cellSeparation + cellRadius) * hint.j;
-                                highlightPosY = boardOffsetY + cellRadius * (hint.i + 1) + (cellSeparation + cellRadius) * hint.i;
-                                infoText.fade(hint.hintText[hint.type.ordinal()], infoHintSize);
+                                highlightPosX = BOARD_OFFSET_X + cellRadius * (hint.j + 1) + (cellSeparation + cellRadius) * hint.j;
+                                highlightPosY = BOARD_OFFSET_Y + cellRadius * (hint.i + 1) + (cellSeparation + cellRadius) * hint.i;
+                                infoText.fade(hint.hintText[hint.type.ordinal()], INFO_HINT_SIZE, false);
                                 infoReset = false;
                             }
                             break;
@@ -182,9 +185,9 @@ public class OhnOLevel extends ApplicationCommon {
         Graphics g = eng_.getGraphics();
 
         g.save();
-        g.translate(g.getWidth() / 2, infoPosY);
+        g.translate(g.getWidth() / 2, INFO_POS_Y);
         infoText.render(g);
-        g.translate(0, progressPosY - infoPosY);
+        g.translate(0, PROGRESS_POS_Y - INFO_POS_Y);
         progressText.render(g);
         g.restore();
 
@@ -194,24 +197,20 @@ public class OhnOLevel extends ApplicationCommon {
         }
         for (int i = 0; i < boardSize; ++i) {
             g.save();
-            g.translate(boardOffsetX + cellRadius, boardOffsetY + cellRadius * (i + 1) + (cellRadius + cellSeparation) * i);
+            g.translate(BOARD_OFFSET_X + cellRadius, BOARD_OFFSET_Y + cellRadius * (i + 1) + (cellRadius + cellSeparation) * i);
             for (int j = 0; j < boardSize; ++j) {
                 renderBoard[i][j].render(g);
-                if (board[i][j].isFixed()) {
-                    //if (board[i][j].getCurrState() == CellLogic.STATE.BLUE) g.drawText(fonts.get("numberFont"), "" + cellLogic.getNumber(), 0, 0, true);
-                    //else if (fixedTapped) g.drawImage(images.get("lockImage"), 0, 0, cellRadius, cellRadius, true);
-                }
                 g.translate(cellRadius * 2 + cellSeparation, 0);
             }
             g.restore();
         }
         g.save();
-        g.translate(buttonOffsetX, buttonOffsetY);
-        g.drawImage(quitImage, 0, 0, buttonSize, buttonSize, false);
-        g.translate(buttonSize + buttonSeparation, 0);
-        g.drawImage(undoImage, 0, 0, buttonSize, buttonSize, false);
-        g.translate(buttonSize + buttonSeparation, 0);
-        g.drawImage(hintImage, 0, 0, buttonSize, buttonSize, false);
+        g.translate(BUTTON_OFFSET_X, BUTTON_OFFSET_Y);
+        g.drawImage(quitImage, 0, 0, BUTTON_SIZE, BUTTON_SIZE, false);
+        g.translate(BUTTON_SIZE + buttonSeparation, 0);
+        g.drawImage(undoImage, 0, 0, BUTTON_SIZE, BUTTON_SIZE, false);
+        g.translate(BUTTON_SIZE + buttonSeparation, 0);
+        g.drawImage(hintImage, 0, 0, BUTTON_SIZE, BUTTON_SIZE, false);
         g.restore();
 
         if (fadeIn ||fadeOut) {
@@ -223,10 +222,26 @@ public class OhnOLevel extends ApplicationCommon {
         return true;
     }
 
-    private boolean updateSceneFades(double deltaTime) {
+    private void updateCellRenders(double deltaTime) {
+        for (int i = 0; i < boardSize; ++i) {
+            for (int j = 0; j < boardSize; ++j) {
+                renderBoard[i][j].updateCellRender(deltaTime);
+            }
+        }
+    }
+
+    private boolean updateScene(double deltaTime) {
+        if (gameOver) {
+            if (currentDuration >= TIME_AFTER_WIN) {
+                gameOver = false;
+                fadeOut = true;
+                currentDuration = 0;
+            }
+            else currentDuration += deltaTime;
+        }
         if (fadeIn || fadeOut) {
-            if (fadeCurrentDuration >= fadeTotalDuration) {
-                fadeCurrentDuration = 0;
+            if (currentDuration >= FADE_TOTAL_DURATION) {
+                currentDuration = 0;
                 if (fadeIn) fadeIn = false;
                 else if (fadeOut) {
                     OhnOMenu app = new OhnOMenu();
@@ -234,9 +249,9 @@ public class OhnOLevel extends ApplicationCommon {
                 }
             }
             else {
-                fadeCurrentDuration += deltaTime;
-                if (fadeIn) sceneAlpha = 1 - Math.min((fadeCurrentDuration / fadeTotalDuration), 1);
-                else if (fadeOut) sceneAlpha = Math.min((fadeCurrentDuration / fadeTotalDuration), 1);
+                currentDuration += deltaTime;
+                if (fadeIn) sceneAlpha = 1 - Math.min((currentDuration / FADE_TOTAL_DURATION), 1);
+                else if (fadeOut) sceneAlpha = Math.min((currentDuration / FADE_TOTAL_DURATION), 1);
                 return true;
             }
         }
@@ -246,7 +261,7 @@ public class OhnOLevel extends ApplicationCommon {
     //region Board Methods
     public void changeCell(int x, int y) {
         if (!infoReset) {
-            infoText.fade(boardSize + " x " + boardSize, infoRegSize);
+            infoText.fade(infoRegContent, INFO_REG_SIZE, false);
             givingHint = false;
             infoReset = true;
         }
@@ -260,16 +275,16 @@ public class OhnOLevel extends ApplicationCommon {
         if (prevState == solBoard[x][y].getCurrState()) contMistakes++;
         else if (currState == solBoard[x][y].getCurrState()) contMistakes--;
         if(contMistakes == 0) {
-            fadeOut = true;
-            infoText.fade("ROCAMBOLESCO", infoWinSize);
+            gameOver = true;
+            infoText.fade("ROCAMBOLESCO", INFO_WIN_SIZE, true);
         }
         if (prevState == CellLogic.STATE.GREY) {
             coloredCells++;
-            progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", progressSize);
+            progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", PROGRESS_SIZE, false);
         }
         else if (currState == CellLogic.STATE.GREY) {
             coloredCells--;
-            progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", progressSize);
+            progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", PROGRESS_SIZE, false);
         }
     }
 
@@ -291,15 +306,22 @@ public class OhnOLevel extends ApplicationCommon {
                     text = "Esta celda a vuelto a rojo";
                     break;
             }
+            if (cell.getCurrState() == CellLogic.STATE.GREY) {
+                coloredCells--;
+                progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", PROGRESS_SIZE, false);
+            }
+            else if (cell.getPrevState() == CellLogic.STATE.GREY) {
+                coloredCells++;
+                progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", PROGRESS_SIZE, false);
+            }
             renderBoard[cell.getX()][cell.getY()].fade();
-            progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", progressSize);
         }
-        infoText.fade(text, infoHintSize);
+        infoText.fade(text, INFO_HINT_SIZE, false);
         infoReset = true;
     }
 
     //Crea la matriz que representa el nivel de un tamaño dado
-    private void createBoard() {
+    private void createLogicBoard() {
         // Crea los objetos
         // Primero coloca un numero de casillas en posiciones aleatorias
         board = new CellLogic[boardSize][boardSize];
@@ -312,22 +334,24 @@ public class OhnOLevel extends ApplicationCommon {
         Hint hint = null;
         while (hint == null) {
             fixedCells = 0;
-            fixedBlueCellLogics = new Vector<>();
+            fixedBlueCells.clear();
             //Se fijan ciertas celdas con valores aleatorios
             for (int i = 0; i < boardSize; ++i) {
                 for (int j = 0; j < boardSize; ++j) {
                     board[i][j].resetCell(); //Por si ha habido un intento anterior
-                    if (getRandomBoolean(fixedProb)) {
-                        if (getRandomBoolean(blueProb)) {
+                    if (getRandomBoolean(FIXED_PROB)) {
+                        if (getRandomBoolean(BLUE_PROB)) {
                             board[i][j].fixCell(CellLogic.STATE.BLUE);
-                            fixedBlueCellLogics.add(board[i][j]);
-                        } else
+                            fixedBlueCells.add(board[i][j]);
+                        }
+                        else {
                             board[i][j].fixCell(CellLogic.STATE.RED);
+                        }
                         fixedCells++;
                     }
                 }
             }
-            for (CellLogic c : fixedBlueCellLogics) {
+            for (CellLogic c : fixedBlueCells) {
                 c.setNumber(Math.min(Math.max(calculateNumber(board, c.getX(), c.getY()), rand.nextInt(boardSize) + 1), boardSize));
             }
             // Se crea la solucion en solBoard
@@ -347,15 +371,33 @@ public class OhnOLevel extends ApplicationCommon {
                 }
                 if (fixedCells + placedCells == numCells) {
                     // Comprueba que los numeros tienen sentido, si no, reinicia
-                    for (int i = 0; i < fixedBlueCellLogics.size(); ++i) {
-                        CellLogic c = fixedBlueCellLogics.get(i);
+                    for (int i = 0; i < fixedBlueCells.size(); ++i) {
+                        CellLogic c = fixedBlueCells.get(i);
                         if (calculateNumber(solBoard, c.getX(), c.getY()) != c.getNumber()) {
                             hint = null;
                             break tries;
                         }
                     }
-                    progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", progressSize);
+                    progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", PROGRESS_SIZE, false);
                     return;
+                }
+            }
+        }
+    }
+
+    private void createRenderBoard() {
+        renderBoard = new CellRender[boardSize][boardSize];
+        for (int i = 0; i < boardSize; ++i) {
+            for (int j = 0; j < boardSize; ++j) {
+                CellLogic logic = board[i][j];
+                CellRender render = renderBoard[i][j] = new CellRender(logic, cellRadius);
+                if (logic.isFixed()) {
+                    if (logic.getCurrState() == CellLogic.STATE.RED) {
+                        lockCells.add(render);
+                        render.setLock(lockImage);
+                    }
+                    else
+                        render.setNumber(new Text(numberFont, ""+logic.getNumber(), true));
                 }
             }
         }
@@ -386,7 +428,7 @@ public class OhnOLevel extends ApplicationCommon {
                         int num = Character.getNumericValue(c);
                         board[i][j].fixCell(CellLogic.STATE.BLUE, num);
                         fixedCells++;
-                        fixedBlueCellLogics.add(board[i][j]);
+                        fixedBlueCells.add(board[i][j]);
                         break;
                 }
             }
@@ -478,8 +520,8 @@ public class OhnOLevel extends ApplicationCommon {
     public Hint giveHint(CellLogic[][] mat) {
         Hint hint = new Hint();
         //Pistas basadas en celdas fijas
-        for (int i = 0; i < fixedBlueCellLogics.size(); ++i) {
-            if (getHintFixedCell(hint, mat, fixedBlueCellLogics.get(i))) return hint;
+        for (int i = 0; i < fixedBlueCells.size(); ++i) {
+            if (getHintFixedCell(hint, mat, fixedBlueCells.get(i))) return hint;
         }
         //Pistas basadas en celdas ordinarias
         for (int i = 0; i < mat.length; ++i) {
@@ -526,8 +568,8 @@ public class OhnOLevel extends ApplicationCommon {
     public Hint giveHint_user() {
         Hint hint = new Hint();
         //Pistas basadas en celdas fijas
-        for (int i = 0; i < fixedBlueCellLogics.size(); ++i) {
-            if (getHintFixedCell(hint, board, fixedBlueCellLogics.get(i))) return hint;
+        for (int i = 0; i < fixedBlueCells.size(); ++i) {
+            if (getHintFixedCell(hint, board, fixedBlueCells.get(i))) return hint;
         }
         //Pistas basadas en celdas ordinarias
         for (int i = 0; i < boardSize; ++i) {

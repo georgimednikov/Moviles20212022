@@ -16,6 +16,7 @@ public class Text {
     private Font font_;
     private String text_;
     private String newText_;
+    private boolean newBold_;
 
     Text(Font font, String text, boolean centered) {
         font_ = font;
@@ -44,6 +45,7 @@ public class Text {
             else {
                 appearing_ = true;
                 font_.setSize(newSize_);
+                font_.setBold(newBold_);
                 text_ = newText_;
                 elapsedTime_ = 0;
             }
@@ -55,10 +57,11 @@ public class Text {
         }
     }
 
-    public void fade(String newText, int newSize) {
+    public void fade(String newText, int newSize, boolean newBold) {
         switching_ = true;
         newText_ = newText;
         newSize_ = newSize;
+        newBold_ = newBold;
         elapsedTime_ = 0;
     }
 }

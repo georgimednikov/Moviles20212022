@@ -12,8 +12,12 @@ public class CellRender {
     private Color blue_;
     private Color red_;
     private Color grey_;
-    //private Image lock_;
-    //private boolean locked_;
+
+    private Image lock_;
+    private boolean locked_;
+
+    private Text number_;
+    private boolean numbered_;
 
     private float alpha_;
     private float elapsedTime_;
@@ -39,6 +43,10 @@ public class CellRender {
         else
             g.setColor(getColorState(cell_.getCurrState()));
         g.fillCircle(0, 0, cellRadius_);
+        if (numbered_)
+            number_.render(g);
+        else if (locked_)
+            g.drawImage(lock_, 0, 0, cellRadius_, cellRadius_, true);
     }
 
     public void updateCellRender(double deltaTime) {
@@ -55,6 +63,19 @@ public class CellRender {
     public void fade() {
         switching_ = true;
         elapsedTime_ = 0;
+    }
+
+    public void cycleLock() {
+        locked_ = !locked_;
+    }
+
+    public void setNumber(Text number) {
+        number_ = number;
+        numbered_ = true;
+    }
+
+    public void setLock(Image lock) {
+        lock_ = lock;
     }
 
     private Color getColorState(CellLogic.STATE state) {
