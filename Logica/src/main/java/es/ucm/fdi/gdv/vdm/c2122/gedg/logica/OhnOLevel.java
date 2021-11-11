@@ -44,7 +44,7 @@ public class OhnOLevel extends ApplicationCommon {
     }
     private List<CellFadeInfo> cellsFading = new ArrayList<>();
     private List<TextFadeInfo> textsFading = new ArrayList<>();
-    private int ind;
+    private boolean infoReset = true;
 
     private boolean fadeIn = true;
     private boolean fadeOut = false;
@@ -142,7 +142,8 @@ public class OhnOLevel extends ApplicationCommon {
                         case 2:
                             if (givingHint) {
                                 givingHint = false;
-                                resetInterface();
+                                textsFading.add(new TextFadeInfo(texts.get("info"), boardSize + " x " + boardSize, infoRegSize));
+                                infoReset = true;
                             }
                             else {
                                 givingHint = true;
@@ -150,6 +151,7 @@ public class OhnOLevel extends ApplicationCommon {
                                 highlightPosX = boardOffsetX + cellRadius * (hint.j + 1) + (cellSeparation + cellRadius) * hint.j;
                                 highlightPosY = boardOffsetY + cellRadius * (hint.i + 1) + (cellSeparation + cellRadius) * hint.i;
                                 textsFading.add(new TextFadeInfo(texts.get("info"), hint.hintText[hint.type.ordinal()], infoHintSize));
+                                infoReset = false;
                             }
                             break;
                     }
@@ -175,6 +177,7 @@ public class OhnOLevel extends ApplicationCommon {
                 Cell cell = board[i][j];
                 Cell.STATE currState = cell.getCurrState();
                 Cell.STATE prevState = cell.getPrevState();
+                int ind;
                 if ((ind = getFadingObject(cell)) > -1) {
                     Color prevColor = getColorState(prevState);
                     g.setColor(prevColor);
@@ -239,6 +242,7 @@ public class OhnOLevel extends ApplicationCommon {
 
     //region RenderMethods
     private void drawText(Graphics g, Text text, int x, int y, boolean centered) {
+        int ind;
         if ((ind = getFadingObject(text)) > -1) {
             Color color = text.font.getColor();
             int originalAlpha = color.a;
@@ -327,16 +331,15 @@ public class OhnOLevel extends ApplicationCommon {
         }
         return colors.get("grey"); //Me obliga a poner un return imposible
     }
-
-    private void resetInterface() {
-        textsFading.add(new TextFadeInfo(texts.get("info"), boardSize + " x " + boardSize, infoRegSize));
-        givingHint = false;
-    }
     //endregion
 
     //region Board Methods
     public void changeCell(int x, int y) {
-        resetInterface();
+        if (!infoReset) {
+            textsFading.add(new TextFadeInfo(texts.get("info"), boardSize + " x " + boardSize, infoRegSize));
+            givingHint = false;
+            infoReset = true;
+        }
         Cell cell = board[x][y];
         cell.changeState();
         previousMoves.add(cell);
@@ -377,6 +380,7 @@ public class OhnOLevel extends ApplicationCommon {
             }
         }
         textsFading.add(new TextFadeInfo(texts.get("info"), text, infoHintSize));
+        infoReset = true;
     }
 
     //Crea la matriz que representa el nivel de un tamaño dado
