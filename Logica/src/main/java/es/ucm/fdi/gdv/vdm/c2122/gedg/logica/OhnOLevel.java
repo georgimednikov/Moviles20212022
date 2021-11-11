@@ -11,39 +11,6 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
 public class OhnOLevel extends ApplicationCommon {
 
-    private class Text {
-        Font font;
-        String text;
-        Text(Font font, String text) {
-            this.font = font;
-            this.text = text;
-        }
-    }
-
-    private class FadeInfo {
-        Object obj;
-        float alpha;
-        float elapsedTime;
-        FadeInfo(Object obj) { this.obj = obj; alpha = 0; elapsedTime = 0; }
-    }
-    private class CellFadeInfo extends FadeInfo {
-        CellFadeInfo(Cell cell) {
-            super(cell);
-        }
-    }
-    private class TextFadeInfo extends FadeInfo {
-        String newText;
-        boolean appearing;
-        int newSize;
-        TextFadeInfo(Text text, String newText, int size) {
-            super(text);
-            this.newText = newText;
-            appearing = false;
-            newSize = size;
-        }
-    }
-    private List<CellFadeInfo> cellsFading = new ArrayList<>();
-    private List<TextFadeInfo> textsFading = new ArrayList<>();
     private boolean infoReset = true;
 
     private boolean fadeIn = true;
@@ -61,10 +28,11 @@ public class OhnOLevel extends ApplicationCommon {
     int coloredCells = 0;
     int fixedCells = 0;
     int contMistakes = 0; //Número de celdas mal puestas
-    private Cell[][] board;
-    private Cell[][] solBoard;
-    private List<Cell> fixedBlueCells = new ArrayList<>();
-    private List<Cell> previousMoves = new ArrayList<>();
+    private CellLogic[][] solBoard;
+    private CellLogic[][] board;
+    private CellRender[][] renderBoard;
+    private List<CellLogic> fixedBlueCellLogics = new ArrayList<>();
+    private List<CellLogic> previousMoves = new ArrayList<>();
 
     //Variables de Cell
     private boolean fixedTapped = false;
@@ -92,31 +60,79 @@ public class OhnOLevel extends ApplicationCommon {
     private int infoRegSize = 60;
     private int infoWinSize = 35;
     private int infoHintSize = 25;
-    private Map<String, Color> colors = new HashMap<>();
-    private Map<String, Font> fonts = new HashMap<>();
-    private Map<String, Text> texts = new HashMap<>();
-    private Map<String, Image> images = new HashMap<>();
+    private int progressSize = 25;
+
+    private Color black;
+    private Color white;
+    private Color darkGrey;
+    private Image quitImage;
+    private Image undoImage;
+    private Image hintImage;
+    private Image lockImage;
+    private Font infoFont;
+    private Font progressFont;
+    private Font numberFont;
+    private Text infoText;
+    private Text progressText;
 
     public OhnOLevel(int size) {
         boardSize = size;
     }
 
     @Override
+    public boolean init() {
+        Graphics g = eng_.getGraphics();
+
+        int paintArea = eng_.getGraphics().getWidth() - 2 * boardOffsetX;
+        cellRadius = (int)((paintArea * 0.9) / 2) / boardSize;
+        cellSeparation = (int)(paintArea * 0.1) / (boardSize-1);
+        int buttonArea = eng_.getGraphics().getWidth() - 2 * buttonOffsetX;
+        buttonSeparation = (buttonArea - (buttonSize * numButtons)) / (numButtons - 1);
+        highlightRadius = (int)Math.round(cellRadius * 1.1);
+
+        black = new Color(0, 0, 0, 255);
+        darkGrey = new Color(150, 150, 150, 255);
+        white = new Color(255, 255, 255, 255);
+
+        infoFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", black, infoRegSize, true);
+        progressFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", darkGrey, 25, false);
+        numberFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", white, cellRadius, false);
+
+        infoText = new Text(infoFont, boardSize + " x " + boardSize);
+        progressText = new Text(progressFont, Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%");
+
+        quitImage = g.newImage("assets/sprites/close.png");
+        undoImage = g.newImage("assets/sprites/history.png");
+        hintImage = g.newImage("assets/sprites/eye.png");
+        lockImage = g.newImage("assets/sprites/lock.png");
+
+        createBoard();
+        for (int i = 0; i < boardSize; ++i) {
+            for (int j = 0; j < boardSize; ++j) {
+                renderBoard[i][j] = new CellRender(board[i][j], cellRadius);
+            }
+        }
+
+        return true;
+    }
+
+    @Override
     public void update() {
         double deltaTime = eng_.getDeltaTime();
-        System.out.println(deltaTime);
-        updateCellFades(deltaTime);
-        updateTextFades(deltaTime);
+        infoText.updateText(deltaTime);
+        progressText.updateText(deltaTime);
         if (updateSceneFades(deltaTime)) return;
+
         TouchEvent event;
         List<TouchEvent> events = eng_.getInput().getTouchEvents();
         next:
         while (!events.isEmpty()) {
             event = events.remove(0);
-            if (event.type != TouchEvent.TouchType.PRESS) continue; //TODO: ESTO NO DEBERIA SER ASI (?)
+            if (event.type != TouchEvent.TouchType.PRESS) continue;
             for (int i = 0; i < boardSize; ++i) {
                 for (int j = 0; j < boardSize; ++j) {
-                    if (getFadingObject(board[j][i]) == -1 && checkCollisionCircle(
+                    renderBoard[j][i].updateCellRender(deltaTime);
+                    if (checkCollisionCircle(
                             boardOffsetX + cellRadius * (i + 1) + (cellSeparation + cellRadius) * i,
                             boardOffsetY + cellRadius * (j + 1) + (cellSeparation + cellRadius) * j,
                             cellRadius, event.x, event.y)) {
@@ -142,7 +158,7 @@ public class OhnOLevel extends ApplicationCommon {
                         case 2:
                             if (givingHint) {
                                 givingHint = false;
-                                textsFading.add(new TextFadeInfo(texts.get("info"), boardSize + " x " + boardSize, infoRegSize));
+                                infoText.fade(boardSize + " x " + boardSize, infoRegSize);
                                 infoReset = true;
                             }
                             else {
@@ -150,7 +166,7 @@ public class OhnOLevel extends ApplicationCommon {
                                 Hint hint = giveHint_user();
                                 highlightPosX = boardOffsetX + cellRadius * (hint.j + 1) + (cellSeparation + cellRadius) * hint.j;
                                 highlightPosY = boardOffsetY + cellRadius * (hint.i + 1) + (cellSeparation + cellRadius) * hint.i;
-                                textsFading.add(new TextFadeInfo(texts.get("info"), hint.hintText[hint.type.ordinal()], infoHintSize));
+                                infoText.fade(hint.hintText[hint.type.ordinal()], infoHintSize);
                                 infoReset = false;
                             }
                             break;
@@ -164,140 +180,46 @@ public class OhnOLevel extends ApplicationCommon {
     @Override
     public void render() {
         Graphics g = eng_.getGraphics();
-        drawText(g, texts.get("info"), g.getWidth() / 2, infoPosY, true);
-        drawText(g, texts.get("progress"), g.getWidth() / 2, progressPosY, true);
+
+        //TODO: TRANSLATE
+        infoText.render(g);
+        progressText.render(g);
+        //drawText(g, texts.get("info"), g.getWidth() / 2, infoPosY, true);
+        //drawText(g, texts.get("progress"), g.getWidth() / 2, progressPosY, true);
+        infoText.render(g);
+        progressText.render(g);
         if (givingHint) {
-            g.setColor(colors.get("black"));
+            g.setColor(black);
             g.fillCircle(highlightPosX, highlightPosY, highlightRadius);
         }
         for (int i = 0; i < boardSize; ++i) {
             g.save();
             g.translate(boardOffsetX + cellRadius, boardOffsetY + cellRadius * (i + 1) + (cellRadius + cellSeparation) * i);
             for (int j = 0; j < boardSize; ++j) {
-                Cell cell = board[i][j];
-                Cell.STATE currState = cell.getCurrState();
-                Cell.STATE prevState = cell.getPrevState();
-                int ind;
-                if ((ind = getFadingObject(cell)) > -1) {
-                    Color prevColor = getColorState(prevState);
-                    g.setColor(prevColor);
-                    g.fillCircle(0, 0, cellRadius);
-                    Color currColor = getColorState(currState);
-                    g.setColor(new Color(currColor.r, currColor.g, currColor.b, (int)(255 * cellsFading.get(ind).alpha)));
-                }
-                else
-                    g.setColor(getColorState(currState));
-                g.fillCircle(0, 0, cellRadius);
-                if (cell.isFixed()) {
-                    if (currState == Cell.STATE.BLUE) g.drawText(fonts.get("numberFont"), "" + cell.getNumber(), 0, 0, true);
+                renderBoard[i][j].render(g);
+                if (board[i][j].isFixed()) {
+                    if (board[i][j].getCurrState() == CellLogic.STATE.BLUE) g.drawText(fonts.get("numberFont"), "" + cellLogic.getNumber(), 0, 0, true);
                     else if (fixedTapped) g.drawImage(images.get("lockImage"), 0, 0, cellRadius, cellRadius, true);
                 }
                 g.translate(cellRadius * 2 + cellSeparation, 0);
             }
             g.restore();
         }
-        g.drawImage(images.get("quitImage"), buttonOffsetX, buttonOffsetY, buttonSize, buttonSize, false);
-        g.drawImage(images.get("undoImage"), buttonOffsetX + (buttonSize + buttonSeparation), buttonOffsetY, buttonSize, buttonSize, false);
-        g.drawImage(images.get("hintImage"), buttonOffsetX + (buttonSize + buttonSeparation) * 2, buttonOffsetY, buttonSize, buttonSize, false);
+        //TODO: TRANSLANTE
+        g.drawImage(quitImage, 0, 0, buttonSize, buttonSize, false);
+        g.drawImage(undoImage, 0, 0, buttonSize, buttonSize, false);
+        g.drawImage(hintImage, 0, 0, buttonSize, buttonSize, false);
+        //g.drawImage(quitImage, buttonOffsetX, buttonOffsetY, buttonSize, buttonSize, false);
+        //g.drawImage(undoImage, buttonOffsetX + (buttonSize + buttonSeparation), buttonOffsetY, buttonSize, buttonSize, false);
+        //g.drawImage(hintImage, buttonOffsetX + (buttonSize + buttonSeparation) * 2, buttonOffsetY, buttonSize, buttonSize, false);
 
         if (fadeIn ||fadeOut) {
             g.clear(new Color(255, 255, 255, (int)(255 * sceneAlpha)));
         }
     }
-
-    @Override
-    public boolean init() {
-        Graphics g = eng_.getGraphics();
-
-        int paintArea = eng_.getGraphics().getWidth() - 2 * boardOffsetX;
-        cellRadius = (int)((paintArea * 0.9) / 2) / boardSize;
-        cellSeparation = (int)(paintArea * 0.1) / (boardSize-1);
-        int buttonArea = eng_.getGraphics().getWidth() - 2 * buttonOffsetX;
-        buttonSeparation = (buttonArea - (buttonSize * numButtons)) / (numButtons - 1);
-        highlightRadius = (int)Math.round(cellRadius * 1.1);
-
-        colors.put("black", new Color(0, 0, 0, 255));
-        colors.put("blue", new Color(72, 193, 228, 255));
-        colors.put("grey", new Color(238, 237, 239, 255));
-        colors.put("darkGrey", new Color(150, 150, 150, 255));
-        colors.put("red", new Color(245, 53, 73, 255));
-        colors.put("white", new Color(255, 255, 255, 255));
-        fonts.put("infoFont", g.newFont("assets/fonts/JosefinSans-Bold.ttf", colors.get("black"), infoRegSize, true));
-        fonts.put("progressFont", g.newFont("assets/fonts/JosefinSans-Bold.ttf", colors.get("darkGrey"), 25, false));
-        fonts.put("numberFont", g.newFont("assets/fonts/JosefinSans-Bold.ttf", colors.get("white"), cellRadius, false));
-        images.put("quitImage", g.newImage("assets/sprites/close.png"));
-        images.put("undoImage", g.newImage("assets/sprites/history.png"));
-        images.put("hintImage", g.newImage("assets/sprites/eye.png"));
-        images.put("lockImage", g.newImage("assets/sprites/lock.png"));
-        texts.put("info", new Text(fonts.get("infoFont"), boardSize + " x " + boardSize));
-        texts.put("progress", new Text(fonts.get("progressFont"), Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%"));
-
-        createBoard(boardSize);
-        return true;
-    }
     @Override
     public boolean close() {
         return true;
-    }
-
-    //region RenderMethods
-    private void drawText(Graphics g, Text text, int x, int y, boolean centered) {
-        int ind;
-        if ((ind = getFadingObject(text)) > -1) {
-            Color color = text.font.getColor();
-            int originalAlpha = color.a;
-            color.a = (int)(255 * textsFading.get(ind).alpha);
-            g.drawText(text.font, text.text, x, y, centered);
-            color.a = originalAlpha;
-        }
-        else g.drawText(text.font, text.text, x, y, centered);
-    }
-
-    private int getFadingObject(Cell cell) {
-        for (int i = 0; i < cellsFading.size(); ++i) {
-            if (cellsFading.get(i).obj == cell) return i;
-        }
-        return -1;
-    }
-    private int getFadingObject(Text text) {
-        for (int i = 0; i < textsFading.size(); ++i) {
-            if (textsFading.get(i).obj == text) return i;
-        }
-        return -1;
-    }
-
-    private void updateCellFades(double deltaTime) {
-        for (int i = 0; i < cellsFading.size(); ++i) {
-            CellFadeInfo info = cellsFading.get(i);
-            if (info.elapsedTime >= objectFadeDuration) {
-                cellsFading.remove(i); --i; //Se ha quitado un objeto de la lista, hay que retroceder
-                continue;
-            }
-            info.elapsedTime += deltaTime;
-            info.alpha = Math.min((info.elapsedTime / objectFadeDuration), 1);
-        }
-    }
-    private void updateTextFades(double deltaTime) {
-        for (int i = 0; i < textsFading.size(); ++i) {
-            TextFadeInfo info = textsFading.get(i);
-            if (info.elapsedTime >= objectFadeDuration) {
-                if (info.appearing) {
-                    textsFading.remove(i);
-                    --i; //Se ha quitado un obejto de la lista, hay que retroceder
-                }
-                else {
-                    info.appearing = true;
-                    Text infoText = texts.get("info");
-                    infoText.font.setSize(info.newSize);
-                    infoText.text = info.newText;
-                    info.elapsedTime = 0;
-                }
-                continue;
-            }
-            info.elapsedTime += deltaTime;
-            if (!info.appearing) info.alpha = 1 - Math.min((info.elapsedTime / objectFadeDuration), 1);
-            else info.alpha = Math.min((info.elapsedTime / objectFadeDuration), 1);
-        }
     }
 
     private boolean updateSceneFades(double deltaTime) {
@@ -320,43 +242,30 @@ public class OhnOLevel extends ApplicationCommon {
         return false;
     }
 
-    private Color getColorState(Cell.STATE state) {
-        switch (state) {
-            case BLUE:
-                return colors.get("blue");
-            case GREY:
-                return colors.get("grey");
-            case RED:
-                return colors.get("red");
-        }
-        return colors.get("grey"); //Me obliga a poner un return imposible
-    }
-    //endregion
-
     //region Board Methods
     public void changeCell(int x, int y) {
         if (!infoReset) {
-            textsFading.add(new TextFadeInfo(texts.get("info"), boardSize + " x " + boardSize, infoRegSize));
+            infoText.fade(boardSize + " x " + boardSize, infoRegSize);
             givingHint = false;
             infoReset = true;
         }
-        Cell cell = board[x][y];
+        CellLogic cell = board[x][y];
         cell.changeState();
+        renderBoard[x][y].fade();
         previousMoves.add(cell);
-        cellsFading.add(new CellFadeInfo(cell));
 
-        Cell.STATE prevState = cell.getPrevState();
-        Cell.STATE currState = cell.getCurrState();
+        CellLogic.STATE prevState = cell.getPrevState();
+        CellLogic.STATE currState = cell.getCurrState();
         if (prevState == solBoard[x][y].getCurrState()) contMistakes++;
         else if (currState == solBoard[x][y].getCurrState()) contMistakes--;
         if(contMistakes == 0) {
             fadeOut = true;
-            textsFading.add(new TextFadeInfo(texts.get("info"), "ROCAMBOLESCO", infoWinSize));
+            infoText.fade("ROCAMBOLESCO", infoWinSize);
         }
-        if (prevState == Cell.STATE.GREY) coloredCells++;
-        else if (currState == Cell.STATE.GREY) coloredCells--;
+        if (prevState == CellLogic.STATE.GREY) coloredCells++;
+        else if (currState == CellLogic.STATE.GREY) coloredCells--;
 
-        texts.get("progress").text = Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%";
+        progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", progressSize);
     }
 
     private void undoMove() {
@@ -365,8 +274,7 @@ public class OhnOLevel extends ApplicationCommon {
             text = "No queda nada por hacer";
         }
         else {
-            Cell cell = previousMoves.remove(previousMoves.size() - 1);
-            cellsFading.add(new CellFadeInfo(cell));
+            CellLogic cell = previousMoves.remove(previousMoves.size() - 1);
             switch (cell.revertState()) {
                 case BLUE:
                     text = "Esta celda a vuelto a azul";
@@ -378,46 +286,47 @@ public class OhnOLevel extends ApplicationCommon {
                     text = "Esta celda a vuelto a rojo";
                     break;
             }
+            renderBoard[cell.getX()][cell.getY()].fade();
+            progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", progressSize);
         }
-        textsFading.add(new TextFadeInfo(texts.get("info"), text, infoHintSize));
+        infoText.fade(text, infoHintSize);
         infoReset = true;
     }
 
     //Crea la matriz que representa el nivel de un tamaño dado
-    private void createBoard(int size) {
+    private void createBoard() {
         // Crea los objetos
         // Primero coloca un numero de casillas en posiciones aleatorias
-        board = new Cell[size][size];
-        for (int i = 0; i < size; ++i) {
-            for (int j = 0; j < size; ++j) {
-                board[i][j] = new Cell(i, j);
+        board = new CellLogic[boardSize][boardSize];
+        for (int i = 0; i < boardSize; ++i) {
+            for (int j = 0; j < boardSize; ++j) {
+                board[i][j] = new CellLogic(i, j);
             }
         }
-        boardSize = size;
-        numCells = size * size;
+        numCells = boardSize * boardSize;
         Hint hint = null;
         while (hint == null) {
             fixedCells = 0;
-            fixedBlueCells = new Vector<>();
+            fixedBlueCellLogics = new Vector<>();
             //Se fijan ciertas celdas con valores aleatorios
-            for (int i = 0; i < size; ++i) {
-                for (int j = 0; j < size; ++j) {
+            for (int i = 0; i < boardSize; ++i) {
+                for (int j = 0; j < boardSize; ++j) {
                     board[i][j].resetCell(); //Por si ha habido un intento anterior
                     if (getRandomBoolean(fixedProb)) {
                         if (getRandomBoolean(blueProb)) {
-                            board[i][j].fixCell(Cell.STATE.BLUE);
-                            fixedBlueCells.add(board[i][j]);
+                            board[i][j].fixCell(CellLogic.STATE.BLUE);
+                            fixedBlueCellLogics.add(board[i][j]);
                         } else
-                            board[i][j].fixCell(Cell.STATE.RED);
+                            board[i][j].fixCell(CellLogic.STATE.RED);
                         fixedCells++;
                     }
                 }
             }
-            for (Cell c : fixedBlueCells) {
-                c.setNumber(Math.min(Math.max(calculateNumber(board, c.getX(), c.getY()), rand.nextInt(size) + 1), size));
+            for (CellLogic c : fixedBlueCellLogics) {
+                c.setNumber(Math.min(Math.max(calculateNumber(board, c.getX(), c.getY()), rand.nextInt(boardSize) + 1), boardSize));
             }
             // Se crea la solucion en solBoard
-            contMistakes = size * size - fixedCells;
+            contMistakes = boardSize * boardSize - fixedCells;
             solBoard = copyBoard(board);
             int placedCells = 0;
             boolean tryAgain = true;
@@ -433,14 +342,14 @@ public class OhnOLevel extends ApplicationCommon {
                 }
                 if (fixedCells + placedCells == numCells) {
                     // Comprueba que los numeros tienen sentido, si no, reinicia
-                    for (int i = 0; i < fixedBlueCells.size(); ++i) {
-                        Cell c = fixedBlueCells.get(i);
+                    for (int i = 0; i < fixedBlueCellLogics.size(); ++i) {
+                        CellLogic c = fixedBlueCellLogics.get(i);
                         if (calculateNumber(solBoard, c.getX(), c.getY()) != c.getNumber()) {
                             hint = null;
                             break tries;
                         }
                     }
-                    texts.get("progress").text = Math.round((float)coloredCells / (float)numCells * 100) + "%";
+                    progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", progressSize);
                     return;
                 }
             }
@@ -463,16 +372,16 @@ public class OhnOLevel extends ApplicationCommon {
 
                 switch (c) {
                     case 'r':
-                        board[i][j].fixCell(Cell.STATE.RED);
+                        board[i][j].fixCell(CellLogic.STATE.RED);
                         fixedCells++;
                         break;
                     case '0':
                         break;
                     default: // numeros
                         int num = Character.getNumericValue(c);
-                        board[i][j].fixCell(Cell.STATE.BLUE, num);
+                        board[i][j].fixCell(CellLogic.STATE.BLUE, num);
                         fixedCells++;
-                        fixedBlueCells.add(board[i][j]);
+                        fixedBlueCellLogics.add(board[i][j]);
                         break;
                 }
             }
@@ -480,11 +389,11 @@ public class OhnOLevel extends ApplicationCommon {
         return fixedCells;
     }
 
-    private Cell[][] copyBoard(Cell[][] orig) {
-        Cell[][] copy = new Cell[orig.length][orig[0].length];
+    private CellLogic[][] copyBoard(CellLogic[][] orig) {
+        CellLogic[][] copy = new CellLogic[orig.length][orig[0].length];
         for (int i = 0; i < orig.length; ++i) {
             for (int j = 0; j < orig[0].length; ++j) {
-                copy[i][j] = new Cell(orig[i][j].getX(), orig[i][j].getY());
+                copy[i][j] = new CellLogic(orig[i][j].getX(), orig[i][j].getY());
                 if (orig[i][j].isFixed())
                     copy[i][j].fixCell(orig[i][j].getCurrState(), orig[i][j].getNumber());
             }
@@ -494,7 +403,7 @@ public class OhnOLevel extends ApplicationCommon {
 
     //Busca la primera casilla con color distinto al dado
     //Si no hay, devuelve la última casilla que hay.
-    public int[] nextDiffColor(Cell[][] mat, int x, int y, int dx, int dy, Cell.STATE color) {
+    public int[] nextDiffColor(CellLogic[][] mat, int x, int y, int dx, int dy, CellLogic.STATE color) {
         int i = 1;
         while (inArray(mat, x + dx * i, y + dy * i) && mat[x + dx * i][y + dy * i].getCurrState() == color) {
             i++;
@@ -508,7 +417,7 @@ public class OhnOLevel extends ApplicationCommon {
 
     //Busca la primera casilla del color dado
     //Si no hay, devuelve la última casilla que hay.
-    public int[] nextColorCell(Cell[][] mat, int x, int y, int dx, int dy, Cell.STATE color) {
+    public int[] nextColorCell(CellLogic[][] mat, int x, int y, int dx, int dy, CellLogic.STATE color) {
         int i = 1;
         while (inArray(mat, x + dx * i, y + dy * i) && mat[x + dx * i][y + dy * i].getCurrState() != color) {
             i++;
@@ -521,30 +430,30 @@ public class OhnOLevel extends ApplicationCommon {
     }
 
     //Cuenta las celdas azules adyacentes a una dada
-    private int calculateNumber(Cell[][] mat, int x, int y) {
+    private int calculateNumber(CellLogic[][] mat, int x, int y) {
         int count = 0;
         int[] newPos;
-        newPos = nextDiffColor(mat, x, y, 1, 0, Cell.STATE.BLUE);
-        if (mat[newPos[0]][newPos[1]].getCurrState() != Cell.STATE.BLUE) {
+        newPos = nextDiffColor(mat, x, y, 1, 0, CellLogic.STATE.BLUE);
+        if (mat[newPos[0]][newPos[1]].getCurrState() != CellLogic.STATE.BLUE) {
             count += newPos[0] - x - 1;
         } else count += newPos[0] - x;
-        newPos = nextDiffColor(mat, x, y, 0, 1, Cell.STATE.BLUE);
-        if (mat[newPos[0]][newPos[1]].getCurrState() != Cell.STATE.BLUE) {
+        newPos = nextDiffColor(mat, x, y, 0, 1, CellLogic.STATE.BLUE);
+        if (mat[newPos[0]][newPos[1]].getCurrState() != CellLogic.STATE.BLUE) {
             count += newPos[1] - y - 1;
         } else count += newPos[1] - y;
-        newPos = nextDiffColor(mat, x, y, -1, 0, Cell.STATE.BLUE);
-        if (mat[newPos[0]][newPos[1]].getCurrState() != Cell.STATE.BLUE) {
+        newPos = nextDiffColor(mat, x, y, -1, 0, CellLogic.STATE.BLUE);
+        if (mat[newPos[0]][newPos[1]].getCurrState() != CellLogic.STATE.BLUE) {
             count += x - newPos[0] - 1;
         } else count += x - newPos[0];
-        newPos = nextDiffColor(mat, x, y, 0, -1, Cell.STATE.BLUE);
-        if (mat[newPos[0]][newPos[1]].getCurrState() != Cell.STATE.BLUE) {
+        newPos = nextDiffColor(mat, x, y, 0, -1, CellLogic.STATE.BLUE);
+        if (mat[newPos[0]][newPos[1]].getCurrState() != CellLogic.STATE.BLUE) {
             count += y - newPos[1] - 1;
         } else count += y - newPos[1];
         return count;
     }
 
     //Comprueba que una posición no se sale del array
-    private boolean inArray(Cell[][] mat, int x, int y) {
+    private boolean inArray(CellLogic[][] mat, int x, int y) {
         return ((x >= 0 && x < mat.length) && (y >= 0 && y < mat[0].length));
     }
 
@@ -561,11 +470,11 @@ public class OhnOLevel extends ApplicationCommon {
     //endregion
 
     //region Hints
-    public Hint giveHint(Cell[][] mat) {
+    public Hint giveHint(CellLogic[][] mat) {
         Hint hint = new Hint();
         //Pistas basadas en celdas fijas
-        for (int i = 0; i < fixedBlueCells.size(); ++i) {
-            if (getHintFixedCell(hint, mat, fixedBlueCells.get(i))) return hint;
+        for (int i = 0; i < fixedBlueCellLogics.size(); ++i) {
+            if (getHintFixedCell(hint, mat, fixedBlueCellLogics.get(i))) return hint;
         }
         //Pistas basadas en celdas ordinarias
         for (int i = 0; i < mat.length; ++i) {
@@ -577,26 +486,26 @@ public class OhnOLevel extends ApplicationCommon {
         return null; //No se han encontrado pistas
     }
 
-    private boolean getHintFixedCell(Hint hint, Cell[][] mat, Cell cell) {
-        int curCount = calculateNumber(mat, cell.getX(), cell.getY()); //Número correcto de azules adyacentes
+    private boolean getHintFixedCell(Hint hint, CellLogic[][] mat, CellLogic cellLogic) {
+        int curCount = calculateNumber(mat, cellLogic.getX(), cellLogic.getY()); //Número correcto de azules adyacentes
         //Pistas que requieren mirar cada direccion
         for (int i = -1; i <= 1; ++i) {
             for (int j = -1; j <= 1; ++j) {
                 if ((i + j == 2) || (i + j == 0) || (i + j == -2)) continue;
-                if (hint_VISIBLE_CELLS_COVERED(hint, mat, cell, i, j, curCount) ||
-                        hint_CANNOT_SURPASS_LIMIT(hint, mat, cell, i, j, curCount) ||
-                        hint_MUST_PLACE_BLUE(hint, mat, cell, i, j, curCount)) return true;
+                if (hint_VISIBLE_CELLS_COVERED(hint, mat, cellLogic, i, j, curCount) ||
+                        hint_CANNOT_SURPASS_LIMIT(hint, mat, cellLogic, i, j, curCount) ||
+                        hint_MUST_PLACE_BLUE(hint, mat, cellLogic, i, j, curCount)) return true;
             }
         }
         return false;
     }
 
-    private boolean getHintRegularCell(Hint hint, Cell[][] mat, Cell cell) {
-        Cell.STATE state = cell.getCurrState();
+    private boolean getHintRegularCell(Hint hint, CellLogic[][] mat, CellLogic cellLogic) {
+        CellLogic.STATE state = cellLogic.getCurrState();
         //Se mira si se aplican unas pistas u otras dependiendo del color de la celda
         switch (state) {
             case GREY:
-                if (hint_BLUE_BUT_ISOLATED(hint, mat, cell)) {
+                if (hint_BLUE_BUT_ISOLATED(hint, mat, cellLogic)) {
                     hint.type = Hint.HintType.ISOLATED_AND_EMPTY;
                     return true;
                 }
@@ -612,8 +521,8 @@ public class OhnOLevel extends ApplicationCommon {
     public Hint giveHint_user() {
         Hint hint = new Hint();
         //Pistas basadas en celdas fijas
-        for (int i = 0; i < fixedBlueCells.size(); ++i) {
-            if (getHintFixedCell(hint, board, fixedBlueCells.get(i))) return hint;
+        for (int i = 0; i < fixedBlueCellLogics.size(); ++i) {
+            if (getHintFixedCell(hint, board, fixedBlueCellLogics.get(i))) return hint;
         }
         //Pistas basadas en celdas ordinarias
         for (int i = 0; i < boardSize; ++i) {
@@ -627,31 +536,31 @@ public class OhnOLevel extends ApplicationCommon {
 
     //Metodo que da pistas especificas para el usuario
     //Expande las que usa el generador de niveles contemplando posibles errores del usuario
-    private boolean getHintFixedCell_user(Hint hint, Cell[][] mat, Cell cell) {
-        if (getHintFixedCell(hint, mat, cell)) return true;
+    private boolean getHintFixedCell_user(Hint hint, CellLogic[][] mat, CellLogic cellLogic) {
+        if (getHintFixedCell(hint, mat, cellLogic)) return true;
         // Caso en el que el usuario se ha equivocado
-        if (hint_TOO_MANY_ADJACENT(hint, mat, cell) ||
-                hint_NOT_ENOUGH_BUT_CLOSED(hint, mat, cell)) return true;
+        if (hint_TOO_MANY_ADJACENT(hint, mat, cellLogic) ||
+                hint_NOT_ENOUGH_BUT_CLOSED(hint, mat, cellLogic)) return true;
         return false;
     }
 
     //Metodo que da pistas especificas para el usuario
     //Expande las que usa el generador de niveles contemplando posibles errores del usuario
-    private boolean getHintRegularCell_user(Hint hint, Cell[][] mat, Cell cell) {
-        if (getHintRegularCell(hint, mat, cell)) return true;
+    private boolean getHintRegularCell_user(Hint hint, CellLogic[][] mat, CellLogic cellLogic) {
+        if (getHintRegularCell(hint, mat, cellLogic)) return true;
         // Caso en el que el usuario se ha equivocado
-        if (cell.getCurrState() == Cell.STATE.BLUE) {
-            return hint_BLUE_BUT_ISOLATED(hint, mat, cell);
+        if (cellLogic.getCurrState() == CellLogic.STATE.BLUE) {
+            return hint_BLUE_BUT_ISOLATED(hint, mat, cellLogic);
         }
         return false;
     }
 
     //region Fixed Hints
-    private boolean hint_VISIBLE_CELLS_COVERED(Hint hint, Cell[][] mat, Cell cell, int i, int j, int cont) {
-        if (cont != cell.getNumber()) return false; //Si no ha llegado al numero correcto pasamos
-        int[] newPos = nextDiffColor(mat, cell.getX(), cell.getY(), i, j, Cell.STATE.BLUE);
+    private boolean hint_VISIBLE_CELLS_COVERED(Hint hint, CellLogic[][] mat, CellLogic cellLogic, int i, int j, int cont) {
+        if (cont != cellLogic.getNumber()) return false; //Si no ha llegado al numero correcto pasamos
+        int[] newPos = nextDiffColor(mat, cellLogic.getX(), cellLogic.getY(), i, j, CellLogic.STATE.BLUE);
         //Busca en la direccion i j la siguiente casilla no azul; si es gris, esta abierta y hay que cerrarla
-        if (mat[newPos[0]][newPos[1]].getCurrState() == Cell.STATE.GREY) {
+        if (mat[newPos[0]][newPos[1]].getCurrState() == CellLogic.STATE.GREY) {
             hint.type = Hint.HintType.VISIBLE_CELLS_COVERED;
             hint.i = newPos[0];
             hint.j = newPos[1];
@@ -660,20 +569,20 @@ public class OhnOLevel extends ApplicationCommon {
         return false;
     }
 
-    private boolean hint_CANNOT_SURPASS_LIMIT(Hint hint, Cell[][] mat, Cell cell, int i, int j, int cont) {
-        if (cont >= cell.getNumber()) return false; //Si se ha llegado al numero correcto pasamos
-        int[] newPos = nextDiffColor(mat, cell.getX(), cell.getY(), i, j, Cell.STATE.BLUE);
+    private boolean hint_CANNOT_SURPASS_LIMIT(Hint hint, CellLogic[][] mat, CellLogic cellLogic, int i, int j, int cont) {
+        if (cont >= cellLogic.getNumber()) return false; //Si se ha llegado al numero correcto pasamos
+        int[] newPos = nextDiffColor(mat, cellLogic.getX(), cellLogic.getY(), i, j, CellLogic.STATE.BLUE);
         //Si la siguiente casilla en la direccion i j es gris puede haber camino, así que miramos si hacerlo supera el numero
-        if (mat[newPos[0]][newPos[1]].getCurrState() == Cell.STATE.GREY) {
-            int[] newNewPos = nextDiffColor(mat, newPos[0], newPos[1], i, j, Cell.STATE.BLUE);
+        if (mat[newPos[0]][newPos[1]].getCurrState() == CellLogic.STATE.GREY) {
+            int[] newNewPos = nextDiffColor(mat, newPos[0], newPos[1], i, j, CellLogic.STATE.BLUE);
             int newCont;
             //Si la siguiente celda no es azul no se ha salido de la matriz y hay que volver a la ultima azul, la anterior
             //Si es azul, se ha salido de la matriz y ha devuelto la ultima azul
-            if ((newPos[0] == newNewPos[0] && newPos[1] == newNewPos[1]) || mat[newNewPos[0]][newNewPos[1]].getCurrState() == Cell.STATE.BLUE) {
+            if ((newPos[0] == newNewPos[0] && newPos[1] == newNewPos[1]) || mat[newNewPos[0]][newNewPos[1]].getCurrState() == CellLogic.STATE.BLUE) {
                 newCont = distanceBetweenPos(newPos[0] - i, newPos[1] - j, newNewPos[0], newNewPos[1]);
             } else newCont = distanceBetweenPos(newPos[0], newPos[1], newNewPos[0], newNewPos[1]);
             //Si poner la casilla gris en azul supera el numero correcto
-            if (cont + newCont > cell.getNumber()) {
+            if (cont + newCont > cellLogic.getNumber()) {
                 hint.type = Hint.HintType.CANNOT_SURPASS_LIMIT;
                 hint.i = newPos[0];
                 hint.j = newPos[1];
@@ -683,25 +592,25 @@ public class OhnOLevel extends ApplicationCommon {
         return false;
     }
 
-    private boolean hint_MUST_PLACE_BLUE(Hint hint, Cell[][] mat, Cell cell, int i, int j, int thisBlues) {
-        if (thisBlues >= cell.getNumber()) return false;
-        int x = cell.getX();
-        int y = cell.getY();
+    private boolean hint_MUST_PLACE_BLUE(Hint hint, CellLogic[][] mat, CellLogic cellLogic, int i, int j, int thisBlues) {
+        if (thisBlues >= cellLogic.getNumber()) return false;
+        int x = cellLogic.getX();
+        int y = cellLogic.getY();
 
         int otherBlues = 0;
         for (int k = -1; k <= 1; ++k) {
             for (int l = -1; l <= 1; ++l) {
                 if ((k + l == 2) || (k + l == 0) || (k + l == -2)) continue;
                 if (i == k && j == l) continue; //No miramos la direccion a evaluar
-                int[] otherDirRed = nextColorCell(mat, x, y, k, l, Cell.STATE.RED);
+                int[] otherDirRed = nextColorCell(mat, x, y, k, l, CellLogic.STATE.RED);
                 // Si es roja, no ha llegado al final y hay que contar hasta esa excluyendola
-                if (mat[otherDirRed[0]][otherDirRed[1]].getCurrState() == Cell.STATE.RED) {
+                if (mat[otherDirRed[0]][otherDirRed[1]].getCurrState() == CellLogic.STATE.RED) {
                     otherDirRed[0] -= k;
                     otherDirRed[1] -= l;
                 }
-                int[] otherNextNoBlue = nextDiffColor(mat, x, y, k, l, Cell.STATE.BLUE);
+                int[] otherNextNoBlue = nextDiffColor(mat, x, y, k, l, CellLogic.STATE.BLUE);
                 // Si es gris, no ha llegado al final y hay que contar hasta esa excluyendola
-                if (mat[otherNextNoBlue[0]][otherNextNoBlue[1]].getCurrState() != Cell.STATE.BLUE) {
+                if (mat[otherNextNoBlue[0]][otherNextNoBlue[1]].getCurrState() != CellLogic.STATE.BLUE) {
                     otherNextNoBlue[0] -= k;
                     otherNextNoBlue[1] -= l;
                 }
@@ -710,9 +619,9 @@ public class OhnOLevel extends ApplicationCommon {
             }
         }
         //Si las otras 3 direcciones juntas mas las casillas azules que ya ve no llegan al numero correcto
-        if (otherBlues + thisBlues < cell.getNumber()) {
-            int[] thisFirstGrey = nextColorCell(mat, x, y, i, j, Cell.STATE.GREY);
-            if (mat[thisFirstGrey[0]][thisFirstGrey[1]].getCurrState() != Cell.STATE.GREY) {
+        if (otherBlues + thisBlues < cellLogic.getNumber()) {
+            int[] thisFirstGrey = nextColorCell(mat, x, y, i, j, CellLogic.STATE.GREY);
+            if (mat[thisFirstGrey[0]][thisFirstGrey[1]].getCurrState() != CellLogic.STATE.GREY) {
                 return false;
             }
             hint.i = thisFirstGrey[0];
@@ -725,61 +634,60 @@ public class OhnOLevel extends ApplicationCommon {
     //endregion
 
     //region Regular Hints
-    private boolean hint_TOO_MANY_ADJACENT(Hint hint, Cell[][] mat, Cell cell) {
-        if (calculateNumber(mat, cell.getX(), cell.getY()) <= cell.getNumber()) return false;
-        hint.i = cell.getX();
-        hint.j = cell.getY();
+    private boolean hint_TOO_MANY_ADJACENT(Hint hint, CellLogic[][] mat, CellLogic cellLogic) {
+        if (calculateNumber(mat, cellLogic.getX(), cellLogic.getY()) <= cellLogic.getNumber()) return false;
+        hint.i = cellLogic.getX();
+        hint.j = cellLogic.getY();
         hint.type = Hint.HintType.TOO_MANY_ADJACENT;
         return true;
     }
 
-    private boolean hint_NOT_ENOUGH_BUT_CLOSED(Hint hint, Cell[][] mat, Cell cell) {
-        int x = cell.getX();
-        int y = cell.getY();
+    private boolean hint_NOT_ENOUGH_BUT_CLOSED(Hint hint, CellLogic[][] mat, CellLogic cellLogic) {
+        int x = cellLogic.getX();
+        int y = cellLogic.getY();
         int blueVisible = 0;
         for (int i = -1; i <= 1; ++i) {
             for (int j = -1; j <= 1; ++j) {
                 if ((i + j == 2) || (i + j == 0) || (i + j == -2)) continue;
-                int[] firstRed = nextDiffColor(mat, x, y, i, j, Cell.STATE.BLUE);
+                int[] firstRed = nextDiffColor(mat, x, y, i, j, CellLogic.STATE.BLUE);
                 // Si es gris, no se ha cerrado
-                if (mat[firstRed[0]][firstRed[1]].getCurrState() == Cell.STATE.GREY) return false;
+                if (mat[firstRed[0]][firstRed[1]].getCurrState() == CellLogic.STATE.GREY) return false;
                 //Si es roja hay que retroceder para no contarla
-                if (mat[firstRed[0]][firstRed[1]].getCurrState() != Cell.STATE.BLUE)
-                    blueVisible += distanceBetweenPos(cell.getX(), cell.getY(), firstRed[0] - i, firstRed[1] - j);
+                if (mat[firstRed[0]][firstRed[1]].getCurrState() != CellLogic.STATE.BLUE)
+                    blueVisible += distanceBetweenPos(cellLogic.getX(), cellLogic.getY(), firstRed[0] - i, firstRed[1] - j);
                 else
-                    blueVisible += distanceBetweenPos(cell.getX(), cell.getY(), firstRed[0], firstRed[1]);
+                    blueVisible += distanceBetweenPos(cellLogic.getX(), cellLogic.getY(), firstRed[0], firstRed[1]);
             }
         }
         //Si ve las que tiene que ver esta pista no aplica
-        if (blueVisible >= cell.getNumber()) return false;
-        hint.i = cell.getX();
-        hint.j = cell.getY();
+        if (blueVisible >= cellLogic.getNumber()) return false;
+        hint.i = cellLogic.getX();
+        hint.j = cellLogic.getY();
         hint.type = Hint.HintType.NOT_ENOUGH_BUT_CLOSED;
         return true;
     }
 
-    private boolean hint_BLUE_BUT_ISOLATED(Hint hint, Cell[][] mat, Cell cell) {
-        int x = cell.getX();
-        int y = cell.getY();
+    private boolean hint_BLUE_BUT_ISOLATED(Hint hint, CellLogic[][] mat, CellLogic cellLogic) {
+        int x = cellLogic.getX();
+        int y = cellLogic.getY();
         for (int i = -1; i <= 1; ++i) {
             for (int j = -1; j <= 1; ++j) {
                 if ((i + j == 2) || (i + j == 0) || (i + j == -2)) continue;
                 //Para direccion buscar si se puede poner rojo porque no hay una azul bloqueada que podria llegar a esta
                 int adv = 1;
                 while (inArray(mat, x + i * adv, y + j * adv) &&
-                        (mat[x + i * adv][y + j * adv].getCurrState() != Cell.STATE.RED)) {
-                    if ((mat[x + i * adv][y + j * adv].getCurrState() == Cell.STATE.BLUE && mat[x + i * adv][y + j * adv].isFixed()))
+                        (mat[x + i * adv][y + j * adv].getCurrState() != CellLogic.STATE.RED)) {
+                    if ((mat[x + i * adv][y + j * adv].getCurrState() == CellLogic.STATE.BLUE && mat[x + i * adv][y + j * adv].isFixed()))
                         return false;
                     adv++;
                 }
             }
         }
-        hint.i = cell.getX();
-        hint.j = cell.getY();
+        hint.i = cellLogic.getX();
+        hint.j = cellLogic.getY();
         hint.type = Hint.HintType.BLUE_BUT_ISOLATED;
         return true;
     }
-
     //endregion
 //endregion
 }
