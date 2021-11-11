@@ -32,7 +32,6 @@ public class OhnOLevel extends ApplicationCommon {
         }
     }
     private class TextFadeInfo extends FadeInfo {
-
         Text text;
         String newText;
         boolean appearing;
@@ -279,7 +278,7 @@ public class OhnOLevel extends ApplicationCommon {
         for (int i = 0; i < textsFading.size(); ++i) {
             TextFadeInfo info = textsFading.get(i);
             if (info.elapsedTime >= objectFadeDuration) {
-                if (!info.appearing) {
+                if (info.appearing) {
                     textsFading.remove(i);
                     --i; //Se ha quitado un obejto de la lista, hay que retroceder
                 }
@@ -331,9 +330,7 @@ public class OhnOLevel extends ApplicationCommon {
     }
 
     private void resetInterface() {
-        Text infoText = texts.get("info");
-        infoText.text = boardSize + " x " + boardSize;
-        infoText.font.setSize(infoRegSize);
+        textsFading.add(new TextFadeInfo(texts.get("info"), boardSize + " x " + boardSize, infoRegSize));
         givingHint = false;
     }
     //endregion
