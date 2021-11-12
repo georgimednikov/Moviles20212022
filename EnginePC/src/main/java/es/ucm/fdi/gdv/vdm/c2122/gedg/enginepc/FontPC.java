@@ -12,7 +12,6 @@ public class FontPC implements Font {
     int originalSize_;
     private java.awt.Font font;
     private Color color_;
-    private boolean bold_;
 
     public FontPC(String name, Color color, int size, boolean isBold) {
         color_ = color;
@@ -48,8 +47,6 @@ public class FontPC implements Font {
     }
     @Override
     public void setBold(boolean isBold) {
-        if(bold_ == isBold) return;
-        bold_ = isBold;
         font = font.deriveFont((isBold) ? java.awt.Font.BOLD : java.awt.Font.PLAIN);
     }
     @Override

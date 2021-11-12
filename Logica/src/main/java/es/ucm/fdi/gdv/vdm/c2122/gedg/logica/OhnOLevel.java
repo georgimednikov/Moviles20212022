@@ -27,7 +27,7 @@ public class OhnOLevel extends ApplicationCommon {
     private final int NUM_BUTTONS = 3;
     //Tiempos
     private final float FADE_TOTAL_DURATION = 0.25f; //Segundos que duran los fades de la escena
-    private final float TIME_AFTER_WIN = 2f;
+    private final float TIME_AFTER_WIN = 10f;
     //Probabilidades
     private final float BLUE_PROB = 0.7f; //Probabilidad de que una celda sea azul en vez de roja en la solución
     private final float FIXED_PROB = 0.5f; //Probabilidad de que una celda sea fija
@@ -290,6 +290,7 @@ public class OhnOLevel extends ApplicationCommon {
 
     private void undoMove() {
         String text = "";
+        givingHint = false;
         if (previousMoves.isEmpty()) {
             text = "No queda nada por hacer";
         }
@@ -317,7 +318,7 @@ public class OhnOLevel extends ApplicationCommon {
             renderBoard[cell.getX()][cell.getY()].fade();
         }
         infoText.fade(text, INFO_HINT_SIZE, false);
-        infoReset = true;
+        infoReset = false;
     }
 
     //Crea la matriz que representa el nivel de un tamaño dado
