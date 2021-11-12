@@ -84,10 +84,8 @@ public class OhnOMenu extends ApplicationCommon {
         if (updateSceneFades()) return;
 
         TouchEvent event;
-        List<TouchEvent> events = eng_.getInput().getTouchEvents();
         next:
-        while (!events.isEmpty()) {
-            event = events.remove(0);
+        while ((event = eng_.getInput().getEvent()) != null) {
             if (event.type != TouchEvent.TouchType.PRESS) continue; //TODO: ESTO NO DEBERIA SER ASI (?)
             if (checkCollisionCircle(eng_.getGraphics().getWidth() / 2, QUIT_POS_Y, BUTTON_SIZE, event.x, event.y)) {
                 fadeOut = true;
