@@ -29,9 +29,9 @@ public class OhnOLevel extends ApplicationCommon {
     private final int NUM_BUTTONS = 3;
     //Tiempos
     private final float FADE_TOTAL_DURATION = 0.25f; //Segundos que duran los fades de la escena
-    private final float TIME_AFTER_WIN = 10f;
+    private final float TIME_AFTER_WIN = 1.5f;
     //Probabilidades
-    private final float BLUE_PROB = 0.7f; //Probabilidad de que una celda sea azul en vez de roja en la solución
+    private final float BLUE_PROB = 0.6f; //Probabilidad de que una celda sea azul en vez de roja en la solución
     private final float FIXED_PROB = 0.5f; //Probabilidad de que una celda sea fija
     //Asignacion dinamica
     private int cellSeparation = -1;
@@ -573,13 +573,13 @@ public class OhnOLevel extends ApplicationCommon {
         Hint hint = new Hint();
         //Pistas basadas en celdas fijas
         for (int i = 0; i < fixedBlueCells.size(); ++i) {
-            if (getHintFixedCell(hint, board, fixedBlueCells.get(i))) return hint;
+            if (getHintFixedCell_user(hint, board, fixedBlueCells.get(i))) return hint;
         }
         //Pistas basadas en celdas ordinarias
         for (int i = 0; i < boardSize; ++i) {
             for (int j = 0; j < boardSize; ++j) {
                 if (board[i][j].isFixed()) continue;
-                if (getHintRegularCell(hint, board, board[i][j])) return hint;
+                if (getHintRegularCell_user(hint, board, board[i][j])) return hint;
             }
         }
         return null; //No se han encontrado pistas

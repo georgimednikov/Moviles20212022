@@ -19,17 +19,16 @@ public class OhnOMenu extends ApplicationCommon {
     }
     private POSSIBLE_SCENES nextScene;
 
-    private float FADE_TOTAL_DURATION = 0.25f; //Segundos que duran los fades
-    private int ROWS = 2;
-    private int ROW_SIZE = 3;
-    private int STARTING_VALUE = 4;
-    private int SELECTED_SIZE = -1;
-    private int LOGO_POS_Y = 130;
-    private int TEXT_POS_Y = 215;
-    private int QUIT_POS_Y = 530;
-    private int BUTTON_SIZE = 40;
-    private int MENU_OFFSET_X = 60;
-    private int MENU_OFFSET_Y = 270;
+    private final float FADE_TOTAL_DURATION = 0.25f; //Segundos que duran los fades
+    private final int ROWS = 2;
+    private final int ROW_SIZE = 3;
+    private final int STARTING_VALUE = 4;
+    private final int LOGO_POS_Y = 130;
+    private final int TEXT_POS_Y = 215;
+    private final int QUIT_POS_Y = 530;
+    private final int BUTTON_SIZE = 40;
+    private final int MENU_OFFSET_X = 60;
+    private final int MENU_OFFSET_Y = 270;
 
     private boolean fadeIn = true;
     private boolean fadeOut = false;
@@ -37,6 +36,7 @@ public class OhnOMenu extends ApplicationCommon {
     private float fadeCurrentDuration = 0f; //Segundos que lleva haciendose un fade
     private int cellSeparation = -1; //Asignacion dinamica
     private int cellRadius = -1; //Asignacion dinamica
+    private int selectedSize = -1;
 
     //Render
     private Map<String, Color> colors = new HashMap<>();
@@ -63,7 +63,7 @@ public class OhnOMenu extends ApplicationCommon {
                             eng_.setApplication(intro);
                             break;
                         case MENU:
-                            OhnOLevel level = new OhnOLevel(SELECTED_SIZE);
+                            OhnOLevel level = new OhnOLevel(selectedSize);
                             eng_.setApplication(level);
                             break;
                     }
@@ -103,7 +103,7 @@ public class OhnOMenu extends ApplicationCommon {
                             cellRadius, event.x, event.y)) {
                         fadeOut = true;
                         nextScene = POSSIBLE_SCENES.MENU;
-                        SELECTED_SIZE = cont;
+                        selectedSize = cont;
                         continue next;
                     }
                     cont++;
