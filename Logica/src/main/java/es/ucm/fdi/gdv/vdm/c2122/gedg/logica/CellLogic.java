@@ -1,7 +1,7 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 
 //Clase representativa de una celda en el juego
-public class Cell {
+public class CellLogic {
     public enum STATE {
         RED,
         GREY,
@@ -15,7 +15,7 @@ public class Cell {
     private STATE currState_; //Color actual de la celda
     private STATE prevState_; //Color actual de la celda
 
-    public Cell(int x, int y){
+    public CellLogic(int x, int y){
         x_ = x;
         y_ = y;
         resetCell();
@@ -68,7 +68,7 @@ public class Cell {
                 break;
         }
     }
-    public Cell.STATE revertState() {
+    public CellLogic.STATE revertState() {
         prevState_ = currState_;
         switch (currState_) {
             case RED:
