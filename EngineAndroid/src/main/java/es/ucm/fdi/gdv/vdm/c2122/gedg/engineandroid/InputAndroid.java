@@ -51,7 +51,7 @@ public class InputAndroid implements Input, View.OnTouchListener {
         }
         event.finger = 0; //TODO: Esto esta mal fijo pero no se como va
         event.x = g_.toVirtualX((int)e.getX(event.finger));
-        event.y = g_.toVirtualX((int)e.getY(event.finger));
+        event.y = g_.toVirtualY((int)e.getY(event.finger));
         addEvent(event);
         return true;
     }
