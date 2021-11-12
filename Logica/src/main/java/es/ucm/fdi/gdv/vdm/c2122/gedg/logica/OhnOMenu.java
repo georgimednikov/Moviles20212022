@@ -11,7 +11,6 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
-
 public class OhnOMenu extends ApplicationCommon {
 
     private enum POSSIBLE_SCENES {
@@ -20,26 +19,24 @@ public class OhnOMenu extends ApplicationCommon {
     }
     private POSSIBLE_SCENES nextScene;
 
+    private float FADE_TOTAL_DURATION = 0.25f; //Segundos que duran los fades
+    private int ROWS = 2;
+    private int ROW_SIZE = 3;
+    private int STARTING_VALUE = 4;
+    private int SELECTED_SIZE = -1;
+    private int LOGO_POS_Y = 130;
+    private int TEXT_POS_Y = 215;
+    private int QUIT_POS_Y = 530;
+    private int BUTTON_SIZE = 40;
+    private int MENU_OFFSET_X = 60;
+    private int MENU_OFFSET_Y = 270;
+
     private boolean fadeIn = true;
     private boolean fadeOut = false;
-    private float fadeCurrentDuration = 0f; //Segundos que lleva haciendose un fade
-    private float fadeTotalDuration = 0.25f; //Segundos que duran los fades
     private float sceneAlpha = 0f; //Alpha de la escena al hacer fade in/out
-
-    private int rows = 2;
-    private int sizePerRow = 3;
-    private int firstSize = 4;
-    private int selectedSize = -1;
-
-    private int menuOffsetX = 60;
-    private int menuOffsetY = 270;
+    private float fadeCurrentDuration = 0f; //Segundos que lleva haciendose un fade
     private int cellSeparation = -1; //Asignacion dinamica
     private int cellRadius = -1; //Asignacion dinamica
-
-    private int logoPosY = 130;
-    private int textPosY = 215;
-    private int quitPosY = 530;
-    private int buttonSize = 40;
 
     //Render
     private Map<String, Color> colors = new HashMap<>();
@@ -56,7 +53,7 @@ public class OhnOMenu extends ApplicationCommon {
 
     private boolean updateSceneFades() {
         if (fadeIn || fadeOut) {
-            if (fadeCurrentDuration >= fadeTotalDuration) {
+            if (fadeCurrentDuration >= FADE_TOTAL_DURATION) {
                 fadeCurrentDuration = 0;
                 if (fadeIn) fadeIn = false;
                 else if (fadeOut) {
@@ -66,7 +63,7 @@ public class OhnOMenu extends ApplicationCommon {
                             eng_.setApplication(intro);
                             break;
                         case MENU:
-                            OhnOLevel level = new OhnOLevel(selectedSize);
+                            OhnOLevel level = new OhnOLevel(SELECTED_SIZE);
                             eng_.setApplication(level);
                             break;
                     }
@@ -74,8 +71,8 @@ public class OhnOMenu extends ApplicationCommon {
             }
             else {
                 fadeCurrentDuration += eng_.getDeltaTime();
-                if (fadeIn) sceneAlpha = 1 - Math.min((fadeCurrentDuration / fadeTotalDuration), 1);
-                else if (fadeOut) sceneAlpha = Math.min((fadeCurrentDuration / fadeTotalDuration), 1);
+                if (fadeIn) sceneAlpha = 1 - Math.min((fadeCurrentDuration / FADE_TOTAL_DURATION), 1);
+                else if (fadeOut) sceneAlpha = Math.min((fadeCurrentDuration / FADE_TOTAL_DURATION), 1);
                 return true;
             }
         }
@@ -92,21 +89,21 @@ public class OhnOMenu extends ApplicationCommon {
         while (!events.isEmpty()) {
             event = events.remove(0);
             if (event.type != TouchEvent.TouchType.PRESS) continue; //TODO: ESTO NO DEBERIA SER ASI (?)
-            if (checkCollisionCircle(eng_.getGraphics().getWidth() / 2, quitPosY, buttonSize, event.x, event.y)) {
+            if (checkCollisionCircle(eng_.getGraphics().getWidth() / 2, QUIT_POS_Y, BUTTON_SIZE, event.x, event.y)) {
                 fadeOut = true;
                 nextScene = POSSIBLE_SCENES.INTRO;
                 continue;
             }
-            int cont = firstSize;
-            for (int i = 0; i < rows; ++i) {
-                for (int j = 0; j < sizePerRow; ++j) {
+            int cont = STARTING_VALUE;
+            for (int i = 0; i < ROWS; ++i) {
+                for (int j = 0; j < ROW_SIZE; ++j) {
                     if (checkCollisionCircle(
-                            menuOffsetX + cellRadius * (j + 1) + (cellRadius + cellSeparation) * j,
-                            menuOffsetY + cellRadius * (i + 1) + (cellRadius + cellSeparation) * i,
+                            MENU_OFFSET_X + cellRadius * (j + 1) + (cellRadius + cellSeparation) * j,
+                            MENU_OFFSET_Y + cellRadius * (i + 1) + (cellRadius + cellSeparation) * i,
                             cellRadius, event.x, event.y)) {
                         fadeOut = true;
                         nextScene = POSSIBLE_SCENES.MENU;
-                        selectedSize = cont;
+                        SELECTED_SIZE = cont;
                         continue next;
                     }
                     cont++;
@@ -117,13 +114,13 @@ public class OhnOMenu extends ApplicationCommon {
     @Override
     public void render() {
         Graphics g = eng_.getGraphics();
-        g.drawText(fonts.get("logoFont"), "Oh nO", g.getWidth() / 2, logoPosY, true);
-        g.drawText(fonts.get("textFont"), "Elija el tamaño a jugar", g.getWidth() / 2, textPosY, true);
-        int cont = firstSize;
-        for (int i = 0; i < rows; ++i) {
+        g.drawText(fonts.get("logoFont"), "Oh nO", g.getWidth() / 2, LOGO_POS_Y, true);
+        g.drawText(fonts.get("textFont"), "Elija el tamaño a jugar", g.getWidth() / 2, TEXT_POS_Y, true);
+        int cont = STARTING_VALUE;
+        for (int i = 0; i < ROWS; ++i) {
             g.save();
-            g.translate(menuOffsetX + cellRadius, menuOffsetY + cellRadius * (i + 1) + (cellRadius + cellSeparation) * i);
-            for (int j = 0; j < sizePerRow; ++j) {
+            g.translate(MENU_OFFSET_X + cellRadius, MENU_OFFSET_Y + cellRadius * (i + 1) + (cellRadius + cellSeparation) * i);
+            for (int j = 0; j < ROW_SIZE; ++j) {
                 if ((i + j) % 2 == 0) g.setColor(colors.get("blue"));
                 else g.setColor(colors.get("red"));
                 g.fillCircle(0, 0, cellRadius);
@@ -132,7 +129,7 @@ public class OhnOMenu extends ApplicationCommon {
             }
             g.restore();
         }
-        g.drawImage(images.get("quitImage"), g.getWidth() / 2, quitPosY, buttonSize, buttonSize, true);
+        g.drawImage(images.get("quitImage"), g.getWidth() / 2, QUIT_POS_Y, BUTTON_SIZE, BUTTON_SIZE, true);
 
         if (fadeIn ||fadeOut) {
             g.clear(new Color(255, 255, 255, (int)(255 * sceneAlpha)));
@@ -142,9 +139,9 @@ public class OhnOMenu extends ApplicationCommon {
     public boolean init() {
         Graphics g = eng_.getGraphics();
 
-        int paintArea = g.getWidth() - 2 * menuOffsetX;
-        cellRadius = (int)((paintArea * 0.9) / 2) / sizePerRow;
-        cellSeparation = (int)(paintArea * 0.1) / (sizePerRow-1);
+        int paintArea = g.getWidth() - 2 * MENU_OFFSET_X;
+        cellRadius = (int)((paintArea * 0.9) / 2) / ROW_SIZE;
+        cellSeparation = (int)(paintArea * 0.1) / (ROW_SIZE -1);
 
         colors.put("blue", new Color(72, 193, 228, 255));
         colors.put("red", new Color(245, 53, 73, 255));

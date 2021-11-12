@@ -11,19 +11,19 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
 public class OhnOIntro extends ApplicationCommon {
 
+    private final int LOGO_POS_Y = 130;
+    private final int PLAY_POS_Y = 250;
+    private final int FIRST_CREDIT_POS_Y = 380;
+    private final int SECOND_CREDIT_POS_Y = 415;
+    private final int IMAGE_POS_Y = 530;
+    private final int IMAGE_WIDTH = 40;
+    private final int IMAGE_HEIGHT = 60;
+    private final float FADE_TOTAL_DURATION = 0.25f; //Segundos que duran los fades
+
     private boolean fadeIn = true;
     private boolean fadeOut = false;
     private float fadeCurrentDuration = 0f; //Segundos que lleva haciendose un fade
-    private float fadeTotalDuration = 0.25f; //Segundos que duran los fades
     private float sceneAlpha = 0f; //Alpha de la escena al hacer fade in/out
-
-    private int logoPosY = 130;
-    private int playPosY = 250;
-    private int firstCreditPosY = 380;
-    private int secondCreditPosY = 415;
-    private int imagePosY = 530;
-    private int imageWidth = 40;
-    private int imageHeight = 60;
     private String playText = "Jugar";
 
     //Render
@@ -32,8 +32,6 @@ public class OhnOIntro extends ApplicationCommon {
     private Font playFont;
     private Font creditFont;
 
-    private int evx;
-    private int evy;
     public OhnOIntro() {}
 
     private boolean checkCollisionBox(int x, int y, int w, int h, int eventX, int eventY, boolean centered) {
@@ -45,7 +43,7 @@ public class OhnOIntro extends ApplicationCommon {
 
     private boolean updateSceneFades() {
         if (fadeIn || fadeOut) {
-            if (fadeCurrentDuration >= fadeTotalDuration) {
+            if (fadeCurrentDuration >= FADE_TOTAL_DURATION) {
                 fadeCurrentDuration = 0;
                 if (fadeIn) fadeIn = false;
                 else if (fadeOut) {
@@ -55,8 +53,8 @@ public class OhnOIntro extends ApplicationCommon {
             }
             else {
                 fadeCurrentDuration += eng_.getDeltaTime();
-                if (fadeIn) sceneAlpha = 1 - Math.min((fadeCurrentDuration / fadeTotalDuration), 1);
-                else if (fadeOut) sceneAlpha = Math.min((fadeCurrentDuration / fadeTotalDuration), 1);
+                if (fadeIn) sceneAlpha = 1 - Math.min((fadeCurrentDuration / FADE_TOTAL_DURATION), 1);
+                else if (fadeOut) sceneAlpha = Math.min((fadeCurrentDuration / FADE_TOTAL_DURATION), 1);
                 return true;
             }
         }
@@ -74,27 +72,24 @@ public class OhnOIntro extends ApplicationCommon {
             if (event.type != TouchEvent.TouchType.PRESS) continue; //TODO: ESTO NO DEBERIA SER ASI (?)
             if (checkCollisionBox(
                     eng_.getGraphics().getWidth() / 2,
-                    playPosY,
+                    PLAY_POS_Y,
                     eng_.getGraphics().getTextWidth(playFont, playText),
                     eng_.getGraphics().getTextHeight(playFont, playText),
                     event.x, event.y,true)) {
                 fadeOut = true;
             }
-            evx = event.x;
-            evy = event.y;
         }
     }
     @Override
     public void render() {
         Graphics g = eng_.getGraphics();
         g.clear(new Color(255, 255, 255, 255));
-        g.drawText(logoFont, "Oh nO", g.getWidth() / 2, logoPosY, true);
-        g.drawText(playFont, playText, g.getWidth() / 2, playPosY, true);
-        g.drawText(creditFont, "Un juego copiado a Q42", g.getWidth() / 2, firstCreditPosY, true);
-        g.drawText(creditFont, "Creado por Martin Kool", g.getWidth() / 2, secondCreditPosY, true);
-        g.drawImage(q42Image, g.getWidth() / 2, imagePosY, imageWidth, imageHeight, true);
+        g.drawText(logoFont, "Oh nO", g.getWidth() / 2, LOGO_POS_Y, true);
+        g.drawText(playFont, playText, g.getWidth() / 2, PLAY_POS_Y, true);
+        g.drawText(creditFont, "Un juego copiado a Q42", g.getWidth() / 2, FIRST_CREDIT_POS_Y, true);
+        g.drawText(creditFont, "Creado por Martin Kool", g.getWidth() / 2, SECOND_CREDIT_POS_Y, true);
+        g.drawImage(q42Image, g.getWidth() / 2, IMAGE_POS_Y, IMAGE_WIDTH, IMAGE_HEIGHT, true);
         g.setColor(new Color(0, 0, 0, 255));
-        g.fillCircle(evx, evy, 30);
         if (fadeIn ||fadeOut) {
             g.clear(new Color(255, 255, 255, (int)(255 * sceneAlpha)));
         }
