@@ -198,8 +198,8 @@ public class OhnOLevel extends ApplicationCommon {
             g.setColor(black);
             g.fillCircle(highlightPosX, highlightPosY, highlightRadius);
         }
-        g.save();
         for (int i = 0; i < boardSize; ++i) {
+            g.save();
             g.translate(BOARD_OFFSET_X + cellRadius, BOARD_OFFSET_Y + cellRadius * (i + 1) + (cellRadius + cellSeparation) * i);
             for (int j = 0; j < boardSize; ++j) {
                 renderBoard[i][j].render(g);
