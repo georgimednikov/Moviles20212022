@@ -64,4 +64,8 @@ public class Text {
         newBold_ = newBold;
         elapsedTime_ = 0;
     }
+
+    public void setText(String text) {
+        text_ = text;
+    }
 }

@@ -31,7 +31,7 @@ public class OhnOLevel extends ApplicationCommon {
     private final float FADE_TOTAL_DURATION = 0.25f; //Segundos que duran los fades de la escena
     private final float TIME_AFTER_WIN = 1.5f;
     //Probabilidades
-    private final float BLUE_PROB = 0.6f; //Probabilidad de que una celda sea azul en vez de roja en la solución
+    private final float BLUE_PROB = 0.5f; //Probabilidad de que una celda sea azul en vez de roja en la solución
     private final float FIXED_PROB = 0.5f; //Probabilidad de que una celda sea fija
     //Asignacion dinamica
     private int cellSeparation = -1;
@@ -60,6 +60,7 @@ public class OhnOLevel extends ApplicationCommon {
     private List<CellRender> lockCells = new ArrayList<>();
 
     //Variables relacionadas con pistas
+    private boolean givingFeedback = false;
     private boolean givingHint = false;
     private int highlightRadius = -1; //Asignacion dinamica
     private int highlightPosX = 0;
@@ -101,7 +102,7 @@ public class OhnOLevel extends ApplicationCommon {
         white = new Color(255, 255, 255, 255);
 
         infoFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", black, INFO_REG_SIZE, true);
-        progressFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", darkGrey, 25, false);
+        progressFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", darkGrey, PROGRESS_SIZE, false);
         numberFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", white, cellRadius, false);
 
         infoRegContent = boardSize + " x " + boardSize;
@@ -150,9 +151,9 @@ public class OhnOLevel extends ApplicationCommon {
             }
             for (int i = 0; i < NUM_BUTTONS; ++i) {
                 if (checkCollisionCircle(
-                        BUTTON_OFFSET_X + cellRadius * (i + 1) + buttonSeparation * i,
-                        BUTTON_OFFSET_Y,
-                        cellRadius, event.x, event.y)) {
+                        BUTTON_OFFSET_X + (BUTTON_SIZE / 2) + (BUTTON_SIZE + buttonSeparation) * i,
+                        BUTTON_OFFSET_Y + (BUTTON_SIZE / 2),
+                        BUTTON_SIZE / 2, event.x, event.y)) {
                     switch (i) {
                         case 0:
                             fadeOut = true;
@@ -162,12 +163,12 @@ public class OhnOLevel extends ApplicationCommon {
                             break;
                         case 2:
                             if (givingHint) {
-                                givingHint = false;
+                                givingFeedback = givingHint = false;
                                 infoText.fade(infoRegContent, INFO_REG_SIZE, false);
                                 infoReset = true;
                             }
                             else {
-                                givingHint = true;
+                                givingFeedback = givingHint = true;
                                 Hint hint = giveHint_user();
                                 highlightPosX = BOARD_OFFSET_X + cellRadius * (hint.j + 1) + (cellSeparation + cellRadius) * hint.j;
                                 highlightPosY = BOARD_OFFSET_Y + cellRadius * (hint.i + 1) + (cellSeparation + cellRadius) * hint.i;
@@ -193,12 +194,12 @@ public class OhnOLevel extends ApplicationCommon {
         progressText.render(g);
         g.restore();
 
-        if (givingHint) {
+        if (givingFeedback) {
             g.setColor(black);
             g.fillCircle(highlightPosX, highlightPosY, highlightRadius);
         }
+        g.save();
         for (int i = 0; i < boardSize; ++i) {
-            g.save();
             g.translate(BOARD_OFFSET_X + cellRadius, BOARD_OFFSET_Y + cellRadius * (i + 1) + (cellRadius + cellSeparation) * i);
             for (int j = 0; j < boardSize; ++j) {
                 renderBoard[i][j].render(g);
@@ -264,7 +265,7 @@ public class OhnOLevel extends ApplicationCommon {
     public void changeCell(int x, int y) {
         if (!infoReset) {
             infoText.fade(infoRegContent, INFO_REG_SIZE, false);
-            givingHint = false;
+            givingFeedback = givingHint = false;
             infoReset = true;
         }
         CellLogic cell = board[x][y];
@@ -282,28 +283,28 @@ public class OhnOLevel extends ApplicationCommon {
         }
         if (prevState == CellLogic.STATE.GREY) {
             coloredCells++;
-            progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", PROGRESS_SIZE, false);
+            progressText.setText(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%");
         }
         else if (currState == CellLogic.STATE.GREY) {
             coloredCells--;
-            progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", PROGRESS_SIZE, false);
+            progressText.setText(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%");
         }
     }
 
     private void undoMove() {
         String text = "";
-        givingHint = false;
         if (previousMoves.isEmpty()) {
             text = "No queda nada por hacer";
+            givingFeedback = givingHint = false;
         }
         else {
+            givingFeedback = true;
             CellLogic cell = previousMoves.remove(previousMoves.size() - 1);
             switch (cell.revertState()) {
                 case BLUE:
                     text = "Esta celda a vuelto a azul";
                     break;
                 case GREY:
-                    coloredCells--;
                     text = "Esta celda a vuelto a gris";
                     break;
                 case RED:
@@ -312,13 +313,15 @@ public class OhnOLevel extends ApplicationCommon {
             }
             if (cell.getCurrState() == CellLogic.STATE.GREY) {
                 coloredCells--;
-                progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", PROGRESS_SIZE, false);
+                progressText.setText(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%");
             }
             else if (cell.getPrevState() == CellLogic.STATE.GREY) {
                 coloredCells++;
-                progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", PROGRESS_SIZE, false);
+                progressText.setText(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%");
             }
             renderBoard[cell.getX()][cell.getY()].fade();
+            highlightPosX = BOARD_OFFSET_X + cellRadius * (cell.getY() + 1) + (cellSeparation + cellRadius) * cell.getY();
+            highlightPosY = BOARD_OFFSET_Y + cellRadius * (cell.getX() + 1) + (cellSeparation + cellRadius) * cell.getX();
         }
         infoText.fade(text, INFO_HINT_SIZE, false);
         infoReset = false;
@@ -382,7 +385,7 @@ public class OhnOLevel extends ApplicationCommon {
                             break tries;
                         }
                     }
-                    progressText.fade(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", PROGRESS_SIZE, false);
+                    progressText.setText(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%");
                     return;
                 }
             }
