@@ -7,7 +7,7 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 public class Text {
     private float alpha_;
     private float elapsedTime_;
-    private float fadeDuration_ = 0.1f; //Segundos que duran los fades de las celdas
+    private float fadeDuration_ = 0.2f; //Segundos que duran los fades de las celdas
     private boolean switching_;
     private boolean appearing_ = false;
 
@@ -26,11 +26,10 @@ public class Text {
 
     public void render(Graphics g) {
         if (switching_) {
-            Color color = font_.getColor();
-            int originalAlpha = color.a;
-            color.a = (int)(255 * alpha_);
+            Color c = font_.getColor();
+            font_.setColor(new Color(c.r, c.g, c.b, (int)(255 * alpha_)));
             g.drawText(font_, text_, 0, 0, centered_);
-            color.a = originalAlpha;
+            font_.setColor(c);
         }
         else g.drawText(font_, text_, 0, 0, centered_);
     }
