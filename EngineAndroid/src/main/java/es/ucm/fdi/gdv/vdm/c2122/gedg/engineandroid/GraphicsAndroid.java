@@ -120,8 +120,8 @@ public class GraphicsAndroid extends GraphicsCommon {
         }
         else
             f.getPaint().setTextAlign(Paint.Align.LEFT);
-        f.setRenderSize(toRealY(f.originalSize_));*/
-        canvas_.drawText(text, x, y + height / 2.0f, f.getPaint());
+        f.setRenderSize(toRealY(f.originalSize_));
+        canvas_.drawText(text, x, y + height / 2.0f, f.getPaint());*/
     }
 
     @Override
