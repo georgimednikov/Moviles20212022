@@ -9,18 +9,11 @@ public class ApplicationCommon implements Application{
     }
 
     @Override
-    public boolean init() {
-        return false;
-    }
+    public void init() {}
 
     @Override
     public void update() {}
 
     @Override
     public void render() {}
-
-    @Override
-    public boolean close() {
-        return false;
-    }
 }

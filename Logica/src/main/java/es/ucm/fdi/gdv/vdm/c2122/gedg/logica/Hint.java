@@ -3,8 +3,8 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 import javax.lang.model.type.NullType;
 
 public class Hint {
+    //IDs de las pistas
     public enum HintType {
-
         //Pistas de verdad
         VISIBLE_CELLS_COVERED, // Tiene el numero correcto de celdas, hay que cerrarla
         CANNOT_SURPASS_LIMIT, // Si pusieramos un azul, nos pasariamos del numero
@@ -19,6 +19,7 @@ public class Hint {
         ISOLATED_AND_EMPTY, // La celda es gris pero esta cerrada
     }
 
+    //Textos para cada pista posible
     public static String[] hintText = {
             //                                   |
             "Ve suficientes celdas azules",

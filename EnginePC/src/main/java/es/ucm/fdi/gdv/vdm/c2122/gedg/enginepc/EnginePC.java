@@ -103,6 +103,5 @@ public class EnginePC implements Engine {
             } while(strategy_.contentsLost());
             updateDeltaTime();
         }
-        a_.close();
     }
 }

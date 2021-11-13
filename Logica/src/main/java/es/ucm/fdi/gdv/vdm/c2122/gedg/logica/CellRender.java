@@ -4,24 +4,27 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 
+/**
+ * Clase que renderiza una CellLogic
+ */
 public class CellRender {
 
-    private int cellRadius_;
-
-    private CellLogic cell_;
+    private CellLogic cell_; //Celda logica que representa
     private Color blue_;
     private Color red_;
     private Color grey_;
+    private int cellRadius_; //Radio del renderizado de la celda
 
+    //Variables de posibles renderizados sobre la celda
     private Image lock_;
     private boolean locked_;
-
     private Text number_;
     private boolean numbered_;
 
+    //Variables relacionadas con las animaciones
+    private float FADE_DURATION = 0.1f; //Segundos que duran los fades de las celdas
     private float alpha_;
     private float elapsedTime_;
-    private float fadeDuration_ = 0.1f; //Segundos que duran los fades de las celdas
     private boolean switching_;
 
     public CellRender(CellLogic cell, int radius) {
@@ -51,12 +54,12 @@ public class CellRender {
 
     public void updateCellRender(double deltaTime) {
         if (!switching_) return;
-        if (elapsedTime_ >= fadeDuration_) {
+        if (elapsedTime_ >= FADE_DURATION) {
             switching_ = false;
         }
         else {
             elapsedTime_ += deltaTime;
-            alpha_ = Math.min((elapsedTime_ / fadeDuration_), 1);
+            alpha_ = Math.min((elapsedTime_ / FADE_DURATION), 1);
         }
     }
 
