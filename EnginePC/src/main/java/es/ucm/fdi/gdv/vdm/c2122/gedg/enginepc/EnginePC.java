@@ -86,13 +86,14 @@ public class EnginePC implements Engine {
     public void run() {
         while(running){
             lastFrameTime_ = System.nanoTime();
-            a_.update();
+            Application currApp = a_;
+            currApp.update();
             do {
                 do {
                     Jgraphics_ = strategy_.getDrawGraphics();
                     g_.setGraphics(Jgraphics_);
                     try {
-                        a_.render();
+                        currApp.render();
                     }
                     finally {
                         Jgraphics_.dispose();

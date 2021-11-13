@@ -66,13 +66,15 @@ public class EngineAndroid implements Engine, Runnable {
         }
         while(running_ && graphics_.init());
         lastFrameTime_ = System.nanoTime();
+        Application currApp;
         while(running_) {
-            updateDeltaTime();
-            app_.update();
+            currApp = app_;
+            currApp.update();
             graphics_.lock();
             graphics_.setGamePosition();
-            app_.render();
+            currApp.render();
             graphics_.unlock();
+            updateDeltaTime();
         }
         app_.close();
     }
