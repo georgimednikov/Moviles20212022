@@ -226,11 +226,11 @@ public class OhnOLevel extends ApplicationCommon {
         }
         g.save();
         g.translate(BUTTON_OFFSET_X, BUTTON_OFFSET_Y);
-        g.drawImage(quitImage, 0, 0, BUTTON_SIZE, BUTTON_SIZE, false);
+        g.drawImage(quitImage, 0, 0, BUTTON_SIZE, BUTTON_SIZE, false,1);
         g.translate(BUTTON_SIZE + buttonSeparation, 0);
-        g.drawImage(undoImage, 0, 0, BUTTON_SIZE, BUTTON_SIZE, false);
+        g.drawImage(undoImage, 0, 0, BUTTON_SIZE, BUTTON_SIZE, false,1);
         g.translate(BUTTON_SIZE + buttonSeparation, 0);
-        g.drawImage(hintImage, 0, 0, BUTTON_SIZE, BUTTON_SIZE, false);
+        g.drawImage(hintImage, 0, 0, BUTTON_SIZE, BUTTON_SIZE, false,1);
         g.restore();
 
         //Animacion de la escena si hay

@@ -131,7 +131,7 @@ public class OhnOMenu extends ApplicationCommon {
             }
             g.restore();
         }
-        g.drawImage(quitImage, g.getWidth() / 2, QUIT_POS_Y, BUTTON_SIZE, BUTTON_SIZE, true);
+        g.drawImage(quitImage, g.getWidth() / 2, QUIT_POS_Y, BUTTON_SIZE, BUTTON_SIZE, true,1);
 
         //Realiza las animaciones si hay
         if (fadeIn ||fadeOut) {

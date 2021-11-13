@@ -81,7 +81,7 @@ public class OhnOIntro extends ApplicationCommon {
         g.drawText(playFont, playText, g.getWidth() / 2, PLAY_POS_Y, true);
         g.drawText(creditFont, "Un juego copiado a Q42", g.getWidth() / 2, FIRST_CREDIT_POS_Y, true);
         g.drawText(creditFont, "Creado por Martin Kool", g.getWidth() / 2, SECOND_CREDIT_POS_Y, true);
-        g.drawImage(q42Image, g.getWidth() / 2, IMAGE_POS_Y, IMAGE_WIDTH, IMAGE_HEIGHT, true);
+        g.drawImage(q42Image, g.getWidth() / 2, IMAGE_POS_Y, IMAGE_WIDTH, IMAGE_HEIGHT, true,1);
 
         //Realiza las animaciones si hay
         if (fadeIn ||fadeOut) {

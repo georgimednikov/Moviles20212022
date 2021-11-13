@@ -1,8 +1,11 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.enginepc;
 
 import javax.swing.JFrame;
+
+import java.awt.AlphaComposite;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.image.BufferStrategy;
@@ -69,7 +72,7 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
      * @param centered Se dibuja en base a su centro a su esquina superior izquierda
      */
     @Override
-    public void drawImage(Image image, int x, int y, int width, int height, boolean centered) {
+    public void drawImage(Image image, int x, int y, int width, int height, boolean centered, float opacity) {
         //Se ajustan los valores a las dimensiones reales del canvas
         x = toRealX(x);
         y = toRealY(y);
@@ -81,7 +84,9 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
             verticalOffset = height / 2;
             horizontalOffset = width / 2;
         }
+        ((Graphics2D) g_).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
         g_.drawImage(img.getImage(), x - horizontalOffset, y - verticalOffset, width, height, null);
+        ((Graphics2D) g_).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1));
     }
 
     @Override

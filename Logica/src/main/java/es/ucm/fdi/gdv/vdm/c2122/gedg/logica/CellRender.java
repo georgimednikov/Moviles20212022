@@ -65,7 +65,7 @@ public class CellRender {
             if (type_ == CELL_TYPE.NUMBER)
                 number_.render(g);
             else if (locked_)
-                g.drawImage(lock_, 0, 0, cellRadius_, cellRadius_, true);
+                g.drawImage(lock_, 0, 0, cellRadius_, cellRadius_, true, 1);
         }
     }
 
