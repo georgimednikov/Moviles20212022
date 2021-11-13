@@ -183,7 +183,7 @@ public class OhnOLevel extends ApplicationCommon {
                                 infoText.fade(infoRegContent, INFO_REG_SIZE, false);
                                 infoReset = true;
                             }
-                            else { //Si no se esta dando una pista, se empieza a dar
+                            else if(contMistakes != 0) { //Si no se esta dando una pista, se empieza a dar
                                 givingFeedback = givingHint = true;
                                 Hint hint = giveHint_user();
                                 //Se fijan los valores de la sombra negra
