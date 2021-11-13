@@ -10,11 +10,14 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Application;
 
 public class EngineAndroid implements Engine, Runnable {
 
+    //Variables del thread
     private Thread gameThread_;
     private volatile boolean running_;
 
+    //Variables del deltaTime
     private double lastFrameTime_;
     private double deltaTime_;
+
     private InputAndroid input_;
     private GraphicsAndroid graphics_;
     private Application app_;
@@ -28,6 +31,9 @@ public class EngineAndroid implements Engine, Runnable {
         return graphics_.getSurfaceView();
     }
 
+    /**
+     * Si no esta ya en ejecucion, se crea un nuevo hilo que corre en juego
+     */
     public void onResume() {
         if (!running_) {
             running_ = true;
@@ -36,6 +42,9 @@ public class EngineAndroid implements Engine, Runnable {
         }
     }
 
+    /**
+     * Si esta en ejecucion la pausa, y espera a que el hilo muera
+     */
     public void onPause() {
         if (running_) {
             running_ = false;
@@ -59,25 +68,33 @@ public class EngineAndroid implements Engine, Runnable {
     }
     public double getDeltaTime() { return deltaTime_; }
 
+    /**
+     * Inicializa y ejecuta el bucle principal de la aplicacion
+     */
     @Override
     public void run() {
+        //Solo el hilo debe ejecutar el juego
         if (gameThread_ != Thread.currentThread()) {
             throw new RuntimeException("run() should not be called directly");
         }
-        while(running_ && !graphics_.init());
+        while(running_ && !graphics_.init()); //Se espera a que se inicialicen los graficos
         lastFrameTime_ = System.nanoTime();
         Application currApp;
-        while(running_) {
-            currApp = app_;
+        while(running_) { //Bucle principal
+            currApp = app_; //Se actualiza la aplicacion con la que se trabaja
             updateDeltaTime();
             currApp.update();
-            graphics_.lock();
+            graphics_.lock(); //Se fija un canvas
             graphics_.setGamePosition();
-            currApp.render();
-            graphics_.unlock();
+            currApp.render(); //Se añaden elementos al canvas
+            graphics_.unlock(); //Se desfija y renderiza
         }
     }
 
+    /**
+     * Asigna una nueva aplicacion y la inicializa
+     * El siguiente frame se empieza a actualizar y renderizar
+     */
     @Override
     public void setApplication(Application a) {
         app_ = a;
@@ -92,8 +109,8 @@ public class EngineAndroid implements Engine, Runnable {
     public Input getInput() {
         return input_;
     }
+
+    //No se usa en este caso init
     @Override
     public boolean init() { return true; }
-    @Override
-    public boolean close() { return true; }
 }

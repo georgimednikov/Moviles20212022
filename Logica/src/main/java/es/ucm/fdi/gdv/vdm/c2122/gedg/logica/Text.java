@@ -7,7 +7,7 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 public class Text {
 
     //Variables de animación
-    private float FADE_DURATION = 0.2f; //Segundos que duran los fades de las celdas
+    private float FADE_DURATION = 0.1f; //Segundos que duran los fades de las celdas
     private float alpha_;
     private float elapsedTime_;
     private boolean switching_;

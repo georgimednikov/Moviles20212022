@@ -9,8 +9,8 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
 
 public class FontPC implements Font {
 
-    int originalSize_;
-    private java.awt.Font font;
+    int originalSize_; //Tamaño original de la fuente, NO modificado por el redimensionado de la pantalla
+    private java.awt.Font font; //Fuente de Java
     private Color color_;
 
     public FontPC(String name, Color color, int size, boolean isBold) {
@@ -31,6 +31,8 @@ public class FontPC implements Font {
         return font;
     }
 
+    @Override
+    //Modifica el tamaño de renderizado
     public void setRenderSize(int size) {
         if(font.getSize() == size) return;
         font = font.deriveFont((float) size);

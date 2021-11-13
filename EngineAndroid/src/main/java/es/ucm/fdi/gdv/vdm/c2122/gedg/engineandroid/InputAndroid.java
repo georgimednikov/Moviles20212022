@@ -3,9 +3,6 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.ArrayList;
-import java.util.List;
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.InputCommon;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
@@ -20,7 +17,7 @@ public class InputAndroid extends InputCommon implements View.OnTouchListener {
 
     public InputAndroid(GraphicsAndroid g) {
         g_ = g;
-        g_.getSurfaceView().setOnTouchListener(this);
+        g_.getSurfaceView().setOnTouchListener(this); //Se añade como listener de la aplicacion
     }
 
     @Override

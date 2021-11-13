@@ -6,7 +6,7 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 
 public class ImageAndroid implements Image {
 
-    private Bitmap sprite_;
+    private Bitmap sprite_; //Imagen para Android
     private int width_;
     private int height_;
 
