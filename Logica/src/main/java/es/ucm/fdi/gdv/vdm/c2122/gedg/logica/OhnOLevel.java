@@ -68,12 +68,12 @@ public class OhnOLevel extends ApplicationCommon {
     private CellRender[][] renderBoard; //Tablero de renderizado
     private List<CellLogic> previousMoves = new ArrayList<>(); //Lista de movimientos realizados
     private List<CellLogic> fixedBlueCells = new ArrayList<>(); //Lista de celdas logicas azules fijas
-    private List<CellRender> lockCells = new ArrayList<>(); //Lista de celdas de renderiza con candado
     private List<Text> texts = new ArrayList<>();
 
     //Variables relacionadas con pistas
     private boolean givingFeedback = false;
     private boolean givingHint = false;
+    private boolean lockChanged = false; //Si hay que cambiar el estado de los candados
     private int highlightPosX = 0; //Posicion del circulo negro
     private int highlightPosY = 0;
     private int highlightRadius = -1; //Asignacion dinamica
@@ -154,9 +154,10 @@ public class OhnOLevel extends ApplicationCommon {
                             cellRadius, event.x, event.y)) {
                         if (!board[j][i].isFixed()) //Si no es fija cambia de estado
                             changeCell(j, i);
-                        else //Si no se dice a las rojas fijas que muestren en candado
-                            for (int k = 0; k < lockCells.size(); ++k)
-                                lockCells.get(k).cycleLock();
+                        else {
+                            renderBoard[j][i].animateCell();
+                            lockChanged = true;
+                        }
                         continue next;
                     }
                 }
@@ -202,9 +203,7 @@ public class OhnOLevel extends ApplicationCommon {
         Graphics g = eng_.getGraphics();
 
         g.save();
-        g.translate(g.getWidth() / 2, INFO_POS_Y);
-        infoText.render(g);
-        g.translate(0, PROGRESS_POS_Y - INFO_POS_Y);
+        g.translate(g.getWidth() / 2, PROGRESS_POS_Y);
         progressText.render(g);
         g.restore();
 
@@ -236,6 +235,11 @@ public class OhnOLevel extends ApplicationCommon {
         if (fadeIn ||fadeOut) {
             g.clear(new Color(255, 255, 255, (int)(255 * sceneAlpha)));
         }
+
+        g.save();
+        g.translate(g.getWidth() / 2, INFO_POS_Y);
+        infoText.render(g);
+        g.restore();
     }
 
     /**
@@ -245,8 +249,12 @@ public class OhnOLevel extends ApplicationCommon {
         for (int i = 0; i < boardSize; ++i) {
             for (int j = 0; j < boardSize; ++j) {
                 renderBoard[i][j].updateCellRender(deltaTime);
+                //Si se ha cambiado si deberian mostrarse los candados se le dice a las celdas apropiadas
+                if (lockChanged && renderBoard[i][j].type_ == CellRender.CELL_TYPE.LOCK)
+                    renderBoard[i][j].changeLock();
             }
         }
+        lockChanged = false;
     }
     /**
      * Actualiza los renderers de los textos
@@ -301,7 +309,7 @@ public class OhnOLevel extends ApplicationCommon {
         }
         CellLogic cell = board[x][y];
         cell.changeState();
-        renderBoard[x][y].fade();
+        renderBoard[x][y].animateCell();
         previousMoves.add(cell);
 
         CellLogic.STATE prevState = cell.getPrevState();
@@ -368,7 +376,7 @@ public class OhnOLevel extends ApplicationCommon {
             if (prevState == solState) contMistakes++;
             else if (currState == solState) contMistakes--;
 
-            renderBoard[cell.getX()][cell.getY()].fade();
+            renderBoard[cell.getX()][cell.getY()].animateCell();
             //Asigna una posicion al circulo negro
             highlightPosX = BOARD_OFFSET_X + cellRadius * (cell.getY() + 1) + (cellSeparation + cellRadius) * cell.getY();
             highlightPosY = BOARD_OFFSET_Y + cellRadius * (cell.getX() + 1) + (cellSeparation + cellRadius) * cell.getX();
@@ -451,12 +459,11 @@ public class OhnOLevel extends ApplicationCommon {
                 if (logic.isFixed()) { //Si es fija...
                     //... y roja se añade a la lista de celdas de renderiza con candado
                     if (logic.getCurrState() == CellLogic.STATE.RED) {
-                        lockCells.add(render);
-                        render.setLock(lockImage);
+                        render.setTypeLock(lockImage);
                     }
                     //... y azul entonces enseña su numero
                     else
-                        render.setNumber(new Text(numberFont, ""+logic.getNumber(), true));
+                        render.setTypeNumber(new Text(numberFont, ""+logic.getNumber(), true));
                 }
             }
         }
