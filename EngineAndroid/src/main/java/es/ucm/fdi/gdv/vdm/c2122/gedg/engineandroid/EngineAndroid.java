@@ -76,7 +76,6 @@ public class EngineAndroid implements Engine, Runnable {
             currApp.render();
             graphics_.unlock();
         }
-        app_.close();
     }
 
     @Override

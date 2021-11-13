@@ -157,10 +157,12 @@ public class OhnOLevel extends ApplicationCommon {
                         else //Si no se dice a las rojas fijas que muestren en candado
                             for (int k = 0; k < lockCells.size(); ++k)
                                 lockCells.get(k).cycleLock();
-                        continue next;
+                        System.out.println(j + " " + i);
                     }
                 }
             }
+
+
             //Se comrpueban los botones
             for (int i = 0; i < NUM_BUTTONS; ++i) {
                 if (checkCollisionCircle(

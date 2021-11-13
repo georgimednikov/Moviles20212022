@@ -51,6 +51,10 @@ public abstract class InputCommon implements Input {
             aux = events_.remove(0);
         }
         events_.add(aux);
+        aux.x = 0;
+        aux.y = 0;
+        aux.finger = 0;
+        aux.type = null;
         return aux;
     }
 
