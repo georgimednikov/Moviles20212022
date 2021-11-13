@@ -95,8 +95,8 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
         int rHeight = (int)Math.round(r2D.getHeight());
         int tX = (int)Math.round(r2D.getX());
         int tY = (int)Math.round(r2D.getY());
-        int a = (int)(x - (rWidth / 2) - tX);
-        int b = (int)(y - (rHeight / 2) - tY);
+        int a = x - (rWidth / 2) - tX;
+        int b = y - (rHeight / 2) - tY;
         g_.drawString(text, a, b);
     }
 

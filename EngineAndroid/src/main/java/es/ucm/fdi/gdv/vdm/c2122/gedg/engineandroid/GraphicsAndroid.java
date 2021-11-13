@@ -108,19 +108,10 @@ public class GraphicsAndroid extends GraphicsCommon {
         FontAndroid f = (FontAndroid) font;
         f.setRenderSize(toRealY(f.originalSize_));
         Rect bounds = new Rect(); f.getPaint().getTextBounds(text, 0, text.length(), bounds);
-        if (centered) {
+        if (centered)
             canvas_.drawText(text, x - bounds.exactCenterX(), y - bounds.exactCenterY(), f.getPaint());
-        }
         else
             canvas_.drawText(text, x, y - bounds.exactCenterY(), f.getPaint());
-        /*if (centered) { // TODO: aqui es donde salta
-            f.getPaint().setTextAlign(Paint.Align.CENTER);
-            height = bounds.height();
-        }
-        else
-            f.getPaint().setTextAlign(Paint.Align.LEFT);
-        f.setRenderSize(toRealY(f.originalSize_));
-        canvas_.drawText(text, x, y + height / 2.0f, f.getPaint());*/
     }
 
     @Override

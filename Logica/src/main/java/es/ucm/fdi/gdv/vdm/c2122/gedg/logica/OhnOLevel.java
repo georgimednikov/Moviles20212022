@@ -13,6 +13,14 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
 public class OhnOLevel extends ApplicationCommon {
 
+    //Frases de victoria
+    private final String[] YOU_WIN_TEXTS = new String[] {
+        "ROCAMBOLESCO",
+        "EXCELENTE",
+        "INCREÍBLE",
+        "PARABIÉN"
+    };
+
     //Textos
     private final int INFO_POS_Y = 75;
     private final int PROGRESS_POS_Y = 500;
@@ -277,7 +285,7 @@ public class OhnOLevel extends ApplicationCommon {
         else if (currState == solBoard[x][y].getCurrState()) contMistakes--;
         if(contMistakes == 0) {
             gameOver = true;
-            infoText.fade("ROCAMBOLESCO", INFO_WIN_SIZE, true);
+            infoText.fade(YOU_WIN_TEXTS[rand.nextInt(YOU_WIN_TEXTS.length)], INFO_WIN_SIZE, true);
         }
         if (prevState == CellLogic.STATE.GREY) {
             coloredCells++;

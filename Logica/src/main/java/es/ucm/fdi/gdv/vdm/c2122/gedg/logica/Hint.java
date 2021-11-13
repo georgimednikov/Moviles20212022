@@ -17,20 +17,15 @@ public class Hint {
         //Pistas para casillas no fijas
         BLUE_BUT_ISOLATED, // La celda es azul pero esta cerrada
         ISOLATED_AND_EMPTY, // La celda es gris pero esta cerrada
-
-        //Pistas adicionales que por supuesto vamos a hacer
-        //MONODIRECTIONAL_INCOMPLETE,
-        //JUST_FILL_ALL,
-        //NOT_ENOUGH_BLUES
     }
 
     public static String[] hintText = {
             //                                   |
-            "Está completa, ciérrala",
-            "Superaría el número de otra",
-            "Está en todas las soluciones",
-            "Demasiadas celdas",
-            "Pocas celdas",
+            "Ve suficientes celdas azules",
+            "Superaría el número de otra celda",
+            "Sin esta no vería suficientes azules",
+            "Ve demasiadas celdas azules",
+            "No ve suficientes azules",
             "Es azul sin azules adyacentes",
             "Celda gris rodeada de rojas"
     };

@@ -9,7 +9,7 @@ public class Text {
     private float elapsedTime_;
     private float fadeDuration_ = 0.2f; //Segundos que duran los fades de las celdas
     private boolean switching_;
-    private boolean appearing_ = false;
+    private boolean appearing_;
 
     private boolean centered_;
     private int newSize_;
@@ -28,10 +28,8 @@ public class Text {
         if (switching_) {
             Color c = font_.getColor();
             font_.setColor(new Color(c.r, c.g, c.b, (int)(255 * alpha_)));
-            g.drawText(font_, text_, 0, 0, centered_);
-            font_.setColor(c);
         }
-        else g.drawText(font_, text_, 0, 0, centered_);
+        g.drawText(font_, text_, 0, 0, centered_);
     }
 
     public void updateText(double deltaTime) {
@@ -39,7 +37,6 @@ public class Text {
         if (elapsedTime_ >= fadeDuration_) {
             if (appearing_) {
                 switching_ = false;
-                appearing_ = false;
             }
             else {
                 appearing_ = true;
@@ -58,10 +55,12 @@ public class Text {
 
     public void fade(String newText, int newSize, boolean newBold) {
         switching_ = true;
+        appearing_ = false;
         newText_ = newText;
         newSize_ = newSize;
         newBold_ = newBold;
         elapsedTime_ = 0;
+        alpha_ = 1;
     }
 
     public void setText(String text) {
