@@ -6,38 +6,23 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.InputCommon;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
-public class InputAndroid implements Input, View.OnTouchListener {
+public class InputAndroid extends InputCommon implements View.OnTouchListener {
 
     private GraphicsAndroid g_;
-    private List<TouchEvent> events_;
-    private List<TouchEvent> freeEvents_;
+
     private int startingEvents = 5;
 
     public InputAndroid(GraphicsAndroid g) {
-        events_ = new ArrayList<>();
-        freeEvents_ = new ArrayList<>();
-        for (int i = 0; i < startingEvents; ++i) freeEvents_.add(new TouchEvent());
         g_ = g;
         g_.getSurfaceView().setOnTouchListener(this);
     }
 
-    synchronized private void addEvent(TouchEvent e) {
-        events_.add(e);
-    }
-
-    synchronized private TouchEvent getEvent() {
-        TouchEvent e;
-        if (freeEvents_.isEmpty()) e = new TouchEvent();
-        else {
-            e = freeEvents_.remove(0);
-        }
-        return e;
-    }
     @Override
     public boolean onTouch(View view, MotionEvent e) {
-        TouchEvent event = getEvent();
+        TouchEvent event = addEvent();
         switch (e.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 event.type = TouchEvent.TouchType.PRESS;
@@ -52,11 +37,6 @@ public class InputAndroid implements Input, View.OnTouchListener {
         event.finger = 0; //TODO: Esto esta mal fijo pero no se como va
         event.x = g_.toVirtualX((int)e.getX(event.finger));
         event.y = g_.toVirtualY((int)e.getY(event.finger));
-        addEvent(event);
         return true;
-    }
-    @Override
-    public List<TouchEvent> getTouchEvents() {
-        return events_;
     }
 }

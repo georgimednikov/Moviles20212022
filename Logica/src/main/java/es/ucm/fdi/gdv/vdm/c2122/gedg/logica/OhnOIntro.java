@@ -66,9 +66,7 @@ public class OhnOIntro extends ApplicationCommon {
         if (updateSceneFades()) return;
 
         TouchEvent event;
-        List<TouchEvent> events = eng_.getInput().getTouchEvents();
-        while (!events.isEmpty()) {
-            event = events.remove(0);
+        while ((event = eng_.getInput().getEvent()) != null) {
             if (event.type != TouchEvent.TouchType.PRESS) continue; //TODO: ESTO NO DEBERIA SER ASI (?)
             if (checkCollisionBox(
                     eng_.getGraphics().getWidth() / 2,

@@ -16,11 +16,11 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.*;
 
 public class GraphicsAndroid extends GraphicsCommon {
 
-    private SurfaceView view_;
-    private SurfaceHolder holder_;
-    private Context context_;
+    private final SurfaceView view_;
+    private final SurfaceHolder holder_;
+    private final Context context_;
     private Canvas canvas_;
-    private Paint paint_; //Paint para cada elemento visual que lo utilice
+    private final Paint paint_; //Paint para cada elemento visual que lo utilice
     private int saveCalled = 0; //Contador para que no se pueda llamar mas veces a restore que a save
 
     public GraphicsAndroid(Context context) {
@@ -114,6 +114,14 @@ public class GraphicsAndroid extends GraphicsCommon {
         }
         else
             canvas_.drawText(text, x, y - bounds.exactCenterY(), f.getPaint());
+        /*if (centered) { // TODO: aqui es donde salta
+            f.getPaint().setTextAlign(Paint.Align.CENTER);
+            height = bounds.height();
+        }
+        else
+            f.getPaint().setTextAlign(Paint.Align.LEFT);
+        f.setRenderSize(toRealY(f.originalSize_));*/
+        canvas_.drawText(text, x, y + height / 2.0f, f.getPaint());
     }
 
     @Override

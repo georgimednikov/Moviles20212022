@@ -129,10 +129,8 @@ public class OhnOLevel extends ApplicationCommon {
         if (updateScene(deltaTime)) return;
 
         TouchEvent event;
-        List<TouchEvent> events = eng_.getInput().getTouchEvents();
         next:
-        while (!events.isEmpty()) {
-            event = events.remove(0);
+        while ((event = eng_.getInput().getEvent()) != null) {
             if (event.type != TouchEvent.TouchType.PRESS) continue;
             for (int i = 0; i < boardSize; ++i) {
                 for (int j = 0; j < boardSize; ++j) {
