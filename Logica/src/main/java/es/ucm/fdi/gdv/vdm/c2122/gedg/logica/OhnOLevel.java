@@ -162,6 +162,8 @@ public class OhnOLevel extends ApplicationCommon {
                     }
                 }
             }
+
+
             //Se comrpueban los botones
             for (int i = 0; i < NUM_BUTTONS; ++i) {
                 if (checkCollisionCircle(
