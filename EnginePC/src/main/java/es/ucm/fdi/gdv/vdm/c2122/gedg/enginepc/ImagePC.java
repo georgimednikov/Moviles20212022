@@ -7,8 +7,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 public class ImagePC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image {
-    private java.awt.Image image_;
-    private int x_, y_;
+
+    private java.awt.Image image_; //Imagen para Android
 
     ImagePC(String name) {
         try {
@@ -20,10 +20,6 @@ public class ImagePC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image {
             System.out.println("Current working directory : " + workingDir);
             e.printStackTrace();
         }
-    }
-
-    public void setPos(int x, int y) {
-        x_ = x; y_ = y;
     }
 
     @Override

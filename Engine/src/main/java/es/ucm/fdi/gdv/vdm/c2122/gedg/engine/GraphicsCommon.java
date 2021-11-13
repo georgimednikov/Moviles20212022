@@ -16,15 +16,6 @@ public abstract class GraphicsCommon implements Graphics {
     public int toVirtualX(int a) { return (int)((float)(a - curPosX) * refSizeX / curSizeX ); }
     public int toVirtualY(int a) { return (int)((float)(a - curPosY) * refSizeY / curSizeY ); }
 
-    public void setReferenceSize(int x, int y){
-        refSizeX = x;
-        refSizeY = y;
-    }
-
-    protected void setCanvasSize(int x, int y){
-        curSizeX = x;
-        curSizeY = y;
-    }
 
     protected void adjustToWindowSize(int x, int y){
         if((float)refSizeY / refSizeX > (float)y / x) {

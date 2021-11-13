@@ -6,8 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid.EngineAndroid;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.logica.OhnOIntro;
-import es.ucm.fdi.gdv.vdm.c2122.gedg.logica.OhnOLevel;
-import es.ucm.fdi.gdv.vdm.c2122.gedg.logica.OhnOMenu;
 
 public class MainActivity extends AppCompatActivity {
 
