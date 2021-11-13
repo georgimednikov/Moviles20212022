@@ -125,9 +125,7 @@ public class GraphicsAndroid extends GraphicsCommon {
     }
 
     @Override
-    public int getWidth() {
-        return refSizeX;
-    }
+    public int getWidth() { return refSizeX; }
 
     @Override
     public int getHeight() {
@@ -172,6 +170,6 @@ public class GraphicsAndroid extends GraphicsCommon {
         curSizeX = view_.getWidth();
         curSizeY = view_.getHeight();
         adjustToWindowSize(view_.getWidth(), view_.getHeight());
-        return curSizeX == 0;
+        return curSizeX != 0;
     }
 }

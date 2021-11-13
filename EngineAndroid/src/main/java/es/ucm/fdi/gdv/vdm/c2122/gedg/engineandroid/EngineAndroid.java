@@ -64,17 +64,17 @@ public class EngineAndroid implements Engine, Runnable {
         if (gameThread_ != Thread.currentThread()) {
             throw new RuntimeException("run() should not be called directly");
         }
-        while(running_ && graphics_.init());
+        while(running_ && !graphics_.init());
         lastFrameTime_ = System.nanoTime();
         Application currApp;
         while(running_) {
             currApp = app_;
+            updateDeltaTime();
             currApp.update();
             graphics_.lock();
             graphics_.setGamePosition();
             currApp.render();
             graphics_.unlock();
-            updateDeltaTime();
         }
         app_.close();
     }

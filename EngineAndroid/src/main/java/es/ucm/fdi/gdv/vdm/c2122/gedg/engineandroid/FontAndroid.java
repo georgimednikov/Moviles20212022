@@ -17,8 +17,7 @@ public class FontAndroid implements Font {
         paint_ = new Paint();
         font_ = font; paint_.setTypeface(font_);
         color_ = color; paint_.setARGB(color.a, color.r, color.g, color.b);
-        originalSize_ = size;
-        paint_.setTextSize(size);
+        originalSize_ = size; paint_.setTextSize(size);
         paint_.setFakeBoldText(isBold);
     }
 
