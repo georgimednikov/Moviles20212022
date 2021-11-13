@@ -105,9 +105,10 @@ public class GraphicsAndroid extends GraphicsCommon {
      * @param width Ancho
      * @param height Alto
      * @param centered Se dibuja en base a su centro a su esquina superior izquierda
+     * @param opacity Alpha
      */
     @Override
-    public void drawImage(Image image, int x, int y, int width, int height, boolean centered) {
+    public void drawImage(Image image, int x, int y, int width, int height, boolean centered, float opacity) {
         ImageAndroid img = (ImageAndroid) image;
         //Se ajustan los valores a las dimensiones reales del canvas
         x = toRealX(x);
@@ -121,7 +122,9 @@ public class GraphicsAndroid extends GraphicsCommon {
             dst = new Rect(x - width / 2, y - height / 2, x + width / 2, y + height / 2);
         else
             dst = new Rect(x, y, x + width, y + height);
-        canvas_.drawBitmap(img.getBitmap(), src, dst, paint_);
+        img.getPaint().setAlpha((int)(opacity * 255));
+        canvas_.drawBitmap(img.getBitmap(), src, dst, img.getPaint());
+        img.getPaint().setAlpha(255);
     }
 
     @Override
