@@ -28,8 +28,10 @@ public class Text {
         if (switching_) {
             Color c = font_.getColor();
             font_.setColor(new Color(c.r, c.g, c.b, (int)(255 * alpha_)));
+            g.drawText(font_, text_, 0, 0, centered_);
+            font_.setColor(c);
         }
-        g.drawText(font_, text_, 0, 0, centered_);
+        else g.drawText(font_, text_, 0, 0, centered_);
     }
 
     public void updateText(double deltaTime) {

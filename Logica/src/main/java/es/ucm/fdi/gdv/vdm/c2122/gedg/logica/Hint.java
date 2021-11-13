@@ -22,7 +22,7 @@ public class Hint {
     public static String[] hintText = {
             //                                   |
             "Ve suficientes celdas azules",
-            "Superaría el número de otra celda",
+            "Superaría el número de una celda",
             "Sin esta no vería suficientes azules",
             "Ve demasiadas celdas azules",
             "No ve suficientes azules",
