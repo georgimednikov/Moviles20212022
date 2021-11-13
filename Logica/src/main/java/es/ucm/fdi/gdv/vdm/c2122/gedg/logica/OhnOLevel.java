@@ -306,8 +306,12 @@ public class OhnOLevel extends ApplicationCommon {
 
         CellLogic.STATE prevState = cell.getPrevState();
         CellLogic.STATE currState = cell.getCurrState();
-        if (prevState == solBoard[x][y].getCurrState()) contMistakes++;
-        else if (currState == solBoard[x][y].getCurrState()) contMistakes--;
+        CellLogic.STATE solState = solBoard[x][y].getCurrState();
+
+        //Si se ha cambiado una celda que estaba bien hay un error mas
+        //Si ahora la celda esta bien entonces hay un error menos
+        if (prevState == solState) contMistakes++;
+        else if (currState == solState) contMistakes--;
         if(contMistakes == 0) {
             gameOver = true;
             infoText.fade(YOU_WIN_TEXTS[rand.nextInt(YOU_WIN_TEXTS.length)], INFO_WIN_SIZE, true);
@@ -345,14 +349,25 @@ public class OhnOLevel extends ApplicationCommon {
                     text = "Esta celda a vuelto a rojo";
                     break;
             }
-            if (cell.getCurrState() == CellLogic.STATE.GREY) {
+            CellLogic.STATE currState = cell.getCurrState();
+            CellLogic.STATE prevState = cell.getPrevState();
+            CellLogic.STATE solState = solBoard[cell.getX()][cell.getY()].getCurrState();
+
+            //Si la celda ahora es gris entonces hay una celda coloreada menos y hay que actualizar el progreso
+            //Si la celda era gris entonces hay una celda coloreada mas y hay que actualizar el progreso
+            if (currState == CellLogic.STATE.GREY) {
                 coloredCells--;
                 progressText.setText(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%");
             }
-            else if (cell.getPrevState() == CellLogic.STATE.GREY) {
+            else if (prevState == CellLogic.STATE.GREY) {
                 coloredCells++;
                 progressText.setText(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%");
             }
+            //Si se ha cambiado una celda que estaba bien hay un error mas
+            //Si ahora la celda esta bien entonces hay un error menos
+            if (prevState == solState) contMistakes++;
+            else if (currState == solState) contMistakes--;
+
             renderBoard[cell.getX()][cell.getY()].fade();
             //Asigna una posicion al circulo negro
             highlightPosX = BOARD_OFFSET_X + cellRadius * (cell.getY() + 1) + (cellSeparation + cellRadius) * cell.getY();
