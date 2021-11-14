@@ -39,8 +39,14 @@ public class OhnOLevel extends ApplicationCommon {
     private final int NUM_BUTTONS = 3;
 
     //Constantes de animacion
-    private final float FADE_TOTAL_DURATION = 0.25f; //Segundos que duran los fades de la escena
+    private final float SCENE_FADE_DURATION = 0.25f; //Segundos que duran los fades de la escena
     private final float TIME_AFTER_WIN = 1.5f;
+    private final float CELL_FADE_DURATION = 0.15f;
+    private final float TEXT_FADE_DURATION = 0.2f;
+    private final float BUMP_DURATION = 0.15f;
+    private final float BUMP_EXPAND_PERCENT = 0.1f;
+    private final int NUM_BUMPS = 2;
+
     //Constantes de probabilidad del nivel
     private final float BLUE_PROB = 0.5f; //Probabilidad de que una celda sea azul en vez de roja en la solución
     private final float FIXED_PROB = 0.5f; //Probabilidad de que una celda sea fija
@@ -52,10 +58,8 @@ public class OhnOLevel extends ApplicationCommon {
 
     //Variables de animacion
     private boolean gameOver = false;
-    private boolean fadeIn = true;
     private boolean fadeOut = false;
-    private float currentDuration = 0f; //Segundos que lleva haciendose un fade de la escena
-    private float sceneAlpha = 0f; //Alpha de la escena al hacer fade in/out
+    private float elapsedTime_ = 0f; //Segundos que lleva haciendose un fade de la escena
 
     //Variables de creacion de tablero
     int boardSize;
@@ -66,9 +70,9 @@ public class OhnOLevel extends ApplicationCommon {
     private CellLogic[][] solBoard;
     private CellLogic[][] board; //Tablero logico
     private CellRender[][] renderBoard; //Tablero de renderizado
+    private List<ObjectRender> objects = new ArrayList<>();
     private List<CellLogic> previousMoves = new ArrayList<>(); //Lista de movimientos realizados
     private List<CellLogic> fixedBlueCells = new ArrayList<>(); //Lista de celdas logicas azules fijas
-    private List<TextRender> textRenders = new ArrayList<>();
 
     //Variables relacionadas con pistas
     private boolean givingFeedback = false;
@@ -82,13 +86,13 @@ public class OhnOLevel extends ApplicationCommon {
     private Color black;
     private Color white;
     private Color darkGrey;
-    private Image quitImage;
-    private Image undoImage;
-    private Image hintImage;
-    private Image lockImage;
     private Font infoFont;
     private Font progressFont;
     private Font numberFont;
+    private Image lockImage;
+    private ImageRender quitImage;
+    private ImageRender undoImage;
+    private ImageRender hintImage;
     private TextRender infoTextRender;
     private TextRender progressTextRender;
     private String infoRegContent; //Contenido del texto que ayuda al jugador (cambia mucho de valor)
@@ -120,24 +124,23 @@ public class OhnOLevel extends ApplicationCommon {
         numberFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", white, cellRadius, false);
 
         infoRegContent = boardSize + " x " + boardSize;
-        infoTextRender = new TextRender(infoFont, infoRegContent, true); textRenders.add(infoTextRender);
-        progressTextRender = new TextRender(progressFont, Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", true); textRenders.add(progressTextRender);
+        infoTextRender = new TextRender(infoFont, infoRegContent, true); objects.add(infoTextRender);
+        progressTextRender = new TextRender(progressFont, Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", true); objects.add(progressTextRender);
 
-        quitImage = g.newImage("assets/sprites/close.png");
-        undoImage = g.newImage("assets/sprites/history.png");
-        hintImage = g.newImage("assets/sprites/eye.png");
         lockImage = g.newImage("assets/sprites/lock.png");
+        quitImage = new ImageRender(g.newImage("assets/sprites/close.png"), BUTTON_SIZE, false); objects.add(quitImage);
+        undoImage = new ImageRender(g.newImage("assets/sprites/history.png"), BUTTON_SIZE, false); objects.add(undoImage);
+        hintImage = new ImageRender(g.newImage("assets/sprites/eye.png"), BUTTON_SIZE, false); objects.add(hintImage);
 
         createLogicBoard();
         createRenderBoard();
+        for (int i = 0; i < objects.size(); ++i) objects.get(i).fadeIn(SCENE_FADE_DURATION);
     }
 
     @Override
     public void update() {
         //Se actualizan las entidades con animaciones
         double deltaTime = eng_.getDeltaTime();
-        updateCellRenders(deltaTime);
-        updateTextRenders(deltaTime);
         if (updateScene(deltaTime)) return;
 
         //Se procesan los eventos de input
@@ -155,7 +158,7 @@ public class OhnOLevel extends ApplicationCommon {
                         if (!board[j][i].isFixed()) //Si no es fija cambia de estado
                             changeCell(j, i);
                         else {
-                            renderBoard[j][i].fadeIn();
+                            renderBoard[j][i].bumpCell(BUMP_EXPAND_PERCENT, BUMP_DURATION, NUM_BUMPS);
                             lockChanged = true;
                         }
                         continue next;
@@ -173,6 +176,8 @@ public class OhnOLevel extends ApplicationCommon {
                     switch (i) {
                         case 0:
                             fadeOut = true;
+                            elapsedTime_ = 0;
+                            for (int j = 0; j < objects.size(); ++j) objects.get(j).fadeOut(SCENE_FADE_DURATION);
                             break;
                         case 1:
                             undoMove();
@@ -180,7 +185,7 @@ public class OhnOLevel extends ApplicationCommon {
                         case 2:
                             if (givingHint) { //Si se esta dando una pista, se deja de dar
                                 givingFeedback = givingHint = false;
-                                infoTextRender.fadeNewText(infoRegContent, INFO_REG_SIZE, false);
+                                infoTextRender.fadeNewText(infoRegContent, INFO_REG_SIZE, false, TEXT_FADE_DURATION);
                                 infoReset = true;
                             }
                             else if(contMistakes != 0) { //Si no se esta dando una pista, se empieza a dar
@@ -189,7 +194,7 @@ public class OhnOLevel extends ApplicationCommon {
                                 //Se fijan los valores de la sombra negra
                                 highlightPosX = BOARD_OFFSET_X + cellRadius * (hint.j + 1) + (cellSeparation + cellRadius) * hint.j;
                                 highlightPosY = BOARD_OFFSET_Y + cellRadius * (hint.i + 1) + (cellSeparation + cellRadius) * hint.i;
-                                infoTextRender.fadeNewText(hint.hintText[hint.type.ordinal()], INFO_HINT_SIZE, false);
+                                infoTextRender.fadeNewText(hint.hintText[hint.type.ordinal()], INFO_HINT_SIZE, false, TEXT_FADE_DURATION);
                                 infoReset = false;
                             }
                             break;
@@ -205,7 +210,9 @@ public class OhnOLevel extends ApplicationCommon {
         Graphics g = eng_.getGraphics();
 
         g.save();
-        g.translate(g.getWidth() / 2, PROGRESS_POS_Y);
+        g.translate(g.getWidth() / 2, INFO_POS_Y);
+        infoTextRender.render(g);
+        g.translate(0, PROGRESS_POS_Y - INFO_POS_Y);
         progressTextRender.render(g);
         g.restore();
 
@@ -226,45 +233,12 @@ public class OhnOLevel extends ApplicationCommon {
         }
         g.save();
         g.translate(BUTTON_OFFSET_X, BUTTON_OFFSET_Y);
-        g.drawImage(quitImage, 0, 0, BUTTON_SIZE, BUTTON_SIZE, false,1);
+        quitImage.render(g);
         g.translate(BUTTON_SIZE + buttonSeparation, 0);
-        g.drawImage(undoImage, 0, 0, BUTTON_SIZE, BUTTON_SIZE, false,1);
+        undoImage.render(g);
         g.translate(BUTTON_SIZE + buttonSeparation, 0);
-        g.drawImage(hintImage, 0, 0, BUTTON_SIZE, BUTTON_SIZE, false,1);
+        hintImage.render(g);
         g.restore();
-
-        //Animacion de la escena si hay
-        if (fadeIn ||fadeOut) {
-            g.clear(new Color(255, 255, 255, (int)(255 * sceneAlpha)));
-        }
-
-        g.save();
-        g.translate(g.getWidth() / 2, INFO_POS_Y);
-        infoTextRender.render(g);
-        g.restore();
-    }
-
-    /**
-     * Actualiza los renderers de las celdas
-     */
-    private void updateCellRenders(double deltaTime) {
-        for (int i = 0; i < boardSize; ++i) {
-            for (int j = 0; j < boardSize; ++j) {
-                renderBoard[i][j].updateRender(deltaTime);
-                //Si se ha cambiado si deberian mostrarse los candados se le dice a las celdas apropiadas
-                if (lockChanged && renderBoard[i][j].type_ == CellRender.CELL_TYPE.LOCK)
-                    renderBoard[i][j].changeLock();
-            }
-        }
-        lockChanged = false;
-    }
-    /**
-     * Actualiza los renderers de los textos
-     */
-    private void updateTextRenders(double deltaTime) {
-        for (int i = 0; i < textRenders.size(); ++i) {
-            textRenders.get(i).updateRender(deltaTime);
-        }
     }
 
     /**
@@ -272,31 +246,41 @@ public class OhnOLevel extends ApplicationCommon {
      * @return True si no se deben procesar inputs porque se esta realizando una animacion, false en caso contrario
      */
     private boolean updateScene(double deltaTime) {
+        updateRenders(deltaTime);
         if (gameOver) { //Si se ha acabado el juego se espera antes de empezar a cambiar de escena
-            if (currentDuration >= TIME_AFTER_WIN) {
+            if (elapsedTime_ >= TIME_AFTER_WIN) {
                 gameOver = false;
                 fadeOut = true; //Flag de transicion
-                currentDuration = 0;
+                elapsedTime_ = 0;
+                for (int i = 0; i < objects.size(); ++i)
+                    if (objects.get(i) != infoTextRender) objects.get(i).fadeOut(SCENE_FADE_DURATION);
             }
-            else currentDuration += deltaTime;
+            else elapsedTime_ += deltaTime;
         }
-        if (fadeIn || fadeOut) {
-            if (currentDuration >= FADE_TOTAL_DURATION) {
-                currentDuration = 0;
-                if (fadeIn) fadeIn = false; //Si estaba apareciendo, se acabo la animacion
-                else if (fadeOut) { //Si estaba desapareciendo se le dice al motor que cambie de escena
-                    OhnOMenu app = new OhnOMenu();
-                    eng_.setApplication(app);
-                }
+        if (fadeOut) {
+            if (elapsedTime_ >= SCENE_FADE_DURATION) {
+                OhnOMenu app = new OhnOMenu();
+                eng_.setApplication(app);
             }
-            else { //Avanza el tiempo y el alpha de la escena
-                currentDuration += deltaTime;
-                if (fadeIn) sceneAlpha = 1 - Math.min((currentDuration / FADE_TOTAL_DURATION), 1);
-                else if (fadeOut) sceneAlpha = Math.min((currentDuration / FADE_TOTAL_DURATION), 1);
-                return true;
-            }
+            else elapsedTime_ += deltaTime;
         }
         return false;
+    }
+    /**
+     * Actualiza los renderers
+     */
+    private void updateRenders(double deltaTime) {
+        for (int i = 0; i < objects.size(); ++i)
+            objects.get(i).updateRender(deltaTime);
+        //Si se ha cambiado si deberian mostrarse los candados se le dice a las celdas apropiadas
+        if (!lockChanged) return;
+        for (int i = 0; i < boardSize; ++i) {
+            for (int j = 0; j < boardSize; ++j) {
+                if (lockChanged && renderBoard[i][j].type_ == CellRender.CELL_TYPE.LOCK)
+                    renderBoard[i][j].changeLock();
+            }
+        }
+        lockChanged = false;
     }
 
     //region Board Methods
@@ -305,13 +289,13 @@ public class OhnOLevel extends ApplicationCommon {
      */
     public void changeCell(int x, int y) {
         if (!infoReset) {
-            infoTextRender.fadeNewText(infoRegContent, INFO_REG_SIZE, false);
+            infoTextRender.fadeNewText(infoRegContent, INFO_REG_SIZE, false, TEXT_FADE_DURATION);
             givingFeedback = givingHint = false;
             infoReset = true;
         }
         CellLogic cell = board[x][y];
         cell.changeState();
-        renderBoard[x][y].fadeIn();
+        renderBoard[x][y].transitionCell(CELL_FADE_DURATION);
         previousMoves.add(cell);
 
         CellLogic.STATE prevState = cell.getPrevState();
@@ -324,7 +308,7 @@ public class OhnOLevel extends ApplicationCommon {
         else if (currState == solState) contMistakes--;
         if(contMistakes == 0) {
             gameOver = true;
-            infoTextRender.fadeNewText(YOU_WIN_TEXTS[rand.nextInt(YOU_WIN_TEXTS.length)], INFO_WIN_SIZE, true);
+            infoTextRender.fadeNewText(YOU_WIN_TEXTS[rand.nextInt(YOU_WIN_TEXTS.length)], INFO_WIN_SIZE, true, TEXT_FADE_DURATION);
         }
         if (prevState == CellLogic.STATE.GREY) {
             coloredCells++;
@@ -378,12 +362,12 @@ public class OhnOLevel extends ApplicationCommon {
             if (prevState == solState) contMistakes++;
             else if (currState == solState) contMistakes--;
 
-            renderBoard[cell.getX()][cell.getY()].fadeIn();
+            renderBoard[cell.getX()][cell.getY()].transitionCell(CELL_FADE_DURATION);
             //Asigna una posicion al circulo negro
             highlightPosX = BOARD_OFFSET_X + cellRadius * (cell.getY() + 1) + (cellSeparation + cellRadius) * cell.getY();
             highlightPosY = BOARD_OFFSET_Y + cellRadius * (cell.getX() + 1) + (cellSeparation + cellRadius) * cell.getX();
         }
-        infoTextRender.fadeNewText(text, INFO_HINT_SIZE, false);
+        infoTextRender.fadeNewText(text, INFO_HINT_SIZE, false, TEXT_FADE_DURATION);
         infoReset = false;
     }
 
@@ -458,14 +442,15 @@ public class OhnOLevel extends ApplicationCommon {
             for (int j = 0; j < boardSize; ++j) {
                 CellLogic logic = board[i][j];
                 CellRender render = renderBoard[i][j] = new CellRender(logic, cellRadius);
+                objects.add(render);
                 if (logic.isFixed()) { //Si es fija...
                     //... y roja se añade a la lista de celdas de renderiza con candado
                     if (logic.getCurrState() == CellLogic.STATE.RED) {
-                        render.setTypeLock(lockImage);
+                        render.setTypeLock(lockImage, BUMP_DURATION * NUM_BUMPS);
                     }
                     //... y azul entonces enseña su numero
                     else
-                        render.setTypeNumber(numberFont, ""+logic.getNumber());
+                        render.setTypeNumber(numberFont, ""+logic.getNumber(), BUMP_DURATION * NUM_BUMPS);
                 }
             }
         }

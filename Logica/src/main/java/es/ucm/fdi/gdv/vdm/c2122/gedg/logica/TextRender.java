@@ -6,9 +6,7 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 
 public class TextRender extends ObjectRender {
 
-    //Variables de animación
-    private float FADE_DURATION = 0.2f; //Segundos que duran los fades de las celdas
-
+    private boolean reappear_;
     private boolean centered_;
     private boolean newBold_; //Nuevo valor bold
     private int newSize_; //Nuevo valor size
@@ -24,7 +22,7 @@ public class TextRender extends ObjectRender {
         font_ = font;
         text_ = text;
         centered_ = centered;
-        animationDur_ = FADE_DURATION;
+        reappear_ = false;
     }
 
     /**
@@ -33,11 +31,12 @@ public class TextRender extends ObjectRender {
      * @param newSize Nuevo tamaño
      * @param newBold Si pasa a ser negrita o no
      */
-    public void fadeNewText(String newText, int newSize, boolean newBold) {
+    public void fadeNewText(String newText, int newSize, boolean newBold, float dur) {
         newText_ = newText;
         newSize_ = newSize;
         newBold_ = newBold;
-        fadeOut();
+        reappear_ = true;
+        fadeOut(dur);
     }
 
     /**
@@ -55,13 +54,10 @@ public class TextRender extends ObjectRender {
     @Override
     public void render(Graphics g) {
         if (alpha_ <= 0) return;
-        if (animated_) {
-            Color c = font_.getColor();
-            font_.setColor(new Color(c.r, c.g, c.b, (int)(255 * alpha_))); //Transiciona el alpha
-            g.drawText(font_, text_, 0, 0, centered_);
-            font_.setColor(c); //Restaura el valor original del color de la fuente
-        }
-        else g.drawText(font_, text_, 0, 0, centered_);
+        Color c = font_.getColor();
+        font_.setColor(new Color(c.r, c.g, c.b, (int)(255 * alpha_))); //Transiciona el alpha
+        g.drawText(font_, text_, 0, 0, centered_);
+        font_.setColor(c); //Restaura el valor original del color de la fuente
     }
 
     /**
@@ -69,9 +65,10 @@ public class TextRender extends ObjectRender {
      */
     @Override
     protected void onFadeOutEnd() {
+        if (!reappear_) return;
         font_.setSize(newSize_);
         font_.setBold(newBold_);
         text_ = newText_;
-        fadeIn(); //Tras cambiar los valores aparecen con un fade-in
+        fadeIn(fadeDur_); //Tras cambiar los valores aparecen con un fade-in
     }
 }

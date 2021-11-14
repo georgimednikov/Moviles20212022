@@ -9,24 +9,23 @@ public class ImageRender extends ObjectRender {
 
     private Image lock_;
     private int size_;
+    private boolean centered_;
 
-    public ImageRender(Image lock, int size) {
-        this(lock, size, true);
+    public ImageRender(Image lock, int size, boolean centered) {
+        this(lock, size, centered, true);
     }
-    public ImageRender(Image lock, int size, boolean visible) {
+    public ImageRender(Image lock, int size, boolean centered, boolean visible) {
         super(visible);
         lock_ = lock;
         size_ = size;
-        elapsedTime_ = 0;
-        animationDur_ = FADE_DURATION;
+        centered_ = centered;
+        elapsedFade_ = 0;
+        fadeDur_ = FADE_DURATION;
     }
 
     @Override
     public void render(Graphics g) {
         if (alpha_ <= 0) return;
-        if (animated_)
-            g.drawImage(lock_, 0, 0, size_, size_, true, alpha_);
-        else
-            g.drawImage(lock_, 0, 0, size_, size_, true, 1);
+        g.drawImage(lock_, 0, 0, size_, size_, centered_, alpha_);
     }
 }
