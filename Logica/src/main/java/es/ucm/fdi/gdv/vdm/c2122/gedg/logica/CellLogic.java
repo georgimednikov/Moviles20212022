@@ -37,7 +37,7 @@ public class CellLogic {
      */
     public void resetCell(){
         number_ = -1;
-        currState_ = STATE.GREY;
+        currState_ = prevState_ = STATE.GREY;
         fixed_ = false;
     }
 
