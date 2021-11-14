@@ -8,16 +8,18 @@ public class ImageRender extends ObjectRender {
     private final float FADE_DURATION = 0.2f; //Segundos que duran los fades
 
     private Image lock_;
-    private int size_;
+    private int width_;
+    private int height_;
     private boolean centered_;
 
-    public ImageRender(Image lock, int size, boolean centered) {
-        this(lock, size, centered, true);
+    public ImageRender(Image lock, int width, int height, boolean centered) {
+        this(lock, width, height, centered, true);
     }
-    public ImageRender(Image lock, int size, boolean centered, boolean visible) {
+    public ImageRender(Image lock, int width, int height, boolean centered, boolean visible) {
         super(visible);
         lock_ = lock;
-        size_ = size;
+        width_ = width;
+        height_ = height;
         centered_ = centered;
         elapsedFade_ = 0;
         fadeDur_ = FADE_DURATION;
@@ -26,6 +28,6 @@ public class ImageRender extends ObjectRender {
     @Override
     public void render(Graphics g) {
         if (alpha_ <= 0) return;
-        g.drawImage(lock_, 0, 0, size_, size_, centered_, alpha_);
+        g.drawImage(lock_, 0, 0, width_, height_, centered_, alpha_);
     }
 }

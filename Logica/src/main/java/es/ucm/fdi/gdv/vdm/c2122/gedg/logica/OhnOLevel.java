@@ -59,7 +59,7 @@ public class OhnOLevel extends ApplicationCommon {
     //Variables de animacion
     private boolean gameOver = false;
     private boolean fadeOut = false;
-    private float elapsedTime_ = 0f; //Segundos que lleva haciendose un fade de la escena
+    private float elapsedTime = 0f; //Segundos que lleva haciendose un fade de la escena
 
     //Variables de creacion de tablero
     int boardSize;
@@ -128,9 +128,9 @@ public class OhnOLevel extends ApplicationCommon {
         progressTextRender = new TextRender(progressFont, Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", true); objects.add(progressTextRender);
 
         lockImage = g.newImage("assets/sprites/lock.png");
-        quitImage = new ImageRender(g.newImage("assets/sprites/close.png"), BUTTON_SIZE, false); objects.add(quitImage);
-        undoImage = new ImageRender(g.newImage("assets/sprites/history.png"), BUTTON_SIZE, false); objects.add(undoImage);
-        hintImage = new ImageRender(g.newImage("assets/sprites/eye.png"), BUTTON_SIZE, false); objects.add(hintImage);
+        quitImage = new ImageRender(g.newImage("assets/sprites/close.png"), BUTTON_SIZE, BUTTON_SIZE, false); objects.add(quitImage);
+        undoImage = new ImageRender(g.newImage("assets/sprites/history.png"), BUTTON_SIZE, BUTTON_SIZE, false); objects.add(undoImage);
+        hintImage = new ImageRender(g.newImage("assets/sprites/eye.png"), BUTTON_SIZE, BUTTON_SIZE, false); objects.add(hintImage);
 
         createLogicBoard();
         createRenderBoard();
@@ -140,8 +140,7 @@ public class OhnOLevel extends ApplicationCommon {
     @Override
     public void update() {
         //Se actualizan las entidades con animaciones
-        double deltaTime = eng_.getDeltaTime();
-        if (updateScene(deltaTime)) return;
+        if (updateScene(eng_.getDeltaTime())) return;
 
         //Se procesan los eventos de input
         TouchEvent event;
@@ -176,7 +175,7 @@ public class OhnOLevel extends ApplicationCommon {
                     switch (i) {
                         case 0:
                             fadeOut = true;
-                            elapsedTime_ = 0;
+                            elapsedTime = 0;
                             for (int j = 0; j < objects.size(); ++j) objects.get(j).fadeOut(SCENE_FADE_DURATION);
                             break;
                         case 1:
@@ -248,21 +247,21 @@ public class OhnOLevel extends ApplicationCommon {
     private boolean updateScene(double deltaTime) {
         updateRenders(deltaTime);
         if (gameOver) { //Si se ha acabado el juego se espera antes de empezar a cambiar de escena
-            if (elapsedTime_ >= TIME_AFTER_WIN) {
+            if (elapsedTime >= TIME_AFTER_WIN) {
                 gameOver = false;
                 fadeOut = true; //Flag de transicion
-                elapsedTime_ = 0;
+                elapsedTime = 0;
                 for (int i = 0; i < objects.size(); ++i)
                     if (objects.get(i) != infoTextRender) objects.get(i).fadeOut(SCENE_FADE_DURATION);
             }
-            else elapsedTime_ += deltaTime;
+            else elapsedTime += deltaTime;
         }
         if (fadeOut) {
-            if (elapsedTime_ >= SCENE_FADE_DURATION) {
+            if (elapsedTime >= SCENE_FADE_DURATION) {
                 OhnOMenu app = new OhnOMenu();
                 eng_.setApplication(app);
             }
-            else elapsedTime_ += deltaTime;
+            else elapsedTime += deltaTime;
         }
         return false;
     }

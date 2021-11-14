@@ -46,6 +46,8 @@ public class TextRender extends ObjectRender {
     public void setText(String text) {
         text_ = text;
     }
+    public String getText() { return text_; }
+    public Font getFont() { return font_; }
 
     /**
      * Renderiza el texto con los valores previamente establecidos

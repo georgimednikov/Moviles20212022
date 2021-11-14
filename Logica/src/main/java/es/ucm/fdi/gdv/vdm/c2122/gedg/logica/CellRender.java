@@ -138,7 +138,7 @@ public class CellRender extends ObjectRender {
      */
     public void setTypeLock(Image lock, float animDur) {
         type_ = CELL_TYPE.LOCK;
-        object_ = new ImageRender(lock, cellRadius_, true, false);
+        object_ = new ImageRender(lock, cellRadius_, cellRadius_, true, false);
         object_.fadeDur_ = animDur;
         object_.maxAlpha_ = 0.3f;
     }

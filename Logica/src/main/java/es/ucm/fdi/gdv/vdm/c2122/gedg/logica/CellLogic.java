@@ -103,6 +103,7 @@ public class CellLogic {
     public void setNumber(int number){
         number_ = number;
     }
+    public void setCurrState(STATE state) { currState_ = state; }
 
     public int getX() { return x_; }
     public int getY() { return y_; }
