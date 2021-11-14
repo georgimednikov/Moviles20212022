@@ -3,6 +3,7 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 import android.content.Context;
 import android.view.SurfaceView;
 
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.ApplicationCommon;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
@@ -98,7 +99,7 @@ public class EngineAndroid implements Engine, Runnable {
     @Override
     public void setApplication(Application a) {
         app_ = a;
-        a.setEngine(this);
+        ((ApplicationCommon)a).setEngine(this);
         app_.init();
     }
     @Override
