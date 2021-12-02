@@ -5,17 +5,29 @@ using UnityEngine;
 public class BoardManager : MonoBehaviour
 {
     [SerializeField]
-    GameObject tile;
+    GameObject tilePref;
 
-    int[,] board;
-    int numPipes;
+    Tile[,] board;
+    Map map;
 
-    public void SetBoardSize(int sizeX, int sizeY)
+    public void SetBoard(int sizeX, int sizeY)
     {
-        board = new int[sizeY == 0 ? sizeX : sizeY, sizeX];
+        sizeY = sizeY == 0 ? sizeX : sizeY;
+        map.Width = sizeX;
+        map.Height = sizeY;
+        board = new Tile[sizeX, sizeY];
+        for (int i = 0; i < board.GetLength(0); i++)
+        {
+            for (int j = 0; j < board.GetLength(1); j++)
+            {
+                GameObject tile = Instantiate(tilePref, new Vector2(i, j), Quaternion.identity, transform);
+                board[i, j] = tile.GetComponent<Tile>();
+            }
+        }
     }
-    public void SetNumPipes(int n)
+
+    public void LoadMap(string[] flows)
     {
-        numPipes = n;
+        map.LoadMap(flows);
     }
 }
