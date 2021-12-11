@@ -7,6 +7,7 @@ public class Flow
     List<Vector2Int> positions;
     LinkedList<Vector2Int> solution;
     bool hasBeenModified = false;
+    bool solved = false;
     bool completed = false;
 
     public Flow(Vector2Int[] sol)
@@ -14,9 +15,10 @@ public class Flow
         positions = new List<Vector2Int>();
         solution = new LinkedList<Vector2Int>(sol);
     }
-    public bool IsComplete()
+    public bool IsSolved()
     {
-        if (!hasBeenModified) return completed;
+        if (!completed) return false;
+        if (!hasBeenModified) return solved;
         bool inversed = false;
         LinkedListNode<Vector2Int> node;
 
@@ -37,19 +39,23 @@ public class Flow
             }
         }
         if (end)
-            completed = false;
-        else completed = true;
+            solved = false;
+        else solved = true;
         hasBeenModified = false;
-        return completed;
+        return solved;
     }
 
     public List<Change> StartNewFlow(Vector2Int flow)
     {
         List<Change> changes = new List<Change>();
         hasBeenModified = true;
+        completed = false;
         if (positions.Count > 0)
         {
-
+            Change change = new Change();
+            change.action = Change.ChangeType.RESET;
+            change.pos = flow;
+            changes.Add(change);
         }
         positions.Add(flow);
         return changes;
@@ -58,6 +64,7 @@ public class Flow
     public List<Change> AddFlow(Vector2Int flow)
     {
         List<Change> changes = new List<Change>();
+        if (completed || flow == positions[positions.Count - 1]) return changes;
         hasBeenModified = true;
         for (int i = 0; i < positions.Count; i++)
         {
@@ -73,12 +80,13 @@ public class Flow
                 return changes;
             }
         }
+        if (!HasAdjacent(flow)) return changes;
         positions.Add(flow);
+        if (IsEnd(flow)) completed = true;
         Change change = new Change(), opposite = new Change();
         change.action = opposite.action = Change.ChangeType.ADD;
         change.pos = flow;
         opposite.pos = positions[positions.Count - 2];
-
         change.dir = VectorsToDir(change.pos, opposite.pos, ref opposite.dir);
 
         changes.Add(change);
@@ -89,16 +97,24 @@ public class Flow
     public Vector2Int GetFirstEnd() { return solution.First.Value; }
     public Vector2Int GetLastEnd() { return solution.Last.Value; }
 
-    public bool beingTouched(Vector2Int pos)
+    public bool BeingTouched(Vector2Int pos)
     {
         foreach (var p in positions)
         {
             if (p == pos) return true;
         }
-        if (pos == GetFirstEnd()) return true;
-        if (pos == GetLastEnd()) return true;
-
+        if (IsEnd(pos)) return true;
         return false;
+    }
+
+    bool IsEnd(Vector2Int pos)
+    {
+        return pos == GetFirstEnd() || pos == GetLastEnd();
+    }
+
+    bool HasAdjacent(Vector2Int pos)
+    {
+        return (pos - positions[positions.Count - 1]).magnitude == 1;
     }
 
     Direction VectorsToDir(Vector2Int start, Vector2Int end, ref Direction opposite)

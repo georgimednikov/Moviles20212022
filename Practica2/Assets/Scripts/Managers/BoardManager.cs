@@ -40,9 +40,12 @@ public class BoardManager : MonoBehaviour
 
     public void TouchedHere(Vector3 pos)
     {
-        var changes = map.TouchedHere(new Vector2Int((int)(pos.x + (map.Width) / 2.0f), (int)(pos.y + (map.Height) / 2.0f)));// + transform.position.y)));
+        Vector2Int boardPos = new Vector2Int(Mathf.FloorToInt(pos.x + (map.Width) / 2.0f), Mathf.FloorToInt(pos.y + (map.Height) / 2.0f));
+        Debug.Log(boardPos);
+        if (boardPos.x < 0 || boardPos.x >= map.Width || boardPos.y < 0 || boardPos.y >= map.Height) return;
+        var changes = map.TouchedHere(boardPos);// + transform.position.y)));
 
-        Debug.Log(changes);
+        //Debug.Log(changes);
         if (changes == null) return;
         foreach (var change in changes)
         {
@@ -65,9 +68,11 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public void Untouched()
+    public void StoppedTouching()
     {
-        map.Untouched();
+        map.StoppedTouching();
+        if (map.IsSolved())
+            ;
     }
 
     void ArrangeInScreen()

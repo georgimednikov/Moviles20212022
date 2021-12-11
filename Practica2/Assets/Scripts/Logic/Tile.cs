@@ -59,7 +59,6 @@ public class Tile : MonoBehaviour
 
     public void Reset()
     {
-        flowEnd.SetActive(false);
         looseEnd.SetActive(false);
         corner.SetActive(false);
         tick.SetActive(false);

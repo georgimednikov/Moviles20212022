@@ -13,11 +13,11 @@ public class Map
     public int Width { get; set; }
     public int Height { get; set; }
 
-    public bool IsComplete()
+    public bool IsSolved()
     {
         foreach (Flow f in flows)
         {
-            if (!f.IsComplete()) return false;
+            if (!f.IsSolved()) return false;
         }
         return true;
     }
@@ -39,14 +39,17 @@ public class Map
     public List<Change> TouchedHere(Vector2Int pos)
     {
         Debug.Log(pos);
+        List<Change> changes = new List<Change>();
         if (touchingFlow == null)
         {
-            GetFlow(pos);
-            return touchingFlow.StartNewFlow(pos);
+            if (GetFlow(pos)) return touchingFlow.StartNewFlow(pos);
+            return changes;
         }
         else
         {
-            List<Change> changes = touchingFlow.AddFlow(pos);
+            for (int i = 0; i < GetFlowEnds().Length; i++)
+                if (pos == GetFlowEnds()[i] && touchingIndex != i / 2) return changes;
+            changes = touchingFlow.AddFlow(pos);
             for (int i = 0; i < changes.Count; i++)
             {
                 changes[i].index = touchingIndex;
@@ -55,34 +58,37 @@ public class Map
         }
     }
 
-    public void Untouched()
+    public void StoppedTouching()
     {
         touchingFlow = null;
     }
 
-    private void GetFlow(Vector2Int pos)
+    private bool GetFlow(Vector2Int pos)
     {
         int i = 0;
         foreach (var flow in flows)
         {
-            if (flow.beingTouched(pos))
+            if (flow.BeingTouched(pos))
             {
                 touchingFlow = flow;
                 touchingIndex = i;
+                return true;
             }
             i++;
         }
+        return false;
     }
 
     public Vector2Int[] GetFlowEnds()
     {
-        Vector2Int[] ends = new Vector2Int[flows.Length * 2];
+        if (flowEnds != null) return flowEnds;
+        flowEnds = new Vector2Int[flows.Length * 2];
         int i = 0;
         foreach (Flow f in flows)
         {
-            ends[i++] = f.GetFirstEnd();
-            ends[i++] = f.GetLastEnd();
+            flowEnds[i++] = f.GetFirstEnd();
+            flowEnds[i++] = f.GetLastEnd();
         }
-        return ends;
+        return flowEnds;
     }
 }

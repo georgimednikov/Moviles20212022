@@ -13,6 +13,6 @@ public class InputManager : MonoBehaviour
             GameManager.instance.LM.BM.TouchedHere(pos);
         }
         else if (Input.GetButtonUp("Fire1"))
-            GameManager.instance.LM.BM.Untouched();
+            GameManager.instance.LM.BM.StoppedTouching();
     }
 }
