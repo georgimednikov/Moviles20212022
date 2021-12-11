@@ -7,10 +7,9 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    [SerializeField]
-    LevelManager LM;
-    [SerializeField]
-    LevelPack[] levelPacks;
+    [SerializeField] public SkinPack skinPack;
+    [SerializeField] private LevelPack[] levelPacks;
+    [SerializeField] private LevelManager LM;
 
     private LevelPack nextPack;
     private string nextLevel;
@@ -20,17 +19,21 @@ public class GameManager : MonoBehaviour
         if (instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(this.gameObject);
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
             if (LM != null)
             {
                 instance.LM = LM;
-                LM.LoadLevel(instance.nextLevel);
             }
-            Destroy(this.gameObject);
+            Destroy(gameObject);
         }
+#if UNITY_EDITOR
+        nextPack = levelPacks[0];
+        nextLevel = nextPack.levelMap.text.Split('\n')[0];
+#endif
+        instance.LM.LoadLevel(instance.nextLevel);
     }
 
     /// <summary>
@@ -49,5 +52,13 @@ public class GameManager : MonoBehaviour
     {
         nextLevel = nextPack.levelMap.text.Split('\n')[level];
         SceneManager.LoadScene("GameScene");
+    }
+
+    /// <summary>
+    /// Se le comunica al Game Manager un nuevo skin pack que usar
+    /// </summary>
+    public void ChangeSkin(SkinPack skin)
+    {
+        skinPack = skin;
     }
 }

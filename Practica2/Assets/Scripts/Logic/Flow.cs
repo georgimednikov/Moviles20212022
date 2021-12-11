@@ -55,4 +55,7 @@ public class Flow
         }
         positions.Add(flow);
     }
+
+    public Vector2Int GetFirstEnd() { return solution.First.Value; }
+    public Vector2Int GetLastEnd() { return solution.Last.Value; }
 }

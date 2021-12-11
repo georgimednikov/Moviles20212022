@@ -2,12 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.UI;
 
 public class LevelManager : MonoBehaviour
 {
-    [SerializeField]
-    BoardManager BM;
+    [SerializeField] BoardManager BM;
     int currentLevel;
+
+    [SerializeField] RectTransform topRect;
+    [SerializeField] RectTransform botRect;
+    [SerializeField] CanvasScaler canvasScaler;
 
     // TODO: comprobacion de errores
     public bool LoadLevel(string level)
@@ -19,6 +23,7 @@ public class LevelManager : MonoBehaviour
         sizeY = int.Parse(levelInfo[1]); //Si es 0 es el valor inutil y no hay segunda dimension
         currentLevel = int.Parse(levelInfo[levelInfo.Length - 2]);
         int numPipes = int.Parse(levelInfo[levelInfo.Length - 1]);
+        BM.SetUIHeight(topRect.rect.height, botRect.rect.height, canvasScaler.referenceResolution.x);
         BM.SetBoard(sizeX, sizeY);
         BM.LoadMap(levelRows.Skip(1).ToArray()); // Quita el primer valor de levelRows que es la info del nivel y no un flow
         return true;

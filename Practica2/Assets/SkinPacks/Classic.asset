@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dac65684ff3248542aafda5d70c9d15f, type: 3}
+  m_Name: Classic
+  m_EditorClassIdentifier: 
+  skinName: Classic
+  colors:
+  - serializedVersion: 2
+    rgba: 4278190335
+  - serializedVersion: 2
+    rgba: 4278226176
+  - serializedVersion: 2
+    rgba: 4294846732
+  - serializedVersion: 2
+    rgba: 4278247658
+  - serializedVersion: 2
+    rgba: 4278225403
+  - serializedVersion: 2
+    rgba: 4294967040
+  - serializedVersion: 2
+    rgba: 4291365631
+  - serializedVersion: 2
+    rgba: 4280953509
+  - serializedVersion: 2
+    rgba: 4286578816
+  - serializedVersion: 2
+    rgba: 4294967295
+  - serializedVersion: 2
+    rgba: 4290617247
+  - serializedVersion: 2
+    rgba: 4278255360
+  - serializedVersion: 2
+    rgba: 4283533985
+  - serializedVersion: 2
+    rgba: 4288616713
+  - serializedVersion: 2
+    rgba: 4286611456
+  - serializedVersion: 2
+    rgba: 4293688574
