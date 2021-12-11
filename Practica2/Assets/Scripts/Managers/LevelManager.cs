@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class LevelManager : MonoBehaviour
 {
-    [SerializeField] BoardManager BM;
+    [SerializeField] public BoardManager BM;
     int currentLevel;
 
     [SerializeField] RectTransform topRect;

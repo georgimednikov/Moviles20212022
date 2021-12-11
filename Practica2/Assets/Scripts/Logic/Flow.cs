@@ -37,25 +37,89 @@ public class Flow
             }
         }
         if (end)
-            completed = false;  
+            completed = false;
         else completed = true;
         hasBeenModified = false;
         return completed;
     }
-    public void AddFlow(Vector2Int flow)
+
+    public List<Change> StartNewFlow(Vector2Int flow)
     {
+        List<Change> changes = new List<Change>();
+        hasBeenModified = true;
+        if (positions.Count > 0)
+        {
+
+        }
+        positions.Add(flow);
+        return changes;
+    }
+
+    public List<Change> AddFlow(Vector2Int flow)
+    {
+        List<Change> changes = new List<Change>();
         hasBeenModified = true;
         for (int i = 0; i < positions.Count; i++)
         {
             if (positions[i] == flow)
             {
-                positions.RemoveRange(i + 1, positions.Count - (i + 1));
-                return;
+                for (int j = i; j < positions.Count - i; j++)
+                {
+                    Change resetChange = new Change();
+                    resetChange.action = Change.ChangeType.RESET;
+                    resetChange.pos = positions[j];
+                }
+                positions.RemoveRange(i, positions.Count - i);
+                return changes;
             }
         }
         positions.Add(flow);
+        Change change = new Change(), opposite = new Change();
+        change.action = opposite.action = Change.ChangeType.ADD;
+        change.pos = flow;
+        opposite.pos = positions[positions.Count - 2];
+
+        change.dir = VectorsToDir(change.pos, opposite.pos, ref opposite.dir);
+
+        changes.Add(change);
+        changes.Add(opposite);
+        return changes;
     }
 
     public Vector2Int GetFirstEnd() { return solution.First.Value; }
     public Vector2Int GetLastEnd() { return solution.Last.Value; }
+
+    public bool beingTouched(Vector2Int pos)
+    {
+        foreach (var p in positions)
+        {
+            if (p == pos) return true;
+        }
+        if (pos == GetFirstEnd()) return true;
+        if (pos == GetLastEnd()) return true;
+
+        return false;
+    }
+
+    Direction VectorsToDir(Vector2Int start, Vector2Int end, ref Direction opposite)
+    {
+        Vector2Int deltaPos = end - start;
+        switch (deltaPos)
+        {
+            case { x: 0, y: 1 }:
+                opposite = Direction.DOWN;
+                return Direction.UP;
+            case { x: 1, y: 0 }:
+                opposite = Direction.LEFT;
+                return Direction.RIGHT;
+            case { x: -1, y: 0 }:
+                opposite = Direction.RIGHT;
+                return Direction.LEFT;
+            case { x: 0, y: -1 }:
+                opposite = Direction.UP;
+                return Direction.DOWN;
+            default:
+                return Direction.DOWN;
+        }
+    }
 }

@@ -34,28 +34,49 @@ public class Tile : MonoBehaviour
             flowDirections[(int)dirs[i]].SetActive(true);
         }
         corner.SetActive(true);
-        if (!flowEnd.activeSelf && dirs.Length == 1)
-        {
-            looseEnd.SetActive(true);
-        } else
-        {
-            looseEnd.SetActive(false);
-        }
+        //if (!flowEnd.activeSelf && dirs.Length == 1)
+        //{
+        //    looseEnd.SetActive(true);
+        //} else
+        //{
+        //    looseEnd.SetActive(false);
+        //}
     }
 
-    public void DisconnectDirections()
+    public void DisconnectDirections(params Direction[] dirs)
     {
+        for (int i = 0; i < dirs.Length; i++)
+        {
+            flowDirections[(int)dirs[i]].SetActive(false);
+        }
+        bool allInactive = true;
+        for (int i = 0; i < flowDirections.Length || allInactive; i++)
+        {
+            allInactive = !flowDirections[i].activeSelf;
+        }
+        corner.SetActive(!allInactive);
+    }
+
+    public void Reset()
+    {
+        flowEnd.SetActive(false);
+        looseEnd.SetActive(false);
+        corner.SetActive(false);
+        tick.SetActive(false);
         for (int i = 0; i < flowDirections.Length; i++)
         {
             flowDirections[i].SetActive(false);
         }
-        looseEnd.SetActive(false);
-        corner.SetActive(false);
     }
 
     public void SetFlowEnd()
     {
         flowEnd.SetActive(true);
+    }
+
+    public void SetLooseEnd()
+    {
+        looseEnd.SetActive(true);
     }
 
     public void SetTick()

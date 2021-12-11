@@ -9,7 +9,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] public SkinPack skinPack;
     [SerializeField] private LevelPack[] levelPacks;
-    [SerializeField] private LevelManager LM;
+    [SerializeField] public LevelManager LM;
 
     private LevelPack nextPack;
     private string nextLevel;

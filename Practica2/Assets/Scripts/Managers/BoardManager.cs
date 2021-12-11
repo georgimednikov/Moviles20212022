@@ -8,7 +8,7 @@ public class BoardManager : MonoBehaviour
     GameObject tilePref;
 
     float topHeight, botHeight, refWidth;
-
+    Vector2Int gridPos;
     Tile[,] board;
     Map map;
 
@@ -36,6 +36,38 @@ public class BoardManager : MonoBehaviour
             }
         }
         ArrangeInScreen();
+    }
+
+    public void TouchedHere(Vector3 pos)
+    {
+        var changes = map.TouchedHere(new Vector2Int((int)(pos.x + (map.Width) / 2.0f), (int)(pos.y + (map.Height) / 2.0f)));// + transform.position.y)));
+
+        Debug.Log(changes);
+        if (changes == null) return;
+        foreach (var change in changes)
+        {
+            Tile tile = board[change.pos.x, change.pos.y];
+            switch (change.action)
+            {
+                case Change.ChangeType.ADD:
+                    tile.SetColor(GameManager.instance.skinPack.colors[change.index]);
+                    tile.SetConnectedDirections(change.dir);
+                    break;
+                case Change.ChangeType.REMOVE:
+                    tile.DisconnectDirections(change.dir);
+                    break;
+                case Change.ChangeType.RESET:
+                    tile.Reset();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public void Untouched()
+    {
+        map.Untouched();
     }
 
     void ArrangeInScreen()
