@@ -15,6 +15,25 @@ public class Flow
         positions = new List<Vector2Int>();
         solution = new LinkedList<Vector2Int>(sol);
     }
+
+    public Vector2Int[] GetPositions(int p = 0) {
+        return positions.GetRange(p, positions.Count - p).ToArray(); 
+    }
+    public void RemovePositions(int p)
+    {
+        if (positions.Count == 0) return;
+        positions.RemoveRange(p, positions.Count - p);
+    }
+
+    public Vector2Int GetLastPosition() {
+        if (positions.Count == 0) return new Vector2Int(-1, -1);
+        return positions[positions.Count - 1]; 
+    }
+
+    public void CommitChanges(int pos) {
+        positions.RemoveRange(pos, positions.Count - pos);
+    }
+
     public bool IsSolved()
     {
         if (!completed) return false;
@@ -45,53 +64,31 @@ public class Flow
         return solved;
     }
 
-    public List<Change> StartNewFlow(Vector2Int flow)
+    public bool StartNewFlow(Vector2Int flow)
     {
-        List<Change> changes = new List<Change>();
+        int size = positions.Count;
         hasBeenModified = true;
         completed = false;
-        if (positions.Count > 0)
-        {
-            Change change = new Change();
-            change.action = Change.ChangeType.RESET;
-            change.pos = flow;
-            changes.Add(change);
-        }
+        positions.Clear();
         positions.Add(flow);
-        return changes;
+        return size > 0;
     }
 
-    public List<Change> AddFlow(Vector2Int flow)
+    public bool AddFlow(Vector2Int flow)
     {
-        List<Change> changes = new List<Change>();
-        if (completed || flow == positions[positions.Count - 1]) return changes;
+        int coll = CollidesWithFlow(flow);
+        //Se comprueba si está completo antes de la siguiente condición eliminatoria
+        //para que si el valor es el mismo que el del frame anterior se actualice
+        //aunque no se añada a la lista de posiciones.
+        if (completed && coll == -1) return false;
+        if (IsEnd(flow) && positions.Count > 1) completed = true;
+        else completed = false;
+        if (positions.Count > 0 &&
+            (flow == positions[positions.Count - 1] ||
+            !HasAdjacent(flow))) return false;
         hasBeenModified = true;
-        for (int i = 0; i < positions.Count; i++)
-        {
-            if (positions[i] == flow)
-            {
-                for (int j = i; j < positions.Count - i; j++)
-                {
-                    Change resetChange = new Change();
-                    resetChange.action = Change.ChangeType.RESET;
-                    resetChange.pos = positions[j];
-                }
-                positions.RemoveRange(i, positions.Count - i);
-                return changes;
-            }
-        }
-        if (!HasAdjacent(flow)) return changes;
         positions.Add(flow);
-        if (IsEnd(flow)) completed = true;
-        Change change = new Change(), opposite = new Change();
-        change.action = opposite.action = Change.ChangeType.ADD;
-        change.pos = flow;
-        opposite.pos = positions[positions.Count - 2];
-        change.dir = VectorsToDir(change.pos, opposite.pos, ref opposite.dir);
-
-        changes.Add(change);
-        changes.Add(opposite);
-        return changes;
+        return true;
     }
 
     public Vector2Int GetFirstEnd() { return solution.First.Value; }
@@ -99,15 +96,24 @@ public class Flow
 
     public bool BeingTouched(Vector2Int pos)
     {
+        if (IsEnd(pos)) return true;
         foreach (var p in positions)
         {
             if (p == pos) return true;
         }
-        if (IsEnd(pos)) return true;
         return false;
     }
 
-    bool IsEnd(Vector2Int pos)
+    public int CollidesWithFlow(Vector2Int pos)
+    {
+        for (int i = 0; i < positions.Count; i++)
+        {
+            if (positions[i] == pos) return i;
+        }
+        return -1;
+    }
+
+    public bool IsEnd(Vector2Int pos)
     {
         return pos == GetFirstEnd() || pos == GetLastEnd();
     }
@@ -117,7 +123,7 @@ public class Flow
         return (pos - positions[positions.Count - 1]).magnitude == 1;
     }
 
-    Direction VectorsToDir(Vector2Int start, Vector2Int end, ref Direction opposite)
+    public static Direction VectorsToDir(Vector2Int start, Vector2Int end, out Direction opposite)
     {
         Vector2Int deltaPos = end - start;
         switch (deltaPos)
@@ -135,7 +141,8 @@ public class Flow
                 opposite = Direction.UP;
                 return Direction.DOWN;
             default:
-                return Direction.DOWN;
+                opposite = Direction.NONE;
+                return Direction.NONE;
         }
     }
 }

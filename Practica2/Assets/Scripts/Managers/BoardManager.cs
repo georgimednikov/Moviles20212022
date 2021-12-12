@@ -8,7 +8,6 @@ public class BoardManager : MonoBehaviour
     GameObject tilePref;
 
     float topHeight, botHeight, refWidth;
-    Vector2Int gridPos;
     Tile[,] board;
     Map map;
 
@@ -40,39 +39,71 @@ public class BoardManager : MonoBehaviour
 
     public void TouchedHere(Vector3 pos)
     {
-        Vector2Int boardPos = new Vector2Int(Mathf.FloorToInt(pos.x + (map.Width) / 2.0f), Mathf.FloorToInt(pos.y + (map.Height) / 2.0f));
-        Debug.Log(boardPos);
+        Vector2Int boardPos = new Vector2Int(Mathf.FloorToInt(pos.x + (map.Width) / 2.0f), Mathf.FloorToInt(pos.y + (map.Height) / 2.0f - transform.position.y));
         if (boardPos.x < 0 || boardPos.x >= map.Width || boardPos.y < 0 || boardPos.y >= map.Height) return;
-        var changes = map.TouchedHere(boardPos);// + transform.position.y)));
+        map.TouchedHere(boardPos);
 
-        //Debug.Log(changes);
-        if (changes == null) return;
-        foreach (var change in changes)
+        foreach (Vector2Int p in map.posToReset)
         {
-            Tile tile = board[change.pos.x, change.pos.y];
-            switch (change.action)
+            board[p.x, p.y].Reset();
+        }
+        map.posToReset.Clear();
+        RenderFlow(map.touchingIndex);
+        for (int i = 0; i < map.flowsToRender.Length; i++)
+        {
+            if (map.flowsToRender[i] && i != map.touchingIndex)
             {
-                case Change.ChangeType.ADD:
-                    tile.SetColor(GameManager.instance.skinPack.colors[change.index]);
-                    tile.SetConnectedDirections(change.dir);
-                    break;
-                case Change.ChangeType.REMOVE:
-                    tile.DisconnectDirections(change.dir);
-                    break;
-                case Change.ChangeType.RESET:
-                    tile.Reset();
-                    break;
-                default:
-                    break;
+                RenderFlow(i);
             }
+        }
+    }
+
+    private void RenderFlow(int flowToRender)
+    {
+        Vector2Int[] flow = map.GetFlow(flowToRender);
+        Vector2Int[] touchingFlow = map.GetFlow(map.touchingIndex);
+        board[flow[0].x, flow[0].y].Reset();
+        for (int i = 1; i < flow.Length; ++i)
+        {
+            Vector2Int pos = flow[i], prev = flow[i - 1];
+            Tile tile = board[pos.x, pos.y], tilePrev = board[prev.x, prev.y];
+            if (flowToRender != map.touchingIndex)
+            {
+                bool collWithTouching = false;
+                for (int j = 1; j < touchingFlow.Length; j++)
+                {
+                    if (pos == touchingFlow[j])
+                    {
+                        collWithTouching = true;
+                        break;
+                    }
+                }
+                if (collWithTouching) break;
+            }
+            tile.Reset();
+            tile.SetColor(GameManager.instance.skinPack.colors[flowToRender]);
+            Direction opposite;
+            Direction dir = Flow.VectorsToDir(pos, prev, out opposite);
+            if (dir != Direction.NONE)
+            {
+                tile.SetConnectedDirections(dir);
+                tilePrev.SetConnectedDirections(opposite);
+            }
+            tilePrev.SetColor(GameManager.instance.skinPack.colors[flowToRender]);
         }
     }
 
     public void StoppedTouching()
     {
+        for (int i = 0; i < map.flowsToRender.Length; i++)
+            if (map.flowsToRender[i]) {
+                map.CommitFlow(i);
+                map.flowsToRender[i]  = false;
+            }
+
         map.StoppedTouching();
         if (map.IsSolved())
-            ;
+            Debug.LogError("HAS GANADO :M");
     }
 
     void ArrangeInScreen()
