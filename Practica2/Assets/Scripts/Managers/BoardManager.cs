@@ -4,8 +4,11 @@ using UnityEngine;
 
 public class BoardManager : MonoBehaviour
 {
+    public LevelManager LM;
+
     [SerializeField]
     GameObject tilePref;
+
 
     float topHeight, botHeight, refWidth;
     Tile[,] board;
@@ -34,6 +37,7 @@ public class BoardManager : MonoBehaviour
                 board[i, j] = tile.GetComponent<Tile>();
             }
         }
+
         ArrangeInScreen();
     }
 
@@ -48,7 +52,8 @@ public class BoardManager : MonoBehaviour
             board[p.x, p.y].Reset();
         }
         map.posToReset.Clear();
-        RenderFlow(map.touchingIndex);
+        if(map.touchingIndex != -1) 
+            RenderFlow(map.touchingIndex);
         for (int i = 0; i < map.flowsToRender.Length; i++)
         {
             if (map.flowsToRender[i] && i != map.touchingIndex)
@@ -98,10 +103,11 @@ public class BoardManager : MonoBehaviour
         for (int i = 0; i < map.flowsToRender.Length; i++)
             if (map.flowsToRender[i]) {
                 map.CommitFlow(i);
-                map.flowsToRender[i]  = false;
+                map.flowsToRender[i] = false;
             }
 
         map.StoppedTouching();
+        LM.UpdateInfo(map.movements, map.percentageFull, map.numFlowsComplete, map.GetNumFlows());
         if (map.IsSolved())
             Debug.LogError("HAS GANADO :M");
     }
@@ -136,5 +142,7 @@ public class BoardManager : MonoBehaviour
             //Módulo para que si no hay suficientes colores se repitan; i++ / 2 para pasar de color cada dos extremos
             tile.SetColor(colorPool[((i++) % colorPool.Length) / 2]);
         }
+
+        LM.UpdateInfo(map.movements, map.percentageFull, 0, map.GetNumFlows());
     }
 }

@@ -6,11 +6,15 @@ using UnityEngine.UI;
 
 public class LevelManager : MonoBehaviour
 {
-    [SerializeField] public BoardManager BM;
+    public BoardManager BM;
     int currentLevel;
 
     [SerializeField] RectTransform topRect;
     [SerializeField] RectTransform botRect;
+    [SerializeField] Text movesText;
+    [SerializeField] Text pipeText;
+    [SerializeField] Text flowsText;
+    [SerializeField] Image completionAmount;
     [SerializeField] CanvasScaler canvasScaler;
 
     // TODO: comprobacion de errores
@@ -27,5 +31,12 @@ public class LevelManager : MonoBehaviour
         BM.SetBoard(sizeX, sizeY);
         BM.LoadMap(levelRows.Skip(1).ToArray()); // Quita el primer valor de levelRows que es la info del nivel y no un flow
         return true;
+    }
+
+    public void UpdateInfo(int moves, int percentage, int curFlows, int totalFlows)
+    {
+        movesText.text = "moves: " + moves;
+        pipeText.text = "pipe: " + percentage + "%";
+        flowsText.text = "flows: " + curFlows + "/" + totalFlows;
     }
 }

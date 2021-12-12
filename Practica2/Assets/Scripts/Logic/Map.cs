@@ -8,7 +8,11 @@ public class Map
     Flow[] flows;
     Flow touchingFlow;
     public int touchingIndex { get; private set; }
+    public int movements { get; private set; }
+    public int percentageFull { get; private set; }
+    public int numFlowsComplete { get; private set; }
     Vector2Int[] flowEnds;
+    int prevTouchingIndex, prevTouchFlowSize;
 
     public bool[] flowsToRender { get; private set; }
     public List<Vector2Int> posToReset { get; private set; }
@@ -17,6 +21,15 @@ public class Map
     public int Height { get; set; }
 
     public Vector2Int[] GetFlow(int i) { return flows[i].GetPositions(); }
+
+    public Map()
+    {
+        touchingIndex = -1;
+        movements = 0;
+        percentageFull = 0;
+        prevTouchingIndex = -1;
+        numFlowsComplete = 0;
+    }
 
     public bool IsSolved()
     {
@@ -51,6 +64,7 @@ public class Map
                 AddToReset(touchingIndex, 0);
                 if (touchingFlow.StartNewFlow(pos))
                     flowsToRender[touchingIndex] = true;
+                prevTouchFlowSize = touchingFlow.GetPositions().Length;
             }
         }
         else
@@ -64,8 +78,25 @@ public class Map
 
     public void StoppedTouching()
     {
+        if (touchingIndex != prevTouchingIndex && touchingFlow.GetPositions().Length != prevTouchFlowSize) movements++;
         touchingFlow = null;
+        prevTouchingIndex = touchingIndex;
         touchingIndex = -1;
+        float sum = 0;
+        int numComp = 0;
+        foreach (var flow in flows)
+        {
+            sum += flow.GetNumPipes() - 2;
+            if (flow.completed) numComp++;
+        }
+
+        numFlowsComplete = numComp;
+        percentageFull = (int)(100 * (sum / ((Width * Height) - 2 * flows.Length)));
+    }
+
+    public int GetNumFlows()
+    {
+        return flows.Length;
     }
 
     public Vector2Int[] GetFlowEnds()

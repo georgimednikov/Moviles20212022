@@ -8,12 +8,23 @@ public class Flow
     LinkedList<Vector2Int> solution;
     bool hasBeenModified = false;
     bool solved = false;
-    bool completed = false;
+    public bool completed { get; private set; }
 
     public Flow(Vector2Int[] sol)
     {
         positions = new List<Vector2Int>();
         solution = new LinkedList<Vector2Int>(sol);
+    }
+
+    public int GetNumPipes()
+    {
+        int ret;
+        if (completed)
+            ret = positions.Count;
+        else if (positions.Count < 2)
+            ret = 2;
+        else ret = positions.Count + 1;
+        return ret;
     }
 
     public Vector2Int[] GetPositions(int p = 0) {
@@ -22,6 +33,7 @@ public class Flow
     public void RemovePositions(int p)
     {
         if (positions.Count == 0) return;
+        if(positions.Count - p > 0) completed = false;
         positions.RemoveRange(p, positions.Count - p);
     }
 
@@ -31,6 +43,7 @@ public class Flow
     }
 
     public void CommitChanges(int pos) {
+        if (positions.Count - pos > 0) completed = false;
         positions.RemoveRange(pos, positions.Count - pos);
     }
 
