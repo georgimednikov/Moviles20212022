@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class BoardManager : MonoBehaviour
 {
@@ -47,9 +48,9 @@ public class BoardManager : MonoBehaviour
         if (boardPos.x < 0 || boardPos.x >= map.Width || boardPos.y < 0 || boardPos.y >= map.Height) return;
         map.TouchedHere(boardPos);
 
-        foreach (Vector2Int p in map.posToReset)
+        foreach (LogicTile p in map.posToReset)
         {
-            board[p.x, p.y].Reset();
+            board[p.pos.x, p.pos.y].Reset();
         }
         map.posToReset.Clear();
         if(map.touchingIndex != -1) 
@@ -65,19 +66,19 @@ public class BoardManager : MonoBehaviour
 
     private void RenderFlow(int flowToRender)
     {
-        Vector2Int[] flow = map.GetFlow(flowToRender);
-        Vector2Int[] touchingFlow = map.GetFlow(map.touchingIndex);
-        board[flow[0].x, flow[0].y].Reset();
+        LogicTile[] flow = map.GetFlow(flowToRender);
+        LogicTile[] touchingFlow = map.GetFlow(map.touchingIndex);
+        board[flow[0].pos.x, flow[0].pos.y].Reset();
         for (int i = 1; i < flow.Length; ++i)
         {
-            Vector2Int pos = flow[i], prev = flow[i - 1];
-            Tile tile = board[pos.x, pos.y], tilePrev = board[prev.x, prev.y];
+            LogicTile p = flow[i], prev = flow[i - 1];
+            Tile tile = board[p.pos.x, p.pos.y], tilePrev = board[prev.pos.x, prev.pos.y];
             if (flowToRender != map.touchingIndex)
             {
                 bool collWithTouching = false;
                 for (int j = 1; j < touchingFlow.Length; j++)
                 {
-                    if (pos == touchingFlow[j])
+                    if (p == touchingFlow[j])
                     {
                         collWithTouching = true;
                         break;
@@ -88,7 +89,7 @@ public class BoardManager : MonoBehaviour
             tile.Reset();
             tile.SetColor(GameManager.instance.skinPack.colors[flowToRender]);
             Direction opposite;
-            Direction dir = Flow.VectorsToDir(pos, prev, out opposite);
+            Direction dir = Flow.VectorsToDir(p.pos, prev.pos, out opposite);
             if (dir != Direction.NONE)
             {
                 tile.SetConnectedDirections(dir);
@@ -131,13 +132,14 @@ public class BoardManager : MonoBehaviour
 
     public void LoadMap(string[] flows)
     {
-        map.LoadMap(flows);
-        Vector2Int[] flowEnds = map.GetFlowEnds();
+        // Nos saltamos 4 para quitar informacion inecesaria para Map
+        map.LoadMap(flows.Skip(1).ToArray(), flows[0].Split(',').Skip(4).ToArray());
+        LogicTile[] flowEnds = map.GetFlowEnds();
         int i = 0;
         Color32[] colorPool = GameManager.instance.skinPack.colors;
-        foreach (Vector2Int end in flowEnds)
+        foreach (LogicTile end in flowEnds)
         {
-            Tile tile = board[end.x, end.y];
+            Tile tile = board[end.pos.x, end.pos.y];
             tile.SetFlowEnd();
             //Módulo para que si no hay suficientes colores se repitan; i++ / 2 para pasar de color cada dos extremos
             tile.SetColor(colorPool[((i++) % colorPool.Length) / 2]);
