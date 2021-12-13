@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class Flow
 {
-    List<Vector2Int> positions;
-    LinkedList<Vector2Int> solution;
+    List<LogicTile> positions;
+    LinkedList<LogicTile> solution;
     bool hasBeenModified = false;
     bool solved = false;
     public bool completed { get; private set; }
 
-    public Flow(Vector2Int[] sol)
+    public Flow(LogicTile[] sol)
     {
-        positions = new List<Vector2Int>();
-        solution = new LinkedList<Vector2Int>(sol);
+        positions = new List<LogicTile>();
+        solution = new LinkedList<LogicTile>(sol);
     }
 
     public int GetNumPipes()
@@ -27,7 +27,7 @@ public class Flow
         return ret;
     }
 
-    public Vector2Int[] GetPositions(int p = 0) {
+    public LogicTile[] GetPositions(int p = 0) {
         return positions.GetRange(p, positions.Count - p).ToArray(); 
     }
     public void RemovePositions(int p)
@@ -37,8 +37,8 @@ public class Flow
         positions.RemoveRange(p, positions.Count - p);
     }
 
-    public Vector2Int GetLastPosition() {
-        if (positions.Count == 0) return new Vector2Int(-1, -1);
+    public LogicTile GetLastPosition() {
+        if (positions.Count == 0) return new LogicTile(new Vector2Int(-1, -1));
         return positions[positions.Count - 1]; 
     }
 
@@ -52,7 +52,7 @@ public class Flow
         if (!completed) return false;
         if (!hasBeenModified) return solved;
         bool inversed = false;
-        LinkedListNode<Vector2Int> node;
+        LinkedListNode<LogicTile> node;
 
         if (positions[0] == solution.Last.Value)
         {
@@ -77,7 +77,7 @@ public class Flow
         return solved;
     }
 
-    public bool StartNewFlow(Vector2Int flow)
+    public bool StartNewFlow(LogicTile flow)
     {
         int size = positions.Count;
         hasBeenModified = true;
@@ -87,7 +87,7 @@ public class Flow
         return size > 0;
     }
 
-    public bool AddFlow(Vector2Int flow)
+    public bool AddFlow(LogicTile flow)
     {
         int coll = CollidesWithFlow(flow);
         //Se comprueba si está completo antes de la siguiente condición eliminatoria
@@ -104,20 +104,20 @@ public class Flow
         return true;
     }
 
-    public Vector2Int GetFirstEnd() { return solution.First.Value; }
-    public Vector2Int GetLastEnd() { return solution.Last.Value; }
+    public LogicTile GetFirstEnd() { return solution.First.Value; }
+    public LogicTile GetLastEnd() { return solution.Last.Value; }
 
-    public bool BeingTouched(Vector2Int pos)
+    public bool BeingTouched(LogicTile pos)
     {
         if (IsEnd(pos)) return true;
-        foreach (var p in positions)
+        foreach (LogicTile p in positions)
         {
             if (p == pos) return true;
         }
         return false;
     }
 
-    public int CollidesWithFlow(Vector2Int pos)
+    public int CollidesWithFlow(LogicTile pos)
     {
         for (int i = 0; i < positions.Count; i++)
         {
@@ -126,14 +126,14 @@ public class Flow
         return -1;
     }
 
-    public bool IsEnd(Vector2Int pos)
+    public bool IsEnd(LogicTile pos)
     {
         return pos == GetFirstEnd() || pos == GetLastEnd();
     }
 
-    bool HasAdjacent(Vector2Int pos)
+    bool HasAdjacent(LogicTile pos)
     {
-        return (pos - positions[positions.Count - 1]).magnitude == 1;
+        return (pos.pos - positions[positions.Count - 1].pos).magnitude == 1;
     }
 
     public static Direction VectorsToDir(Vector2Int start, Vector2Int end, out Direction opposite)
