@@ -7,4 +7,5 @@ public class LevelPack : ScriptableObject
 {
     public string levelName;
     public TextAsset levelMap;
+    public int numLevels;
 }

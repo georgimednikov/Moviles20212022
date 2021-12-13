@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 749597f354bb3aa4986a1c3895efce14, type: 3}
+  m_Name: Intro
+  m_EditorClassIdentifier: 
+  bundleName: Intro
+  bundleColor:
+    serializedVersion: 2
+    rgba: 4278226176
+  packs:
+  - {fileID: 11400000, guid: 81c4081d27064084a95f23bb0da9dd57, type: 2}
+  - {fileID: 11400000, guid: 0abcd8604c3b77049ad09f07816681b7, type: 2}
+  - {fileID: 11400000, guid: bc68bd9fbc844374a8d844c0884f8573, type: 2}
+  - {fileID: 11400000, guid: c39c684d6b46e934580a2a8546f0c43c, type: 2}

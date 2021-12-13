@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
 
     [SerializeField] public SkinPack skinPack;
-    [SerializeField] private LevelPack[] levelPacks;
+    [SerializeField] public LevelBundle[] levelBundles;
     [SerializeField] public LevelManager LM;
 
     private LevelPack nextPack;
@@ -30,18 +30,18 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
 #if UNITY_EDITOR
-        nextPack = levelPacks[0];
+        nextPack = levelBundles[0].packs[0];
         nextLevel = nextPack.levelMap.text.Split('\n')[0];
 #endif
-        instance.LM.LoadLevel(instance.nextLevel);
+        instance.LM?.LoadLevel(instance.nextLevel);
     }
 
     /// <summary>
     /// Se le comunica al Game Manager de qué pack va a ser el siguiente nivel
     /// </summary>
-    public void NextPack(int pack)
+    public void NextPack(int bundle, int pack)
     {
-        nextPack = levelPacks[pack];
+        nextPack = levelBundles[bundle].packs[pack];
         SceneManager.LoadScene("SelectLevelScene");
     }
 

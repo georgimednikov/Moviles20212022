@@ -515,18 +515,6 @@ PrefabInstance:
       propertyPath: LM
       value: 
       objectReference: {fileID: 595818643}
-    - target: {fileID: 4199122799030511052, guid: 7ac4ad9fae998364cbd4403069a3db1f, type: 3}
-      propertyPath: skinPack
-      value: 
-      objectReference: {fileID: 11400000, guid: 8e15ca9fd782a33429d1955ae1d20a4f, type: 2}
-    - target: {fileID: 4199122799030511052, guid: 7ac4ad9fae998364cbd4403069a3db1f, type: 3}
-      propertyPath: levelPacks.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4199122799030511052, guid: 7ac4ad9fae998364cbd4403069a3db1f, type: 3}
-      propertyPath: levelPacks.Array.data[0]
-      value: 
-      objectReference: {fileID: 11400000, guid: 81c4081d27064084a95f23bb0da9dd57, type: 2}
     - target: {fileID: 8284359497429419071, guid: 7ac4ad9fae998364cbd4403069a3db1f, type: 3}
       propertyPath: m_RootOrder
       value: 3

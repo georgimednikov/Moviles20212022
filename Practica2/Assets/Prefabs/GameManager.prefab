@@ -43,5 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67a39a00493c3a341974a40684114640, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  skinPack: {fileID: 11400000, guid: 8e15ca9fd782a33429d1955ae1d20a4f, type: 2}
+  levelPacks:
+  - {fileID: 11400000, guid: 81c4081d27064084a95f23bb0da9dd57, type: 2}
   LM: {fileID: 0}
-  levelPacks: []
