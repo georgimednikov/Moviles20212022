@@ -25,7 +25,7 @@ public class PackSelect : MonoBehaviour
         foregroundImg.color = bundle.bundleColor;
         foreach(var pack in bundle.packs)
         {
-            PackUI ui = Instantiate(packTextPrefab, transform).GetComponent<PackUI>();
+            PackText ui = Instantiate(packTextPrefab, transform).GetComponent<PackText>();
             ui.SetPackName(pack.levelName);
             ui.SetPackTotalLevels(pack.numLevels);
             ui.SetColor(bundle.bundleColor);

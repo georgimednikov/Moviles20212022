@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PackUI : MonoBehaviour
+public class PackText : MonoBehaviour
 {
     [SerializeField] Text nameText;
     [SerializeField] Text levelsText;
