@@ -12,7 +12,7 @@ public class Map
     public int percentageFull { get; private set; }
     public int numFlowsComplete { get; private set; }
     LogicTile[] flowEnds;
-    int prevTouchingIndex, prevTouchFlowSize;
+    int prevTouchingIndex, startTouchFlowSize;
 
     public bool[] flowsToRender { get; private set; }
     public List<LogicTile> posToReset { get; private set; }
@@ -118,12 +118,15 @@ public class Map
         LogicTile tile = tileBoard[pos.x, pos.y];
         if (touchingFlow == null)
         {
-            if (GetFlow(pos) && touchingFlow.IsEnd(tile))
+            if (GetFlow(pos))
             {
-                AddToReset(touchingIndex, 0);
-                if (touchingFlow.StartNewFlow(tile))
-                    flowsToRender[touchingIndex] = true;
-                prevTouchFlowSize = touchingFlow.GetPositions().Length;
+                if (touchingFlow.IsEnd(tile))
+                {
+                    AddToReset(touchingIndex, 0);
+                    if (touchingFlow.StartNewFlow(tile))
+                        flowsToRender[touchingIndex] = true;
+                }
+                startTouchFlowSize = touchingFlow.GetPositions().Length;
             }
         }
         else
@@ -137,12 +140,13 @@ public class Map
 
     public void StoppedTouching()
     {
-        if (touchingIndex != prevTouchingIndex && touchingFlow?.GetPositions()?.Length != prevTouchFlowSize) movements++;
-        touchingFlow = null;
-        prevTouchingIndex = touchingIndex;
+        if (touchingFlow != null && touchingIndex != prevTouchingIndex && touchingFlow.GetPositions().Length != startTouchFlowSize) movements++;
+        //Si has tocado en un lugar no válido no se reasigna
+        if (touchingFlow != null) prevTouchingIndex = touchingIndex;
         touchingIndex = -1;
         float sum = 0;
         int numComp = 0;
+        touchingFlow = null;
         foreach (var flow in flows)
         {
             sum += flow.GetNumPipes() - 2;

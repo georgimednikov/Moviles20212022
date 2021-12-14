@@ -16,8 +16,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] public LevelBundle[] levelBundles;
     [SerializeField] public LevelManager LM;
 
-    private LevelPack nextPack;
-    private string nextLevel;
+    public LevelPack nextPack;
+    public string nextLevel;
 #if UNITY_EDITOR
     public int bundle, pack, level;
 #endif

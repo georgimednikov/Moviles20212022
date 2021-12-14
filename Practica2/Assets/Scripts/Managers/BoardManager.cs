@@ -7,13 +7,14 @@ public class BoardManager : MonoBehaviour
 {
     public LevelManager LM;
 
-    [SerializeField]
-    GameObject tilePref;
+    [SerializeField] GameObject tilePref;
+    [SerializeField] GameObject cursor;
 
 
     float topHeight, botHeight, refWidth;
     Tile[,] board;
     Map map;
+    Vector2 mapRatio;
 
     public void SetUIHeight(float topHeight, float botHeight, float refWidth)
     {
@@ -44,10 +45,17 @@ public class BoardManager : MonoBehaviour
 
     public void TouchedHere(Vector3 pos)
     {
-        // Dani arregla esto TODO
-        Vector2Int boardPos = new Vector2Int(Mathf.FloorToInt(pos.x * ((map.Width) / 2.0f) / Camera.main.orthographicSize / Camera.main.aspect / transform.localScale.x + (map.Width) / 2.0f) , Mathf.FloorToInt(pos.y * ((map.Height) / 2.0f) / transform.localScale.y + map.Height / 2.0f - transform.position.y));
-        if (boardPos.x < 0 || boardPos.x >= map.Width || boardPos.y < 0 || boardPos.y >= map.Height) return;
-        map.TouchedHere(boardPos);
+        Vector2 camSize = new Vector2(Camera.main.orthographicSize * Camera.main.aspect, Camera.main.orthographicSize);
+        int x = Mathf.FloorToInt((pos.x + camSize.x * mapRatio.x) / transform.localScale.x);
+        int y = Mathf.FloorToInt((pos.y + camSize.y * mapRatio.y) / transform.localScale.y);
+
+        cursor.SetActive(true);
+        cursor.transform.position = pos;
+        cursor.transform.Translate(Vector3.forward * 11);
+        // cursor.getComponent<Image>().setColor() TODO
+
+        if (x < 0 || x >= map.Width || y < 0 || y >= map.Height) return;
+        map.TouchedHere(new Vector2Int(x, y));
 
         foreach (LogicTile p in map.posToReset)
         {
@@ -102,6 +110,7 @@ public class BoardManager : MonoBehaviour
 
     public void StoppedTouching()
     {
+        cursor.SetActive(false);
         for (int i = 0; i < map.flowsToRender.Length; i++)
             if (map.flowsToRender[i]) {
                 map.CommitFlow(i);
@@ -121,11 +130,13 @@ public class BoardManager : MonoBehaviour
         if (cameraWidthSize > boardScreenMaxHeight)//hay muchas tiles en vertical
         {
             transform.localScale = new Vector3(boardScreenMaxHeight / (map.Height), boardScreenMaxHeight / (map.Height), 1);
+            mapRatio = new Vector2(transform.localScale.y, boardScreenMaxHeight / Camera.main.orthographicSize / 2.0f);
             // Hay que coger el height como valor limite de la pantalla
         }
         else
         {
             transform.localScale = new Vector3(cameraWidthSize / (map.Width), cameraWidthSize / (map.Width), 1);
+            mapRatio = new Vector2(1, transform.localScale.y);
         }
         //Se offsetea en Y en base a los márgenes del canvas
         transform.Translate(0, (botHeight - topHeight) / Camera.main.scaledPixelHeight * Camera.main.orthographicSize * Camera.main.scaledPixelWidth / refWidth, 0);
