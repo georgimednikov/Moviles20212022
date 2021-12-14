@@ -8,6 +8,7 @@ public class Tile : MonoBehaviour
 {
     [SerializeField] GameObject flowEnd;
     [SerializeField] GameObject[] flowDirections;
+    [SerializeField] GameObject[] walls;
     [SerializeField] GameObject looseEnd;
     [SerializeField] GameObject corner;
     [SerializeField] GameObject tick;
@@ -34,13 +35,14 @@ public class Tile : MonoBehaviour
             flowDirections[(int)dirs[i]].SetActive(true);
         }
         corner.SetActive(true);
-        //if (!flowEnd.activeSelf && dirs.Length == 1)
-        //{
-        //    looseEnd.SetActive(true);
-        //} else
-        //{
-        //    looseEnd.SetActive(false);
-        //}
+    }
+
+    public void SetWalls(params int[] dirs)
+    {
+        for (int i = 0; i < dirs.Length; i++)
+        {
+            walls[dirs[i]].SetActive(true);
+        }
     }
 
     public void DisconnectDirections(params Direction[] dirs)

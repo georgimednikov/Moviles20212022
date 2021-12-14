@@ -46,8 +46,8 @@ public class BoardManager : MonoBehaviour
     public void TouchedHere(Vector3 pos)
     {
         Vector2 camSize = new Vector2(Camera.main.orthographicSize * Camera.main.aspect, Camera.main.orthographicSize);
-        int x = Mathf.FloorToInt((pos.x + camSize.x * mapRatio.x) / transform.localScale.x);
-        int y = Mathf.FloorToInt((pos.y + camSize.y * mapRatio.y) / transform.localScale.y);
+        int x = Mathf.FloorToInt((pos.x + camSize.x * mapRatio.x) / transform.localScale.x + transform.position.x),
+            y = Mathf.FloorToInt((pos.y + camSize.y * mapRatio.y) / transform.localScale.y + transform.position.y);
 
         cursor.SetActive(true);
         cursor.transform.position = pos;
@@ -160,6 +160,10 @@ public class BoardManager : MonoBehaviour
         foreach (var tile in map.tileBoard)
         {
             if (tile.tileType == LogicTile.TileType.EMPTY) board[tile.pos.x, tile.pos.y].Deactivate();
+            for(int j = 0; j < tile.walls.Length; ++j)
+            {
+                if (tile.walls[j]) board[tile.pos.x, tile.pos.y].SetWalls(j);
+            }
         }
 
         LM.UpdateInfo(map.movements, map.percentageFull, 0, map.GetNumFlows());

@@ -86,7 +86,6 @@ public class Map
                     aux = levelInfo[1].Split(':');
                     foreach (var n in aux)
                     {
-                        Debug.LogError("Vacio");
                         a = int.Parse(n);
                         tileBoard[a % Width, a / Width].tileType = LogicTile.TileType.EMPTY;
                     }
