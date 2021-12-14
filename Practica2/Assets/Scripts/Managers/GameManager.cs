@@ -31,10 +31,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            if (LM != null)
-            {
-                instance.LM = LM;
-            }
+            instance.LM = LM;
             Destroy(gameObject);
         }
 #if UNITY_EDITOR
@@ -50,7 +47,7 @@ public class GameManager : MonoBehaviour
     public static void NextPack(OnClickBundle onClick)
     {
         instance.nextPack = instance.levelBundles[onClick.bundle].packs[onClick.pack];
-        SceneManager.LoadScene("LevelSelect");
+        GoToLevelSelect();
     }
 
 
@@ -61,6 +58,11 @@ public class GameManager : MonoBehaviour
     {
         instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[level];
         SceneManager.LoadScene("Level");
+    }
+
+    public static void GoToLevelSelect()
+    {
+        SceneManager.LoadScene("LevelSelect");
     }
 
     /// <summary>

@@ -19,7 +19,7 @@ public class BoardManager : MonoBehaviour
     Vector2 baseOffset;
 
 
-public void SetUIHeight(float topHeight, float botHeight, float refWidth)
+    public void SetUIHeight(float topHeight, float botHeight, float refWidth)
     {
         this.topHeight = topHeight;
         this.botHeight = botHeight;
@@ -46,6 +46,14 @@ public void SetUIHeight(float topHeight, float botHeight, float refWidth)
         ArrangeInScreen();
     }
 
+    public void GiveHint()
+    {
+        int i = map.GiveHint();
+        if (i == -1) return;
+        RenderFlow(i);
+        // Reducir en 1 las pistas TODO
+    }
+
     public void TouchedHere(Vector3 pos)
     {
         int x = Mathf.FloorToInt((pos.x - baseOffset.x - transform.position.x) / tileSize),
@@ -64,7 +72,7 @@ public void SetUIHeight(float topHeight, float botHeight, float refWidth)
             board[p.pos.x, p.pos.y].Reset();
         }
         map.posToReset.Clear();
-        if(map.touchingIndex != -1) 
+        if (map.touchingIndex != -1)
             RenderFlow(map.touchingIndex);
         for (int i = 0; i < map.flowsToRender.Length; i++)
         {
@@ -114,7 +122,8 @@ public void SetUIHeight(float topHeight, float botHeight, float refWidth)
     {
         cursor.SetActive(false);
         for (int i = 0; i < map.flowsToRender.Length; i++)
-            if (map.flowsToRender[i]) {
+            if (map.flowsToRender[i])
+            {
                 map.CommitFlow(i);
                 map.flowsToRender[i] = false;
             }
@@ -163,7 +172,7 @@ public void SetUIHeight(float topHeight, float botHeight, float refWidth)
         foreach (var tile in map.tileBoard)
         {
             if (tile.tileType == LogicTile.TileType.EMPTY) board[tile.pos.x, tile.pos.y].Deactivate();
-            for(int j = 0; j < tile.walls.Length; ++j)
+            for (int j = 0; j < tile.walls.Length; ++j)
             {
                 if (tile.walls[j]) board[tile.pos.x, tile.pos.y].SetWalls(j);
             }

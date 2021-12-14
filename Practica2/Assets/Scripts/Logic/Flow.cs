@@ -33,6 +33,23 @@ public class Flow
         positions.RemoveRange(p, positions.Count - p);
     }
 
+    public void Solve()
+    {
+        positions.Clear();
+        //positions.AddRange(solution);
+        int i = 0;
+        var sol = solution.First;
+        while (sol != null)
+        {
+            LogicTile tile =  new LogicTile(Vector2Int.one);
+            tile.pos = sol.Value.pos;
+            tile.tileType = sol.Value.tileType;
+            tile.walls = sol.Value.walls;
+            AddFlow(tile);
+            sol = sol.Next; i++;
+        }
+    }
+
     public LogicTile GetLastPosition() {
         if (positions.Count == 0) return new LogicTile(new Vector2Int(-1, -1));
         return positions[positions.Count - 1]; 
@@ -50,7 +67,7 @@ public class Flow
         bool inversed = false;
         LinkedListNode<LogicTile> node;
 
-        if (positions[0] == solution.Last.Value)
+        if (positions[0].pos == solution.Last.Value.pos)
         {
             inversed = true;
             node = solution.Last;
@@ -60,17 +77,14 @@ public class Flow
         for (int i = 1; i < positions.Count && !end; i++)
         {
             node = inversed ? node.Previous : node.Next;
-            if (positions[i] != node.Value)
+            if (positions[i].pos != node.Value.pos)
             {
                 end = true;
                 break;
             }
         }
-        if (end)
-            solved = false;
-        else solved = true;
         hasBeenModified = false;
-        return solved;
+        return solved = !end;
     }
 
     public bool StartNewFlow(LogicTile flow)
@@ -125,7 +139,7 @@ public class Flow
 
     public bool IsEnd(LogicTile p)
     {
-        return p == GetFirstEnd() || p == GetLastEnd();
+        return p.pos == GetFirstEnd().pos || p.pos == GetLastEnd().pos;
     }
 
     bool CanPlaceFlow(LogicTile p)

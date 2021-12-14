@@ -6,6 +6,7 @@ using UnityEngine;
 public class Map
 {
     Flow[] flows;
+    List<int> hintFlows;
     Flow touchingFlow;
     public int touchingIndex { get; private set; }
     public int movements { get; private set; }
@@ -24,6 +25,8 @@ public class Map
 
     public LogicTile[,] tileBoard;
 
+    int emptyTiles = 0;
+
     public Map()
     {
         touchingIndex = -1;
@@ -33,11 +36,25 @@ public class Map
         numFlowsComplete = 0;
     }
 
+    public int GiveHint()
+    {
+        if (hintFlows.Count == 0) return -1;
+
+        int randomIndex = UnityEngine.Random.Range(0, hintFlows.Count - 1);
+        flows[hintFlows[randomIndex]].Solve();
+        //flowsToRender[hintFlows[chosenFlow]] = true;
+        touchingFlow = flows[hintFlows[randomIndex]];
+        touchingIndex = hintFlows[randomIndex];
+        hintFlows.RemoveAt(randomIndex);
+        return touchingIndex;
+    }
+
     public bool IsSolved()
     {
         foreach (Flow f in flows)
         {
-            if (!f.IsSolved()) return false;
+            if (!f.IsSolved()) 
+                return false;
         }
         return true;
     }
@@ -45,6 +62,11 @@ public class Map
     public void LoadMap(string[] flowStrings, string[] levelInfo)
     {
         flows = new Flow[flowStrings.Length];
+        hintFlows = new List<int>();
+        for (int i = 0; i < flows.Length; ++i)
+        {
+            hintFlows.Add(i);
+        }
         flowsToRender = new bool[flows.Length];
         posToReset = new List<LogicTile>();
         tileBoard = new LogicTile[Width, Height];
@@ -74,7 +96,6 @@ public class Map
                 aux = levelInfo[0].Split(':');
                 foreach (var n in aux)
                 {
-                    Debug.Log("Puente");
                     a = int.Parse(n);
                     tileBoard[a % Width, a / Width].tileType = LogicTile.TileType.BRIDGE;
                 }
@@ -88,6 +109,7 @@ public class Map
                     {
                         a = int.Parse(n);
                         tileBoard[a % Width, a / Width].tileType = LogicTile.TileType.EMPTY;
+                        emptyTiles++;
                     }
                 }
                 if (levelInfo.Length > 2)
@@ -96,7 +118,6 @@ public class Map
                     aux = levelInfo[2].Split(':', '|');
                     for (int j = 0; j < aux.Length;)
                     {
-                        Debug.LogWarning("Pared");
                         a = int.Parse(aux[j++]);
                         b = int.Parse(aux[j++]);
                         Vector2Int start = new Vector2Int(a % Width, a / Width);
@@ -152,8 +173,9 @@ public class Map
             if (flow.completed) numComp++;
         }
 
+        Debug.Log(sum);
         numFlowsComplete = numComp;
-        percentageFull = (int)(100 * (sum / ((Width * Height) - 2 * flows.Length)));
+        percentageFull = (int)(100 * (sum / ((Width * Height) - 2 * flows.Length - emptyTiles)));
     }
 
     public int GetNumFlows()
@@ -230,13 +252,14 @@ public class Map
             if (coll != -1 && !(i == touchingIndex && p == touchingFlow.GetLastPosition()))
             {
                 //Si se pasa sobre un puente y se recorre en direcciones distintas no hay colisión
-                if (p.tileType == LogicTile.TileType.BRIDGE) {
-                LogicTile[] flowPositions = f.GetPositions();
-                Direction newBridgeDir = Flow.VectorsToDir(touchingFlow.GetLastPosition().pos, p.pos);
-                Direction prevBridgeDir1;
-                Direction prevBridgeDir2 = Flow.VectorsToDir(flowPositions[coll - 1].pos, flowPositions[coll].pos, out prevBridgeDir1);
-                
-                //Comprobar que no vayan en el mismo eje = dirección perpendicular
+                if (p.tileType == LogicTile.TileType.BRIDGE)
+                {
+                    LogicTile[] flowPositions = f.GetPositions();
+                    Direction newBridgeDir = Flow.VectorsToDir(touchingFlow.GetLastPosition().pos, p.pos);
+                    Direction prevBridgeDir1;
+                    Direction prevBridgeDir2 = Flow.VectorsToDir(flowPositions[coll - 1].pos, flowPositions[coll].pos, out prevBridgeDir1);
+
+                    //Comprobar que no vayan en el mismo eje = dirección perpendicular
                     if (newBridgeDir != prevBridgeDir1 && newBridgeDir != prevBridgeDir2) continue;
                 }
                 // Si es otro flujo, hay que quitar un indice mas porque la posicion que se comprueba pasa a ser del touchingFlow

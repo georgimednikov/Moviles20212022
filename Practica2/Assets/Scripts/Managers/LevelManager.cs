@@ -14,6 +14,8 @@ public class LevelManager : MonoBehaviour
     [SerializeField] Text movesText;
     [SerializeField] Text pipeText;
     [SerializeField] Text flowsText;
+    [SerializeField] Text levelText;
+    [SerializeField] Text sizeText;
     [SerializeField] Image completionAmount;
     [SerializeField] CanvasScaler canvasScaler;
 
@@ -29,8 +31,12 @@ public class LevelManager : MonoBehaviour
         // Si el mapa no es cuadrado, el levelSize tiene tamaño 2.
         sizeY = (levelSize.Length > 1) ? int.Parse(levelSize[1].Split('+')[0]) : 0; //Si es 0 es el valor inutil y no hay segunda dimension
 
-
         currentLevel = int.Parse(levelInfo[2]);
+
+        levelText.text = "Level " + currentLevel;
+        sizeText.text = sizeX + "x" + (sizeY == 0 ? sizeX : sizeY);
+        // completionAmount.sprite = ; TODO
+
         BM.SetUIHeight(topRect.rect.height, botRect.rect.height, canvasScaler.referenceResolution.x);
         BM.SetBoard(sizeX, sizeY);
         BM.LoadMap(levelRows); // Quita el primer valor de levelRows que es la info del nivel y no un flow
