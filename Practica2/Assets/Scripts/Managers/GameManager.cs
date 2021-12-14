@@ -60,7 +60,7 @@ public class GameManager : MonoBehaviour
     public static void NextLevel(int level)
     {
         instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[level];
-        SceneManager.LoadScene("GameScene");
+        SceneManager.LoadScene("Level");
     }
 
     /// <summary>

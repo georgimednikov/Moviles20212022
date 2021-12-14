@@ -604,7 +604,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4199122799030511052, guid: 7ac4ad9fae998364cbd4403069a3db1f, type: 3}
       propertyPath: level
-      value: 0
+      value: 31
       objectReference: {fileID: 0}
     - target: {fileID: 4199122799030511052, guid: 7ac4ad9fae998364cbd4403069a3db1f, type: 3}
       propertyPath: bundle

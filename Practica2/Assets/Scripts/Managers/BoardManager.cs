@@ -14,9 +14,12 @@ public class BoardManager : MonoBehaviour
     float topHeight, botHeight, refWidth;
     Tile[,] board;
     Map map;
-    Vector2 mapRatio;
+    Vector2 camSize;
+    float tileSize;
+    Vector2 baseOffset;
 
-    public void SetUIHeight(float topHeight, float botHeight, float refWidth)
+
+public void SetUIHeight(float topHeight, float botHeight, float refWidth)
     {
         this.topHeight = topHeight;
         this.botHeight = botHeight;
@@ -45,9 +48,8 @@ public class BoardManager : MonoBehaviour
 
     public void TouchedHere(Vector3 pos)
     {
-        Vector2 camSize = new Vector2(Camera.main.orthographicSize * Camera.main.aspect, Camera.main.orthographicSize);
-        int x = Mathf.FloorToInt((pos.x + camSize.x * mapRatio.x) / transform.localScale.x + transform.position.x),
-            y = Mathf.FloorToInt((pos.y + camSize.y * mapRatio.y) / transform.localScale.y + transform.position.y);
+        int x = Mathf.FloorToInt((pos.x - baseOffset.x - transform.position.x) / tileSize),
+            y = Mathf.FloorToInt((pos.y - baseOffset.y - transform.position.y) / tileSize);
 
         cursor.SetActive(true);
         cursor.transform.position = pos;
@@ -129,14 +131,15 @@ public class BoardManager : MonoBehaviour
         float cameraWidthSize = Camera.main.orthographicSize * 2 * Camera.main.aspect;
         if (cameraWidthSize > boardScreenMaxHeight)//hay muchas tiles en vertical
         {
-            transform.localScale = new Vector3(boardScreenMaxHeight / (map.Height), boardScreenMaxHeight / (map.Height), 1);
-            mapRatio = new Vector2(transform.localScale.y, boardScreenMaxHeight / Camera.main.orthographicSize / 2.0f);
             // Hay que coger el height como valor limite de la pantalla
+            transform.localScale = new Vector3(boardScreenMaxHeight / (map.Height), boardScreenMaxHeight / (map.Height), 1);
         }
         else
         {
+            camSize = new Vector2(Camera.main.orthographicSize * Camera.main.aspect, Camera.main.orthographicSize);
+            tileSize = camSize.x * 2.0f / map.Width;
+            baseOffset = new Vector2(-tileSize * map.Width / 2.0f, -tileSize * map.Height / 2.0f);
             transform.localScale = new Vector3(cameraWidthSize / (map.Width), cameraWidthSize / (map.Width), 1);
-            mapRatio = new Vector2(1, transform.localScale.y);
         }
         //Se offsetea en Y en base a los márgenes del canvas
         transform.Translate(0, (botHeight - topHeight) / Camera.main.scaledPixelHeight * Camera.main.orthographicSize * Camera.main.scaledPixelWidth / refWidth, 0);

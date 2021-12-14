@@ -18,11 +18,12 @@ public class LevelSelectManager : MonoBehaviour
         LevelPack pack = GameManager.instance.nextPack;
         nameText.text = pack.levelName;
         // nameText.color =  TODO
-        int i = pack.numLevels;
-        while(i > 0)
+        int i = 0;
+        while(i < pack.numLevels)
         {
-            Instantiate(levelGridPrefab, content);
-            i -= 30;
+            LevelGrid g = Instantiate(levelGridPrefab, content).GetComponent<LevelGrid>();
+            g.SetIndexStart(i);
+            i += 30;
         }
     }
 }
