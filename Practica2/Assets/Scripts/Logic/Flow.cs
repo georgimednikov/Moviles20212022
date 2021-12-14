@@ -18,13 +18,9 @@ public class Flow
 
     public int GetNumPipes()
     {
-        int ret;
-        if (completed)
-            ret = positions.Count;
-        else if (positions.Count < 2)
-            ret = 2;
-        else ret = positions.Count + 1;
-        return ret;
+        if (completed) return positions.Count;
+        if (positions.Count < 2) return 2;
+        return positions.Count + 1;
     }
 
     public LogicTile[] GetPositions(int p = 0) {

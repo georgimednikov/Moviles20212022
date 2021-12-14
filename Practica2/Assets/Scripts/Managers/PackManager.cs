@@ -15,10 +15,10 @@ public class PackManager : MonoBehaviour
     public void LoadBundles()
     {
         LevelBundle[] bundles = GameManager.instance.levelBundles;
-        foreach (LevelBundle bundle in bundles)
+        for (int i = 0; i < bundles.Length; ++i)
         {
             PackSelect sel = Instantiate(selectPrefab, packContent).GetComponent<PackSelect>();
-            sel.SetBundle(bundle);
+            sel.SetBundle(i);
             sel.LoadPacks();
         }
     }

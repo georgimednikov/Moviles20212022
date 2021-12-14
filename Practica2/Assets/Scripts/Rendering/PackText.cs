@@ -11,6 +11,14 @@ public class PackText : MonoBehaviour
     int totalLevels;
     int completedLevels;
 
+    public void SetButtonEvent(int bundle, int pack)
+    {
+        GameManager.OnClickBundle b = new GameManager.OnClickBundle();
+        b.bundle = bundle;
+        b.pack = pack;
+        GetComponent<Button>().onClick.AddListener(() => { GameManager.NextPack(b); });
+    }
+
     public void SetPackName(string name)
     {
         nameText.text = name;

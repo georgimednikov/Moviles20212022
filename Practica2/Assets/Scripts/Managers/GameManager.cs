@@ -5,6 +5,11 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    public struct OnClickBundle
+    {
+        public int bundle, pack;
+    }
+
     public static GameManager instance;
 
     [SerializeField] public SkinPack skinPack;
@@ -39,11 +44,12 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Se le comunica al Game Manager de qué pack va a ser el siguiente nivel
     /// </summary>
-    public static void NextPack(int bundle, int pack)
+    public static void NextPack(OnClickBundle onClick)
     {
-        instance.nextPack = instance.levelBundles[bundle].packs[pack];
-        SceneManager.LoadScene("SelectLevelScene");
+        instance.nextPack = instance.levelBundles[onClick.bundle].packs[onClick.pack];
+        SceneManager.LoadScene("LevelSelect");
     }
+
 
     /// <summary>
     /// Se le comunica al Game Manager qué nivel se va a jugar
