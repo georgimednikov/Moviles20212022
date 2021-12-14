@@ -13,22 +13,26 @@ public class PackSelect : MonoBehaviour
     [SerializeField] Text nameText;
     [SerializeField] Image foregroundImg;
     [SerializeField] GameObject packTextPrefab;
-    
-    public void SetBundle(LevelBundle bundle)
+
+    int bundleIndex;
+
+    public void SetBundle(int index)
     {
-        this.bundle = bundle;
+        bundleIndex = index;
+        bundle = GameManager.instance.levelBundles[index];
     }
 
     public void LoadPacks()
     {
         nameText.text = bundle.bundleName;
         foregroundImg.color = bundle.bundleColor;
-        foreach(var pack in bundle.packs)
+        for(int i = 0; i < bundle.packs.Length; ++i)
         {
-            PackUI ui = Instantiate(packTextPrefab, transform).GetComponent<PackUI>();
-            ui.SetPackName(pack.levelName);
-            ui.SetPackTotalLevels(pack.numLevels);
+            PackText ui = Instantiate(packTextPrefab, transform).GetComponent<PackText>();
+            ui.SetPackName(bundle.packs[i].levelName);
+            ui.SetPackTotalLevels(bundle.packs[i].numLevels);
             ui.SetColor(bundle.bundleColor);
+            ui.SetButtonEvent(bundleIndex, i);
             //ui.SetPackCompletedLevels(); TODO
         }
     }

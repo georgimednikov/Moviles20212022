@@ -3,13 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PackUI : MonoBehaviour
+public class PackText : MonoBehaviour
 {
     [SerializeField] Text nameText;
     [SerializeField] Text levelsText;
 
     int totalLevels;
     int completedLevels;
+
+    public void SetButtonEvent(int bundle, int pack)
+    {
+        GameManager.OnClickBundle b = new GameManager.OnClickBundle();
+        b.bundle = bundle;
+        b.pack = pack;
+        GetComponent<Button>().onClick.AddListener(() => { GameManager.NextPack(b); });
+    }
 
     public void SetPackName(string name)
     {
