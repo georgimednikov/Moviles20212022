@@ -10,6 +10,11 @@ public class LevelItem : MonoBehaviour
     [SerializeField] Image star;
     [SerializeField] Image tick;
 
+    public void SetButtonEvent(int level)
+    {
+        GetComponent<Button>().onClick.AddListener(() => { GameManager.NextLevel(level); });
+    }
+
     public void SetColor(Color32 col)
     {
         backgroundImg.color = col;
