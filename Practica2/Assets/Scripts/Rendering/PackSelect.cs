@@ -11,8 +11,6 @@ public class PackSelect : MonoBehaviour
 
     [Header("RenderItem")]
     [SerializeField] Text nameText;
-    [SerializeField] Image backgroundImg;
-    [SerializeField] Color32 foregroundcolor;
     [SerializeField] Image foregroundImg;
     [SerializeField] GameObject packTextPrefab;
     
@@ -24,8 +22,7 @@ public class PackSelect : MonoBehaviour
     public void LoadPacks()
     {
         nameText.text = bundle.bundleName;
-        backgroundImg.color = bundle.bundleColor;
-        foregroundImg.color = foregroundcolor;
+        foregroundImg.color = bundle.bundleColor;
         foreach(var pack in bundle.packs)
         {
             PackUI ui = Instantiate(packTextPrefab, transform).GetComponent<PackUI>();
@@ -34,6 +31,5 @@ public class PackSelect : MonoBehaviour
             ui.SetColor(bundle.bundleColor);
             //ui.SetPackCompletedLevels(); TODO
         }
-        
     }
 }

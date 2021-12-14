@@ -39,18 +39,18 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Se le comunica al Game Manager de qué pack va a ser el siguiente nivel
     /// </summary>
-    public void NextPack(int bundle, int pack)
+    public static void NextPack(int bundle, int pack)
     {
-        nextPack = levelBundles[bundle].packs[pack];
+        instance.nextPack = instance.levelBundles[bundle].packs[pack];
         SceneManager.LoadScene("SelectLevelScene");
     }
 
     /// <summary>
     /// Se le comunica al Game Manager qué nivel se va a jugar
     /// </summary>
-    public void NextLevel(int level)
+    public static void NextLevel(int level)
     {
-        nextLevel = nextPack.levelMap.text.Split('\n')[level];
+        instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[level];
         SceneManager.LoadScene("GameScene");
     }
 
@@ -60,5 +60,15 @@ public class GameManager : MonoBehaviour
     public void ChangeSkin(SkinPack skin)
     {
         skinPack = skin;
+    }
+
+    public static void GoToMainMenu()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    public static void GoToPackSelect()
+    {
+        SceneManager.LoadScene("PackSelect");
     }
 }

@@ -10,14 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 749597f354bb3aa4986a1c3895efce14, type: 3}
-  m_Name: Intro
+  m_Name: Rectangles
   m_EditorClassIdentifier: 
-  bundleName: Intro
+  bundleName: Rectangles
   bundleColor:
     serializedVersion: 2
-    rgba: 4278255360
+    rgba: 4278225403
   packs:
-  - {fileID: 11400000, guid: 81c4081d27064084a95f23bb0da9dd57, type: 2}
-  - {fileID: 11400000, guid: 0abcd8604c3b77049ad09f07816681b7, type: 2}
-  - {fileID: 11400000, guid: bc68bd9fbc844374a8d844c0884f8573, type: 2}
-  - {fileID: 11400000, guid: c39c684d6b46e934580a2a8546f0c43c, type: 2}
+  - {fileID: 11400000, guid: d9550d8aeafc87f49a04e64e3a3b443c, type: 2}
+  - {fileID: 11400000, guid: 41d41a23b64805344ac9ef7c13722c38, type: 2}
+  - {fileID: 11400000, guid: dc6c0a4774eb3a543975b6a1f16dd9cf, type: 2}

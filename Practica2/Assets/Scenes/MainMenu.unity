@@ -386,7 +386,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1001 &1171854367
+--- !u!1001 &1331352919
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -443,6 +443,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ac4ad9fae998364cbd4403069a3db1f, type: 3}
+--- !u!114 &1331352920 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4199122799030511052, guid: 7ac4ad9fae998364cbd4403069a3db1f, type: 3}
+  m_PrefabInstance: {fileID: 1331352919}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67a39a00493c3a341974a40684114640, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1484174122
 GameObject:
   m_ObjectHideFlags: 0
@@ -590,7 +601,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2073368681}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1331352920}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: GoToPackSelect
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &2073368681
 MonoBehaviour:
   m_ObjectHideFlags: 0
