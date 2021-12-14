@@ -13,6 +13,9 @@ public class GameManager : MonoBehaviour
 
     private LevelPack nextPack;
     private string nextLevel;
+#if UNITY_EDITOR
+    public int bundle, pack, level;
+#endif
 
     void Awake()
     {
@@ -30,8 +33,8 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
 #if UNITY_EDITOR
-        nextPack = levelBundles[0].packs[0];
-        nextLevel = nextPack.levelMap.text.Split('\n')[0];
+        nextPack = levelBundles[bundle].packs[pack];
+        nextLevel = nextPack.levelMap.text.Split('\n')[level];
 #endif
         instance.LM?.LoadLevel(instance.nextLevel);
     }

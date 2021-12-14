@@ -20,14 +20,15 @@ public class LevelManager : MonoBehaviour
     // TODO: comprobacion de errores
     public bool LoadLevel(string level)
     {
-        int sizeX, sizeY;
+        int sizeX, sizeY = 0;
         string[] levelRows = level.Split(';');
         string[] levelInfo = levelRows[0].Split(',');
 
         string[] levelSize = levelInfo[0].Split(':');
         sizeX = int.Parse(levelSize[0]);
         // Si el mapa no es cuadrado, el levelSize tiene tamaño 2.
-        sizeY = (levelSize.Length > 1) ? int.Parse(levelSize[1]) : 0; //Si es 0 es el valor inutil y no hay segunda dimension
+        sizeY = (levelSize.Length > 1) ? int.Parse(levelSize[1].Split('+')[0]) : 0; //Si es 0 es el valor inutil y no hay segunda dimension
+
 
         currentLevel = int.Parse(levelInfo[2]);
         BM.SetUIHeight(topRect.rect.height, botRect.rect.height, canvasScaler.referenceResolution.x);

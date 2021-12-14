@@ -22,7 +22,7 @@ public class Map
 
     public LogicTile[] GetFlow(int i) { return flows[i].GetPositions(); }
 
-    LogicTile[,] tileBoard;
+    public LogicTile[,] tileBoard;
 
     public Map()
     {
@@ -56,7 +56,7 @@ public class Map
         {
             string[] pos = flowStrings[i].Split(','); //Dividimos el string del flow en "numeros"
             int[] absFlow = System.Array.ConvertAll(pos, s => int.Parse(s)); //Pasamos los "numeros" a numeros
-            Vector2Int[] flow = System.Array.ConvertAll(absFlow, s => new Vector2Int(s / Height, s % Height)); //Pasamos los numeros a posiciones
+            Vector2Int[] flow = System.Array.ConvertAll(absFlow, s => new Vector2Int(s % Width, s / Width)); //Pasamos los numeros a posiciones
 
             LogicTile[] tiles = new LogicTile[flow.Length];
             for (int j = 0; j < tiles.Length; j++)
@@ -65,38 +65,49 @@ public class Map
         }
 
         // Se comprueba que parametros adicionales tiene el nivel y se gestionan.
-        int a, b;
+        int a = 0, b;
         string[] aux;
         if (levelInfo.Length > 0)
         {
-            aux = levelInfo[0].Split(':');
-            foreach (var n in aux)
+            if (levelInfo[0] != "")
             {
-                a = int.Parse(n);
-                tileBoard[a / Height, a % Height].tileType = LogicTile.TileType.BRIDGE;
+                aux = levelInfo[0].Split(':');
+                foreach (var n in aux)
+                {
+                    Debug.Log("Puente");
+                    a = int.Parse(n);
+                    tileBoard[a % Width, a / Width].tileType = LogicTile.TileType.BRIDGE;
+                }
             }
             if (levelInfo.Length > 1)
             {
-                aux = levelInfo[1].Split(':');
-                foreach (var n in aux)
+                if (levelInfo[1] != "")
                 {
-                    a = int.Parse(n);
-                    tileBoard[a / Height, a % Height].tileType = LogicTile.TileType.EMPTY;
+                    aux = levelInfo[1].Split(':');
+                    foreach (var n in aux)
+                    {
+                        Debug.LogError("Vacio");
+                        a = int.Parse(n);
+                        tileBoard[a % Width, a / Width].tileType = LogicTile.TileType.EMPTY;
+                    }
                 }
                 if (levelInfo.Length > 2)
                 {
+
                     aux = levelInfo[2].Split(':', '|');
                     for (int j = 0; j < aux.Length;)
                     {
+                        Debug.LogWarning("Pared");
                         a = int.Parse(aux[j++]);
                         b = int.Parse(aux[j++]);
-                        Vector2Int start = new Vector2Int(a / Height, a % Height);
-                        Vector2Int end = new Vector2Int(b / Height, b % Height);
+                        Vector2Int start = new Vector2Int(a % Width, a / Width);
+                        Vector2Int end = new Vector2Int(b % Width, b / Width);
                         Direction endDir;
                         Direction startDir = Flow.VectorsToDir(start, end, out endDir);
                         tileBoard[start.x, start.y].walls[(int)startDir] = true;
                         tileBoard[end.x, end.y].walls[(int)endDir] = true;
                     }
+
                 }
             }
         }
@@ -126,7 +137,7 @@ public class Map
 
     public void StoppedTouching()
     {
-        if (touchingIndex != prevTouchingIndex && touchingFlow.GetPositions().Length != prevTouchFlowSize) movements++;
+        if (touchingIndex != prevTouchingIndex && touchingFlow?.GetPositions()?.Length != prevTouchFlowSize) movements++;
         touchingFlow = null;
         prevTouchingIndex = touchingIndex;
         touchingIndex = -1;
@@ -182,12 +193,12 @@ public class Map
         }
     }
 
-    private bool GetFlow(Vector2Int pos)
+    private bool GetFlow(Vector2Int p)
     {
         int i = 0;
         foreach (var flow in flows)
         {
-            if (flow.BeingTouched(tileBoard[pos.x, pos.y]))
+            if (flow.BeingTouched(tileBoard[p.x, p.y]))
             {
                 touchingFlow = flow;
                 touchingIndex = i;
@@ -198,21 +209,33 @@ public class Map
         return false;
     }
 
-    private bool DifferentFlowEnd(LogicTile pos)
+    private bool DifferentFlowEnd(LogicTile p)
     {
         for (int i = 0; i < GetFlowEnds().Length; i++)
-            if (pos == GetFlowEnds()[i] && touchingIndex != i / 2) return true;
+            if (p == GetFlowEnds()[i] && touchingIndex != i / 2) return true;
         return false;
     }
 
-    private void CheckFlowCollision(LogicTile pos)
+    private void CheckFlowCollision(LogicTile p)
     {
         for (int i = 0; i < flows.Length; i++)
         {
             Flow f = flows[i];
-            int coll = f.CollidesWithFlow(pos);
-            if (coll != -1 && !(i == touchingIndex && pos == touchingFlow.GetLastPosition()))
+            int coll = f.CollidesWithFlow(p);
+
+            //Si hay colisión y no es con el flow que se está modificando (no te cortas a ti mismo)
+            if (coll != -1 && !(i == touchingIndex && p == touchingFlow.GetLastPosition()))
             {
+                //Si se pasa sobre un puente y se recorre en direcciones distintas no hay colisión
+                if (p.tileType == LogicTile.TileType.BRIDGE) {
+                LogicTile[] flowPositions = f.GetPositions();
+                Direction newBridgeDir = Flow.VectorsToDir(touchingFlow.GetLastPosition().pos, p.pos);
+                Direction prevBridgeDir1;
+                Direction prevBridgeDir2 = Flow.VectorsToDir(flowPositions[coll - 1].pos, flowPositions[coll].pos, out prevBridgeDir1);
+                
+                //Comprobar que no vayan en el mismo eje = dirección perpendicular
+                    if (newBridgeDir != prevBridgeDir1 && newBridgeDir != prevBridgeDir2) continue;
+                }
                 // Si es otro flujo, hay que quitar un indice mas porque la posicion que se comprueba pasa a ser del touchingFlow
                 // Si es el mismo flow no hace falta porque sigue perteneciendo a el
                 if (touchingIndex != i)

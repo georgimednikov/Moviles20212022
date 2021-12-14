@@ -42,9 +42,9 @@ public class Flow
         return positions[positions.Count - 1]; 
     }
 
-    public void CommitChanges(int pos) {
-        if (positions.Count - pos > 0) completed = false;
-        positions.RemoveRange(pos, positions.Count - pos);
+    public void CommitChanges(int p) {
+        if (positions.Count - p > 0) completed = false;
+        positions.RemoveRange(p, positions.Count - p);
     }
 
     public bool IsSolved()
@@ -98,7 +98,7 @@ public class Flow
         else completed = false;
         if (positions.Count > 0 &&
             (flow == positions[positions.Count - 1] ||
-            !HasAdjacent(flow))) return false;
+            !CanPlaceFlow(flow))) return false;
         hasBeenModified = true;
         positions.Add(flow);
         return true;
@@ -107,33 +107,65 @@ public class Flow
     public LogicTile GetFirstEnd() { return solution.First.Value; }
     public LogicTile GetLastEnd() { return solution.Last.Value; }
 
-    public bool BeingTouched(LogicTile pos)
+    public bool BeingTouched(LogicTile p)
     {
-        if (IsEnd(pos)) return true;
-        foreach (LogicTile p in positions)
+        if (IsEnd(p)) return true;
+        foreach (LogicTile po in positions)
         {
-            if (p == pos) return true;
+            if (po == p) return true;
         }
         return false;
     }
 
-    public int CollidesWithFlow(LogicTile pos)
+    //Devuelve el índice de la posición del flow donde ha habido una coincidencia; -1 si no hay
+    public int CollidesWithFlow(LogicTile p)
     {
         for (int i = 0; i < positions.Count; i++)
         {
-            if (positions[i] == pos) return i;
+            if (positions[i] == p) return i;
         }
         return -1;
     }
 
-    public bool IsEnd(LogicTile pos)
+    public bool IsEnd(LogicTile p)
     {
-        return pos == GetFirstEnd() || pos == GetLastEnd();
+        return p == GetFirstEnd() || p == GetLastEnd();
     }
 
-    bool HasAdjacent(LogicTile pos)
+    bool CanPlaceFlow(LogicTile p)
     {
-        return (pos.pos - positions[positions.Count - 1].pos).magnitude == 1;
+        LogicTile prev = positions[positions.Count - 1];
+
+        //Si la casilla está demasiado lejos o no se puede pone flujo sobre ella se devuelve false
+        if (p.tileType == LogicTile.TileType.EMPTY ||
+            (p.pos - prev.pos).magnitude != 1) return false;
+
+        //Si hay una pared entre la nueva casilla p y la última ya establecida se devuelve false
+        Direction prevToP;
+        Direction pToPrev = VectorsToDir(p.pos, prev.pos, out prevToP);
+        if (p.walls[(int)pToPrev]) return false;
+
+        //Si la anterior es puente y la nueva tile intenta girar se devuelve false
+        if (prev.tileType == LogicTile.TileType.BRIDGE)
+        {
+            LogicTile bridgeStart = positions[positions.Count - 2];
+            Direction startToPrev = VectorsToDir(bridgeStart.pos, prev.pos);
+            if (startToPrev != prevToP) return false;
+
+            //                  p (Si está aquí está mal)
+            //                ------
+            // bridgeStart ->  prev  -> p (Si está aquí está bien)
+            //                ------
+        }
+
+        //No se ha cumplido ninguna condición eliminatoria -> return true
+        return true;
+    }
+
+    public static Direction VectorsToDir(Vector2Int start, Vector2Int end)
+    {
+        Direction d;
+        return VectorsToDir(start, end, out d);
     }
 
     public static Direction VectorsToDir(Vector2Int start, Vector2Int end, out Direction opposite)
