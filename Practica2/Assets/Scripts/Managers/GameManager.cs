@@ -16,8 +16,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] public LevelBundle[] levelBundles;
     [SerializeField] public LevelManager LM;
 
-    public LevelPack nextPack;
-    public string nextLevel;
+    private LevelPack nextPack;
+    private string nextLevel;
+#if UNITY_EDITOR
+    public int bundle, pack, level;
+#endif
 
     void Awake()
     {
@@ -35,14 +38,14 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
 #if UNITY_EDITOR
-        nextPack = levelBundles[0].packs[0];
-        nextLevel = nextPack.levelMap.text.Split('\n')[0];
+        nextPack = levelBundles[bundle].packs[pack];
+        nextLevel = nextPack.levelMap.text.Split('\n')[level];
 #endif
         instance.LM?.LoadLevel(instance.nextLevel);
     }
 
     /// <summary>
-    /// Se le comunica al Game Manager de qué pack va a ser el siguiente nivel
+    /// Se le comunica al Game Manager de quï¿½ pack va a ser el siguiente nivel
     /// </summary>
     public static void NextPack(OnClickBundle onClick)
     {
@@ -52,7 +55,7 @@ public class GameManager : MonoBehaviour
 
 
     /// <summary>
-    /// Se le comunica al Game Manager qué nivel se va a jugar
+    /// Se le comunica al Game Manager quï¿½ nivel se va a jugar
     /// </summary>
     public static void NextLevel(int level)
     {

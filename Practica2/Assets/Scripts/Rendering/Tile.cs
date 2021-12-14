@@ -68,6 +68,11 @@ public class Tile : MonoBehaviour
         }
     }
 
+    public void Deactivate()
+    {
+        gameObject.SetActive(false);
+    }
+
     public void SetFlowEnd()
     {
         flowEnd.SetActive(true);

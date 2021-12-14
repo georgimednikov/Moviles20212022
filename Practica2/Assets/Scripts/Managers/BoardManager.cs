@@ -44,7 +44,8 @@ public class BoardManager : MonoBehaviour
 
     public void TouchedHere(Vector3 pos)
     {
-        Vector2Int boardPos = new Vector2Int(Mathf.FloorToInt(pos.x + (map.Width) / 2.0f), Mathf.FloorToInt(pos.y + (map.Height) / 2.0f - transform.position.y));
+        // Dani arregla esto TODO
+        Vector2Int boardPos = new Vector2Int(Mathf.FloorToInt(pos.x * ((map.Width) / 2.0f) / Camera.main.orthographicSize / Camera.main.aspect / transform.localScale.x + (map.Width) / 2.0f) , Mathf.FloorToInt(pos.y * ((map.Height) / 2.0f) / transform.localScale.y + map.Height / 2.0f - transform.position.y));
         if (boardPos.x < 0 || boardPos.x >= map.Width || boardPos.y < 0 || boardPos.y >= map.Height) return;
         map.TouchedHere(boardPos);
 
@@ -86,7 +87,7 @@ public class BoardManager : MonoBehaviour
                 }
                 if (collWithTouching) break;
             }
-            tile.Reset();
+            if (p.tileType != LogicTile.TileType.BRIDGE) tile.Reset();
             tile.SetColor(GameManager.instance.skinPack.colors[flowToRender]);
             Direction opposite;
             Direction dir = Flow.VectorsToDir(p.pos, prev.pos, out opposite);
@@ -143,6 +144,11 @@ public class BoardManager : MonoBehaviour
             tile.SetFlowEnd();
             //Módulo para que si no hay suficientes colores se repitan; i++ / 2 para pasar de color cada dos extremos
             tile.SetColor(colorPool[((i++) % colorPool.Length) / 2]);
+        }
+
+        foreach (var tile in map.tileBoard)
+        {
+            if (tile.tileType == LogicTile.TileType.EMPTY) board[tile.pos.x, tile.pos.y].Deactivate();
         }
 
         LM.UpdateInfo(map.movements, map.percentageFull, 0, map.GetNumFlows());
