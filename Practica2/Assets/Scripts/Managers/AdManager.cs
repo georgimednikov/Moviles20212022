@@ -14,7 +14,6 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     [SerializeField] Button _showAdButton;
     private string _gameId;
     string _adUnitId;
-    RewardedAdsButton litsener;
     static bool showInit = false, loadInit = false, initInit = false;
 
 
