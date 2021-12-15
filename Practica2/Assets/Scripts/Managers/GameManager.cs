@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -105,6 +106,13 @@ public class GameManager : MonoBehaviour
     public static void GoToMainMenu()
     {
         SceneManager.LoadScene("MainMenu");
+    }
+
+    internal void addHint()
+    {
+        hints++;
+        PlayerPrefs.SetInt("hints", _hints);
+        LM.UpdateHints();
     }
 
     public static void GoToPackSelect()

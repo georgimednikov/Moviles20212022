@@ -179,7 +179,7 @@ public class BoardManager : MonoBehaviour
 
     public void ToggleInput(bool enabled)
     {
-        GetComponent<InputManager>().enabled = enabled;
+        GetComponent<InputManager>().inputEnabled = enabled;
     }
 
     public void ShowEndScreen()

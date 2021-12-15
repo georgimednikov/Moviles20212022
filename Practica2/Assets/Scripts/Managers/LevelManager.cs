@@ -111,4 +111,9 @@ public class LevelManager : MonoBehaviour
         if(GameManager.instance.hints > 0) hintsText.text = GameManager.instance.hints + " x";
         else hintsText.text = "+";
     }
+
+    public void UpdateHints()
+    {
+        hintsText.text = GameManager.instance.hints + " x";
+    }
 }
