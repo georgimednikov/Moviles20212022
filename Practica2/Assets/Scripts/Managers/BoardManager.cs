@@ -14,10 +14,11 @@ public class BoardManager : MonoBehaviour
 
     Tile[,] board;
     Map map;
-    float topHeight, botHeight, refWidth;
-    float tileSize;
     Vector2 camSize;
     Vector2 baseOffset;
+    float topHeight, botHeight, refWidth;
+    float tileSize;
+    bool alreadyOver = false;
 
     public void SetUIHeight(float topHeight, float botHeight, float refWidth)
     {
@@ -62,6 +63,7 @@ public class BoardManager : MonoBehaviour
         baseOffset = Vector2.zero;
         transform.position = Vector3.zero;
         transform.localScale = Vector3.one;
+        alreadyOver = false;
     }
 
     public void UndoMove()
@@ -76,6 +78,13 @@ public class BoardManager : MonoBehaviour
     {
         int i = map.GiveHint();
         if (i == -1) return;
+        LogicTile[] ends = map.GetFlowEnds(map.touchingIndex);
+        foreach (LogicTile t in ends)
+        {
+            Tile tile = board[t.pos.x, t.pos.y];
+            tile.SetTick();
+            tile.GetComponent<TileAnimation>().PlayWave();
+        }
         RenderFlows();
         // Reducir en 1 las pistas TODO
     }
@@ -88,13 +97,25 @@ public class BoardManager : MonoBehaviour
         cursor.SetActive(true);
         cursor.transform.position = pos;
         cursor.transform.Translate(Vector3.forward * 11);
-        // cursor.getComponent<Image>().setColor() TODO
+        Color color = Color.white; color.a /= 2;
+        SpriteRenderer cursorRender = cursor.GetComponent<SpriteRenderer>();
+        cursorRender.color = color;
 
         if (x < 0 || x >= map.Width || y < 0 || y >= map.Height) return;
         map.TouchedHere(new Vector2Int(x, y));
 
+        //Si se está tocando un flow se cambia el color del cursor
+        if (map.touchingIndex != -1)
+        {
+            color = GameManager.instance.skinPack.colors[map.touchingIndex]; color.a /= 2;
+            cursorRender.color = color;
+        }
+
+        //Si hay una tile que animar (se ha hecho click en el final de un flow) se anima
+        LogicTile t = map.TileToAnimate();
+        if (t != null) board[t.pos.x, t.pos.y].GetComponent<TileAnimation>().PlayBump();
+
         RenderReset();
-        map.posToReset.Clear();
         RenderFlows();
     }
 
@@ -117,6 +138,7 @@ public class BoardManager : MonoBehaviour
         {
             board[p.pos.x, p.pos.y].Reset();
         }
+        map.posToReset.Clear();
     }
 
     private void RenderFlow(int flowToRender)
@@ -145,6 +167,11 @@ public class BoardManager : MonoBehaviour
                 if (collWithTouching) break;
             }
             if (p.tileType != LogicTile.TileType.BRIDGE) tile.Reset();
+            if (map.IsFlowSolved(flowToRender))
+            {
+                tilePrev.DrawTick();
+                tile.DrawTick();
+            }
             tile.SetColor(GameManager.instance.skinPack.colors[flowToRender]);
             Direction opposite;
             Direction dir = Flow.VectorsToDir(p.pos, prev.pos, out opposite);
@@ -169,10 +196,16 @@ public class BoardManager : MonoBehaviour
 
         map.StoppedTouching();
         LM.UpdateInfo(map.movements, map.percentageFull, map.numFlowsComplete, map.GetNumFlows());
-        if (map.IsSolved())
+        if (!alreadyOver && map.IsGameSolved())
         {
+            alreadyOver = true;
             ToggleInput(false);
             FadeOutAnimation fadeOut = Instantiate(map.movements == map.GetNumFlows() ? star : tick).GetComponent<FadeOutAnimation>();
+            LogicTile[] ends = map.GetFlowEnds();
+            foreach (LogicTile t in ends)
+            {
+                board[t.pos.x, t.pos.y].GetComponent<TileAnimation>().PlayWave(Random.Range(0f, 0.2f));
+            }
             fadeOut.AddListener(ShowEndScreen);
         }
     }
