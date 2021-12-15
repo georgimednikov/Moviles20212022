@@ -15,3 +15,10 @@ MonoBehaviour:
   levelName: Bonus Pack
   levelMap: {fileID: 4900000, guid: 60a547736549aad49b35554f364521ec, type: 3}
   numLevels: 150
+  minipackName:
+  - 5x5 - easy
+  - 6x6
+  - 7x7 - normal
+  - 8x8
+  - 9x9 - hard
+  locked: 0

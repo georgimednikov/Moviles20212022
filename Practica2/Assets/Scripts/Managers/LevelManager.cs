@@ -70,12 +70,17 @@ public class LevelManager : MonoBehaviour
 
     public void GameFinished(bool perfect, int moves)
     {
-        string finished = "finished_" + GameManager.instance.nextPack.name + "_" + currentLevel;
+        string finishedstr = "finished_" + GameManager.instance.nextPack.name + "_" + currentLevel;
         string movesstr = "moves_" + GameManager.instance.nextPack.name + "_" + currentLevel;
-        int oldfinished = PlayerPrefs.GetInt(finished, 0);
-        if(oldfinished < 2) PlayerPrefs.SetInt(finished, perfect ? 2 : 1);
+        string ncompletedstr = "ncompleted_" + GameManager.instance.nextPack.name;
+
+        int oldfinished = PlayerPrefs.GetInt(finishedstr, 0);
+        if(oldfinished < 2) PlayerPrefs.SetInt(finishedstr, perfect ? 2 : 1);
+
+        bestMovesText.text = "best: " + moves;
         int oldBest = PlayerPrefs.GetInt(movesstr, int.MaxValue);
         if(moves < oldBest) PlayerPrefs.SetInt(movesstr, moves);
+
         // Desbloquear el siguiente
         completeRect.Open();
 
@@ -86,6 +91,12 @@ public class LevelManager : MonoBehaviour
         } 
         youCompletedText.text = "You completed the level in " + moves + " moves.";
         levelCompleteText.text = perfect ? "Perfect!" : "Level complete!";
+
+        if(currentLevel < GameManager.instance.nextPack.numLevels - 1) PlayerPrefs.SetInt("locked_" + GameManager.instance.nextPack.name + "_" + (currentLevel + 1), 0);
+
+        int packNumCompleted = PlayerPrefs.GetInt(ncompletedstr, 0);
+        if (oldfinished < 1) packNumCompleted++;
+        PlayerPrefs.SetInt(ncompletedstr, packNumCompleted);
     }
 
     public void UndoMove()

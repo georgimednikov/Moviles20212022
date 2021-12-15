@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
     int _hints = 0;
     public int hints { get { return _hints; } set { _hints = value; PlayerPrefs.SetInt("hints", _hints); } }
     public LevelPack nextPack;
+    public LevelBundle nextBundle;
     public string nextLevel;
     public int levelIndex = 0;
 #if UNITY_EDITOR
@@ -42,7 +43,8 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
 #if UNITY_EDITOR
-        nextPack = levelBundles[bundle].packs[pack];
+        nextBundle = levelBundles[bundle];
+        nextPack = nextBundle.packs[pack];
         nextLevel = nextPack.levelMap.text.Split('\n')[level];
 #endif
         instance.LM?.LoadLevel(instance.nextLevel);
@@ -53,7 +55,8 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public static void NextPack(OnClickBundle onClick)
     {
-        instance.nextPack = instance.levelBundles[onClick.bundle].packs[onClick.pack];
+        instance.nextBundle = instance.levelBundles[onClick.bundle];
+        instance.nextPack = instance.nextBundle.packs[onClick.pack];
         GoToLevelSelect();
     }
 

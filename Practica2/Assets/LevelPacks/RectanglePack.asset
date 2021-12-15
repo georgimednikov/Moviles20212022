@@ -15,3 +15,10 @@ MonoBehaviour:
   levelName: Rectangle Pack
   levelMap: {fileID: 4900000, guid: 5da4779119fa9b349bda22ebc342cfd5, type: 3}
   numLevels: 150
+  minipackName:
+  - 8x10
+  - 9x11
+  - 10x12
+  - 11x13
+  - 12x14
+  locked: 0
