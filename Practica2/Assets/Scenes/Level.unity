@@ -502,9 +502,9 @@ RectTransform:
   m_Father: {fileID: 1439972871}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 30, y: -75}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 261, y: 0}
   m_SizeDelta: {x: 0, y: 150}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &165831927
@@ -596,6 +596,8 @@ MonoBehaviour:
   LM: {fileID: 595818643}
   tilePref: {fileID: 5487100221829159595, guid: ee513e031514527458e1c0cf14ae2967, type: 3}
   cursor: {fileID: 38409281}
+  star: {fileID: 4891118713542247071, guid: da956914b3f085945a2da3d9b8c67c1d, type: 3}
+  tick: {fileID: 3267365515847702037, guid: 8f101b0c9d1bf7f4592874106bf52a82, type: 3}
 --- !u!4 &219432602
 Transform:
   m_ObjectHideFlags: 0
@@ -622,6 +624,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a536ebedde68f3043b476d2fb3c03e59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputEnabled: 1
 --- !u!1 &226058154
 GameObject:
   m_ObjectHideFlags: 0
@@ -882,7 +885,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 115.04999}
+  m_AnchoredPosition: {x: 0, y: 115.049805}
   m_SizeDelta: {x: 200, y: 100}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &301212301
@@ -1036,7 +1039,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 298.56003}
+  m_AnchoredPosition: {x: 0, y: 298.56006}
   m_SizeDelta: {x: 480, y: 70}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &405064016
@@ -1536,6 +1539,8 @@ MonoBehaviour:
   finishedTick: {fileID: 1309659476}
   completeRect: {fileID: 1810411334}
   canvasScaler: {fileID: 748195277}
+  animationStar: {fileID: 0}
+  animationTick: {fileID: 0}
 --- !u!4 &595818644
 Transform:
   m_ObjectHideFlags: 0
@@ -1832,6 +1837,18 @@ MonoBehaviour:
         m_TargetAssemblyTypeName: BoardManager, Assembly-CSharp
         m_MethodName: ToggleInput
         m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 628193833}
+        m_TargetAssemblyTypeName: DeactivateButton, Assembly-CSharp
+        m_MethodName: OppositeClicked
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -2948,9 +2965,9 @@ RectTransform:
   m_Father: {fileID: 1439972871}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: -75}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 150}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &1146542847
@@ -3805,8 +3822,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b6bcf6d36bef77409c87ebb4889d13f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameId: 4505913
-  enableTestMode: 1
+  _androidAdUnitId: Banner_Android
+  _iOsAdUnitId: Banner_iOS
+  _androidGameId: 4505885
+  _iOSGameId: 4505884
+  _testMode: 1
+  _showAdButton: {fileID: 1916885941}
 --- !u!1 &1710200986
 GameObject:
   m_ObjectHideFlags: 0
@@ -4287,7 +4308,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1916885942}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1576025642}
+        m_TargetAssemblyTypeName: AdManager, Assembly-CSharp
+        m_MethodName: ShowAd
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1916885942
 MonoBehaviour:
   m_ObjectHideFlags: 0

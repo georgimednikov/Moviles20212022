@@ -9,15 +9,15 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] GameObject tilePref;
     [SerializeField] GameObject cursor;
+    [SerializeField] GameObject star;
+    [SerializeField] GameObject tick;
 
-
-    float topHeight, botHeight, refWidth;
     Tile[,] board;
     Map map;
-    Vector2 camSize;
+    float topHeight, botHeight, refWidth;
     float tileSize;
+    Vector2 camSize;
     Vector2 baseOffset;
-
 
     public void SetUIHeight(float topHeight, float botHeight, float refWidth)
     {
@@ -172,13 +172,19 @@ public class BoardManager : MonoBehaviour
         if (map.IsSolved())
         {
             ToggleInput(false);
-            LM.GameFinished(map.movements == map.GetNumFlows(), map.movements);
+            FadeOutAnimation fadeOut = Instantiate(map.movements == map.GetNumFlows() ? star : tick).GetComponent<FadeOutAnimation>();
+            fadeOut.AddListener(ShowEndScreen);
         }
     }
 
     public void ToggleInput(bool enabled)
     {
-        GetComponent<InputManager>().enabled = enabled;
+        GetComponent<InputManager>().inputEnabled = enabled;
+    }
+
+    public void ShowEndScreen()
+    {
+        LM.GameFinished(map.movements == map.GetNumFlows(), map.movements);
     }
 
     void ArrangeInScreen()
