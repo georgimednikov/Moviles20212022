@@ -2,33 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct Animation
-{
-    public bool active;
-    public float durationTime;
-    public float elapsedTime;
-
-    public Animation(float dur)
-    {
-        active = false;
-        elapsedTime = 0;
-        durationTime = dur;
-    }
-
-    public bool UpdateTime()
-    {
-        elapsedTime += Time.deltaTime;
-        if (elapsedTime >= durationTime)
-        {
-            elapsedTime = 0;
-            active = false;
-            return false;
-        }
-        else
-            return true;
-    }
-}
-
 public class TileAnimation : MonoBehaviour
 {
     public GameObject flowEnd;
@@ -43,13 +16,13 @@ public class TileAnimation : MonoBehaviour
     SpriteRenderer waveRenderer;
     float baseSize;
 
-    Animation wave;
-    Animation bump;
+    GameAnimation wave;
+    GameAnimation bump;
 
     private void Start()
     {
-        wave = new Animation(waveDuration);
-        bump = new Animation(bumpDuration);
+        wave = new GameAnimation(waveDuration);
+        bump = new GameAnimation(bumpDuration);
 
         flowWave = Instantiate(flowMid, transform);
         waveRenderer = flowWave.GetComponent<SpriteRenderer>();
@@ -60,7 +33,7 @@ public class TileAnimation : MonoBehaviour
 
     private void Update()
     {
-        if (bump.active)
+        if (bump.active && !bump.UpdateWait())
         {
             if (bump.UpdateTime())
             {
@@ -75,7 +48,7 @@ public class TileAnimation : MonoBehaviour
             }
         }
 
-        if (wave.active)
+        if (wave.active && !wave.UpdateWait())
         {
             if (wave.UpdateTime())
             {
@@ -93,14 +66,16 @@ public class TileAnimation : MonoBehaviour
         }
     }
 
-    public void PlayBump()
+    public void PlayBump(float wait = -1)
     {
         bump.active = true;
+        bump.waitTime = wait;
     }
 
-    public void PlayWave()
+    public void PlayWave(float wait = -1)
     {
         wave.active = true;
+        wave.waitTime = wait;
         flowWave.SetActive(true);
     }
 }

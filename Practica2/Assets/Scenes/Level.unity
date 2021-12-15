@@ -504,7 +504,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 261, y: 0}
   m_SizeDelta: {x: 0, y: 150}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &165831927
@@ -596,6 +596,8 @@ MonoBehaviour:
   LM: {fileID: 595818643}
   tilePref: {fileID: 5487100221829159595, guid: ee513e031514527458e1c0cf14ae2967, type: 3}
   cursor: {fileID: 38409281}
+  star: {fileID: 4891118713542247071, guid: da956914b3f085945a2da3d9b8c67c1d, type: 3}
+  tick: {fileID: 3267365515847702037, guid: 8f101b0c9d1bf7f4592874106bf52a82, type: 3}
 --- !u!4 &219432602
 Transform:
   m_ObjectHideFlags: 0
@@ -1536,6 +1538,8 @@ MonoBehaviour:
   finishedTick: {fileID: 1309659476}
   completeRect: {fileID: 1810411334}
   canvasScaler: {fileID: 748195277}
+  animationStar: {fileID: 0}
+  animationTick: {fileID: 0}
 --- !u!4 &595818644
 Transform:
   m_ObjectHideFlags: 0

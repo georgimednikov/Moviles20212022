@@ -25,6 +25,8 @@ public class LevelManager : MonoBehaviour
     [SerializeField] Image finishedTick;
     [SerializeField] CompleteRect completeRect;
     [SerializeField] CanvasScaler canvasScaler;
+    [SerializeField] GameObject animationStar;
+    [SerializeField] GameObject animationTick;
 
     // TODO: comprobacion de errores
     public bool LoadLevel(string level)
@@ -77,6 +79,11 @@ public class LevelManager : MonoBehaviour
         // Desbloquear el siguiente
         completeRect.Open();
 
+        if (!finishedStar.enabled)
+        {
+            finishedStar.enabled = perfect;
+            finishedTick.enabled = !perfect;
+        } 
         youCompletedText.text = "You completed the level in " + moves + " moves.";
         levelCompleteText.text = perfect ? "Perfect!" : "Level complete!";
     }
