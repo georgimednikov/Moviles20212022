@@ -15,3 +15,10 @@ MonoBehaviour:
   levelName: Tower Pack
   levelMap: {fileID: 4900000, guid: 34255bf164c772a41868305dcefc3edf, type: 3}
   numLevels: 150
+  minipackName:
+  - 5x6 - 5x11
+  - 6x7 - 6x12
+  - 7x8 - 7x13
+  - 8x9 - 8x14
+  - 9x10 - 9x15
+  locked: 0

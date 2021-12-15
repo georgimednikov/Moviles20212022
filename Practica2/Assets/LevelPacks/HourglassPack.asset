@@ -15,3 +15,10 @@ MonoBehaviour:
   levelName: Hourglass Pack
   levelMap: {fileID: 4900000, guid: 29edee0a965a75542b264e64b54f091d, type: 3}
   numLevels: 150
+  minipackName:
+  - 9x11
+  - 9x12
+  - 11x13
+  - 11x14
+  - 13x15
+  locked: 0

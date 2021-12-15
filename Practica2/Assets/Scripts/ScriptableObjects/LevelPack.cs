@@ -8,5 +8,6 @@ public class LevelPack : ScriptableObject
     public string levelName;
     public TextAsset levelMap;
     public int numLevels;
+    public string[] minipackName;
     public bool locked = false;
 }

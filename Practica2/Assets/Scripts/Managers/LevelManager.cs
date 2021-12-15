@@ -79,6 +79,8 @@ public class LevelManager : MonoBehaviour
 
         youCompletedText.text = "You completed the level in " + moves + " moves.";
         levelCompleteText.text = perfect ? "Perfect!" : "Level complete!";
+
+        if(currentLevel < GameManager.instance.nextPack.numLevels - 1)PlayerPrefs.SetInt("locked_" + GameManager.instance.nextPack.name + "_" + (currentLevel + 1), 0);
     }
 
     public void UndoMove()

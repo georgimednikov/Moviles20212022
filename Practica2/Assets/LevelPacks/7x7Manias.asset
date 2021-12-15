@@ -15,4 +15,10 @@ MonoBehaviour:
   levelName: 7x7 Manias
   levelMap: {fileID: 4900000, guid: 2378aa7508d9a2c4ea2dc6b73c470adf, type: 3}
   numLevels: 150
+  minipackName:
+  - 1 - 30
+  - 31 - 60
+  - 61 - 90
+  - 91 - 120
+  - 121 - 150
   locked: 1
