@@ -343,7 +343,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4669536746062531885
 Transform:
   m_ObjectHideFlags: 0
@@ -1062,6 +1062,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5487100221829159596}
   - component: {fileID: 4523026797000672014}
+  - component: {fileID: 4605599905949659492}
   m_Layer: 0
   m_Name: Tile
   m_TagString: Untagged
@@ -1117,6 +1118,24 @@ MonoBehaviour:
   looseEnd: {fileID: 5487100220572559097}
   corner: {fileID: 5487100220265200329}
   tick: {fileID: 2066521350051349020}
+--- !u!114 &4605599905949659492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5487100221829159595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ac8f6652e2e7db4295e669ec8526959, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flowEnd: {fileID: 5487100221986777961}
+  bumpDuration: 0.3
+  bumpSizeInc: 0.3
+  flowMid: {fileID: 5487100220572559097}
+  waveDuration: 0.5
+  waveSizeInc: 2.5
 --- !u!1 &5487100221986777961
 GameObject:
   m_ObjectHideFlags: 0

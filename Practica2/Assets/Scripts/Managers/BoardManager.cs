@@ -174,6 +174,9 @@ public class BoardManager : MonoBehaviour
             ToggleInput(false);
             LM.GameFinished(map.movements == map.GetNumFlows(), map.movements);
         }
+
+        board[0, 0].GetComponent<TileAnimation>().PlayWave();
+        //board[0, 0].GetComponent<TileAnimation>().PlayBump();
     }
 
     public void ToggleInput(bool enabled)
