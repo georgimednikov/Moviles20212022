@@ -112,7 +112,7 @@ public class BoardManager : MonoBehaviour
         }
 
         //Si hay una tile que animar (se ha hecho click en el final de un flow) se anima
-        LogicTile t = map.TileToAnimate();
+        LogicTile t = map.TileToBump();
         if (t != null) board[t.pos.x, t.pos.y].GetComponent<TileAnimation>().PlayBump();
 
         RenderReset();
@@ -146,7 +146,7 @@ public class BoardManager : MonoBehaviour
         LogicTile[] flow = map.GetFlow(flowToRender);
         //Si el flow no tiene longitud (pasa al hacerle undo a un flow con un único movimiento) no se renderiza
         if (flow.Length == 0) return;
-
+        
         LogicTile[] touchingFlow = map.GetFlow(map.touchingIndex);
         board[flow[0].pos.x, flow[0].pos.y].Reset();
         for (int i = 1; i < flow.Length; ++i)
@@ -194,7 +194,15 @@ public class BoardManager : MonoBehaviour
                 map.flowsToRender[i] = false;
             }
 
+        //Si se ha commiteado el flow y hay que animar una tile por un corte se anima
+        LogicTile tw = map.TileToWave();
+        if (tw != null) board[tw.pos.x, tw.pos.y].GetComponent<TileAnimation>().PlayWave();
+
         map.StoppedTouching();
+
+        tw = map.TileIncomplete();
+        if (tw != null) board[tw.pos.x, tw.pos.y].SetLooseEnd();
+
         LM.UpdateInfo(map.movements, map.percentageFull, map.numFlowsComplete, map.GetNumFlows());
         if (!alreadyOver && map.IsGameSolved())
         {
