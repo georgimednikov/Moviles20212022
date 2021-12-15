@@ -11,6 +11,7 @@ public class LevelManager : MonoBehaviour
 
     [SerializeField] RectTransform topRect;
     [SerializeField] RectTransform botRect;
+    [SerializeField] RectTransform infoRect;
     [SerializeField] Text movesText;
     [SerializeField] Text bestMovesText;
     [SerializeField] Text pipeText;
@@ -66,6 +67,11 @@ public class LevelManager : MonoBehaviour
     public void ResetLevel()
     {
         BM.ResetLevel();
+    }
+
+    public void setInfoRectHeight(float h)
+    {
+        infoRect.anchoredPosition = new Vector2(infoRect.anchoredPosition.x, h * canvasScaler.referenceResolution.y / 2);
     }
 
     public void GameFinished(bool perfect, int moves)

@@ -191,20 +191,23 @@ public class BoardManager : MonoBehaviour
     {
         float boardScreenMaxHeight = Camera.main.orthographicSize * 2 * (1 - (topHeight + botHeight) / Camera.main.scaledPixelHeight * Camera.main.scaledPixelWidth / refWidth);
         float cameraWidthSize = Camera.main.orthographicSize * 2 * Camera.main.aspect;
-        if (cameraWidthSize > boardScreenMaxHeight)//hay muchas tiles en vertical
+        camSize = new Vector2(Camera.main.orthographicSize * Camera.main.aspect, Camera.main.orthographicSize);
+        if (map.Width / (float)map.Height < cameraWidthSize / boardScreenMaxHeight)//hay muchas tiles en vertical
         {
             // Hay que coger el height como valor limite de la pantalla
+            tileSize = boardScreenMaxHeight / map.Height;
             transform.localScale = new Vector3(boardScreenMaxHeight / (map.Height), boardScreenMaxHeight / (map.Height), 1);
         }
         else
         {
-            camSize = new Vector2(Camera.main.orthographicSize * Camera.main.aspect, Camera.main.orthographicSize);
             tileSize = camSize.x * 2.0f / map.Width;
-            baseOffset = new Vector2(-tileSize * map.Width / 2.0f, -tileSize * map.Height / 2.0f);
             transform.localScale = new Vector3(cameraWidthSize / (map.Width), cameraWidthSize / (map.Width), 1);
         }
+        baseOffset = new Vector2(-tileSize * map.Width / 2.0f, -tileSize * map.Height / 2.0f);
         //Se offsetea en Y en base a los márgenes del canvas
         transform.Translate(0, (botHeight - topHeight) / Camera.main.scaledPixelHeight * Camera.main.orthographicSize * Camera.main.scaledPixelWidth / refWidth, 0);
+        float y = (tileSize * map.Height / 2 + transform.position.y) / camSize.y;
+        LM.setInfoRectHeight(y);
     }
 
     public void LoadMap(string[] flows)
