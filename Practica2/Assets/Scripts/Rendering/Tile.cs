@@ -13,7 +13,7 @@ public class Tile : MonoBehaviour
     [SerializeField] GameObject corner;
     [SerializeField] GameObject tick;
 
-    Color32 color;
+    bool hinted = false;
 
     private void Awake()
     {
@@ -87,12 +87,17 @@ public class Tile : MonoBehaviour
 
     public void SetTick()
     {
-        tick.SetActive(true);
+        hinted = true;
+    }
+
+    public void DrawTick()
+    {
+        if (hinted)
+            tick.SetActive(true);
     }
 
     public void SetColor(Color32 col)
     {
-        color = col;
         flowEnd.GetComponent<SpriteRenderer>().color = col;
         looseEnd.GetComponent<SpriteRenderer>().color = col;
         corner.GetComponent<SpriteRenderer>().color = col;

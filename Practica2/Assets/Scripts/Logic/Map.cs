@@ -8,14 +8,15 @@ public class Map
     Flow[] flows;
     List<int> hintFlows;
     Flow touchingFlow;
+    LogicTile tileToAnim;
     LogicTile[] lastMovedFlow;
+    LogicTile[] flowEnds;
     int lastMovedIndex;
     int lastMovedMovements;
     public int touchingIndex { get; private set; }
     public int movements { get; private set; }
     public int percentageFull { get; private set; }
     public int numFlowsComplete { get; private set; }
-    LogicTile[] flowEnds;
     int prevTouchingIndex, startTouchFlowSize;
 
     public bool[] flowsToRender { get; private set; }
@@ -66,7 +67,12 @@ public class Map
         return touchingIndex;
     }
 
-    public bool IsSolved()
+    public bool IsFlowSolved(int flow)
+    {
+        return flows[flow].IsSolved();
+    }
+
+    public bool IsGameSolved()
     {
         foreach (Flow f in flows)
         {
@@ -153,6 +159,7 @@ public class Map
     public void TouchedHere(Vector2Int pos)
     {
         LogicTile tile = tileBoard[pos.x, pos.y];
+        tileToAnim = null; //Suponemos que no hay que animar ninguna tile
         if (touchingFlow == null)
         {
             if (GetFlow(pos))
@@ -162,6 +169,7 @@ public class Map
                 lastMovedIndex = touchingIndex;
                 if (touchingFlow.IsEnd(tile))
                 {
+                    tileToAnim = tileBoard[pos.x, pos.y]; //Si se da la condición se asigna
                     AddToReset(touchingIndex, 0);
                     if (touchingFlow.StartNewFlow(tile))
                         flowsToRender[touchingIndex] = true;
@@ -197,6 +205,19 @@ public class Map
         percentageFull = (int)(100 * (sum / ((Width * Height) - 2 * flows.Length - emptyTiles)));
     }
 
+    public LogicTile TileToAnimate()
+    {
+        //Si hay que animar una tile se coge el extremo contrario al que se ha pulsado
+        if (tileToAnim != null)
+        {
+            LogicTile[] ends = GetFlowEnds(touchingIndex);
+            foreach (LogicTile t in ends)
+                if (tileToAnim != t)
+                    return t;
+        }
+        return null;
+    }
+
     public int UndoMove()
     {
         if (lastMovedFlow == null) return -1;
@@ -211,6 +232,15 @@ public class Map
     public int GetNumFlows()
     {
         return flows.Length;
+    }
+
+    public LogicTile[] GetFlowEnds(int flow)
+    {
+        if (flowEnds == null) GetFlowEnds();
+        LogicTile[] tiles = new LogicTile[2];
+        tiles[0] = flowEnds[flow * 2];
+        tiles[1] = flowEnds[flow * 2 + 1];
+        return tiles;
     }
 
     public LogicTile[] GetFlowEnds()
