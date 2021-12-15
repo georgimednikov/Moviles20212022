@@ -8,6 +8,9 @@ public class Map
     Flow[] flows;
     List<int> hintFlows;
     Flow touchingFlow;
+    LogicTile[] lastMovedFlow;
+    int lastMovedIndex;
+    int lastMovedMovements;
     public int touchingIndex { get; private set; }
     public int movements { get; private set; }
     public int percentageFull { get; private set; }
@@ -38,14 +41,28 @@ public class Map
 
     public int GiveHint()
     {
+        // TODO: no es solo random, coge al mas molesto, y ademas no coge flows solved
         if (hintFlows.Count == 0) return -1;
 
         int randomIndex = UnityEngine.Random.Range(0, hintFlows.Count - 1);
         flows[hintFlows[randomIndex]].Solve();
-        //flowsToRender[hintFlows[chosenFlow]] = true;
+
+        //Se asignan los touching para que cuando se deje de hacer click
+        //en la pista se procesa como si se hubiera realizado un movimiento
         touchingFlow = flows[hintFlows[randomIndex]];
         touchingIndex = hintFlows[randomIndex];
+
+        for (int i = 0; i < flows.Length; ++i)
+        {
+            CommitFlow(i);
+            flowsToRender[i] = true;
+        }
+
         hintFlows.RemoveAt(randomIndex);
+        lastMovedFlow = null;
+        lastMovedMovements = movements;
+        lastMovedIndex = -1;
+
         return touchingIndex;
     }
 
@@ -53,7 +70,7 @@ public class Map
     {
         foreach (Flow f in flows)
         {
-            if (!f.IsSolved()) 
+            if (!f.IsSolved())
                 return false;
         }
         return true;
@@ -140,6 +157,9 @@ public class Map
         {
             if (GetFlow(pos))
             {
+                lastMovedFlow = touchingFlow.GetPositions();
+                lastMovedMovements = movements;
+                lastMovedIndex = touchingIndex;
                 if (touchingFlow.IsEnd(tile))
                 {
                     AddToReset(touchingIndex, 0);
@@ -161,7 +181,7 @@ public class Map
     public void StoppedTouching()
     {
         if (touchingFlow != null && touchingIndex != prevTouchingIndex && touchingFlow.GetPositions().Length != startTouchFlowSize) movements++;
-        //Si has tocado en un lugar no válido no se reasigna
+        //Solo se reasigna si has tocado en un lugar válido
         if (touchingFlow != null) prevTouchingIndex = touchingIndex;
         touchingIndex = -1;
         float sum = 0;
@@ -173,9 +193,19 @@ public class Map
             if (flow.completed) numComp++;
         }
 
-        Debug.Log(sum);
         numFlowsComplete = numComp;
         percentageFull = (int)(100 * (sum / ((Width * Height) - 2 * flows.Length - emptyTiles)));
+    }
+
+    public int UndoMove()
+    {
+        if (lastMovedFlow == null) return -1;
+        Flow flow = flows[lastMovedIndex];
+        AddToReset(lastMovedIndex);
+        flow.UndoMove(lastMovedFlow);
+        movements = lastMovedMovements;
+        touchingIndex = lastMovedIndex;
+        return touchingIndex;
     }
 
     public int GetNumFlows()
@@ -210,7 +240,7 @@ public class Map
             LogicTile fpos = flows[flowIndex].GetPositions()[i];
             foreach (LogicTile touchpos in flows[touchingIndex].GetPositions())
             {
-                if (fpos == touchpos)
+                if (fpos.pos == touchpos.pos)
                 {
                     flows[flowIndex].CommitChanges(i);
                 }
@@ -272,7 +302,7 @@ public class Map
         }
     }
 
-    private void AddToReset(int flowIndex, int posIndex)
+    private void AddToReset(int flowIndex, int posIndex = 0)
     {
         Flow f = flows[flowIndex];
         LogicTile[] collFlow = f.GetPositions(posIndex);

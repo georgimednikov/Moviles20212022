@@ -15,3 +15,4 @@ MonoBehaviour:
   levelName: 6x6 Manias
   levelMap: {fileID: 4900000, guid: db1d18d471c4d5a42b3803977aefb3d4, type: 3}
   numLevels: 150
+  locked: 1

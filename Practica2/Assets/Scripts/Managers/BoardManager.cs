@@ -46,11 +46,37 @@ public class BoardManager : MonoBehaviour
         ArrangeInScreen();
     }
 
+    public void ResetLevel()
+    {
+        topHeight = 0;
+        botHeight = 0;
+        refWidth = 0;
+        foreach (Tile t in board)
+        {
+            Destroy(t.gameObject);
+        }
+        board = null;
+        map = null;
+        camSize = Vector2.zero;
+        tileSize = 0;
+        baseOffset = Vector2.zero;
+        transform.position = Vector3.zero;
+        transform.localScale = Vector3.one;
+    }
+
+    public void UndoMove()
+    {
+        int i = map.UndoMove();
+        if (i == -1) return;
+        RenderReset();
+        RenderFlow(i);
+    }
+
     public void GiveHint()
     {
         int i = map.GiveHint();
         if (i == -1) return;
-        RenderFlow(i);
+        RenderFlows();
         // Reducir en 1 las pistas TODO
     }
 
@@ -67,11 +93,13 @@ public class BoardManager : MonoBehaviour
         if (x < 0 || x >= map.Width || y < 0 || y >= map.Height) return;
         map.TouchedHere(new Vector2Int(x, y));
 
-        foreach (LogicTile p in map.posToReset)
-        {
-            board[p.pos.x, p.pos.y].Reset();
-        }
+        RenderReset();
         map.posToReset.Clear();
+        RenderFlows();
+    }
+
+    private void RenderFlows()
+    {
         if (map.touchingIndex != -1)
             RenderFlow(map.touchingIndex);
         for (int i = 0; i < map.flowsToRender.Length; i++)
@@ -83,9 +111,20 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    private void RenderReset()
+    {
+        foreach (LogicTile p in map.posToReset)
+        {
+            board[p.pos.x, p.pos.y].Reset();
+        }
+    }
+
     private void RenderFlow(int flowToRender)
     {
         LogicTile[] flow = map.GetFlow(flowToRender);
+        //Si el flow no tiene longitud (pasa al hacerle undo a un flow con un único movimiento) no se renderiza
+        if (flow.Length == 0) return;
+
         LogicTile[] touchingFlow = map.GetFlow(map.touchingIndex);
         board[flow[0].pos.x, flow[0].pos.y].Reset();
         for (int i = 1; i < flow.Length; ++i)
@@ -131,7 +170,15 @@ public class BoardManager : MonoBehaviour
         map.StoppedTouching();
         LM.UpdateInfo(map.movements, map.percentageFull, map.numFlowsComplete, map.GetNumFlows());
         if (map.IsSolved())
-            Debug.LogError("HAS GANADO :M");
+        {
+            ToggleInput(false);
+            LM.GameFinished(map.movements == map.GetNumFlows(), map.movements);
+        }
+    }
+
+    public void ToggleInput(bool enabled)
+    {
+        GetComponent<InputManager>().enabled = enabled;
     }
 
     void ArrangeInScreen()

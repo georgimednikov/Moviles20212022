@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class InputManager : MonoBehaviour
 {
-    
     void Update()
     {
         if (Input.GetButton("Fire1"))
@@ -14,5 +13,17 @@ public class InputManager : MonoBehaviour
         }
         else if (Input.GetButtonUp("Fire1"))
             GameManager.instance.LM.BM.StoppedTouching();
+
+        if (Input.touches.Length > 0)
+        {
+            var touch = Input.touches[0];
+            if (touch.phase == TouchPhase.Began || touch.phase == TouchPhase.Moved)
+            {
+                Vector3 pos = Camera.main.ScreenToWorldPoint(touch.position);
+                GameManager.instance.LM.BM.TouchedHere(pos);
+            }
+            else if (touch.phase == TouchPhase.Ended)
+                GameManager.instance.LM.BM.StoppedTouching();
+        }
     }
 }

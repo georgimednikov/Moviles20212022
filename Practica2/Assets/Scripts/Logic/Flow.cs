@@ -36,17 +36,24 @@ public class Flow
     public void Solve()
     {
         positions.Clear();
-        //positions.AddRange(solution);
         int i = 0;
         var sol = solution.First;
         while (sol != null)
         {
-            LogicTile tile =  new LogicTile(Vector2Int.one);
-            tile.pos = sol.Value.pos;
+            LogicTile tile =  new LogicTile(sol.Value.pos);
             tile.tileType = sol.Value.tileType;
             tile.walls = sol.Value.walls;
             AddFlow(tile);
             sol = sol.Next; i++;
+        }
+    }
+
+    public void UndoMove(LogicTile[] p)
+    {
+        positions.Clear();
+        foreach (LogicTile t in p)
+        {
+            AddFlow(t);
         }
     }
 

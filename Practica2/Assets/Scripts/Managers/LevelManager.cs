@@ -12,11 +12,16 @@ public class LevelManager : MonoBehaviour
     [SerializeField] RectTransform topRect;
     [SerializeField] RectTransform botRect;
     [SerializeField] Text movesText;
+    [SerializeField] Text bestMovesText;
     [SerializeField] Text pipeText;
     [SerializeField] Text flowsText;
     [SerializeField] Text levelText;
     [SerializeField] Text sizeText;
-    [SerializeField] Image completionAmount;
+    [SerializeField] Text hintsText;
+    [SerializeField] DeactivateButton nextLevelButton;
+    [SerializeField] Image finishedStar;
+    [SerializeField] Image finishedTick;
+    [SerializeField] CompleteRect completeRect;
     [SerializeField] CanvasScaler canvasScaler;
 
     // TODO: comprobacion de errores
@@ -41,7 +46,39 @@ public class LevelManager : MonoBehaviour
         BM.SetBoard(sizeX, sizeY);
         BM.LoadMap(levelRows); // Quita el primer valor de levelRows que es la info del nivel y no un flow
 
+        nextLevelButton.SetLimit(GameManager.instance.nextPack.numLevels);
+
+        int finished = PlayerPrefs.GetInt("finished_" + GameManager.instance.nextPack.name + "_" + currentLevel, 0);
+        finishedStar.enabled = finished == 2;
+        finishedTick.enabled = finished == 1;
+        int bestMoves = PlayerPrefs.GetInt("moves_" + GameManager.instance.nextPack.name + "_" + currentLevel, 0);
+        bestMovesText.text = "best: " + (bestMoves == 0 ? "-" : bestMoves.ToString());
+
+        hintsText.text = GameManager.instance.hints + " x";
+
         return true;
+    }
+
+    public void ResetLevel()
+    {
+        BM.ResetLevel();
+    }
+
+    public void GameFinished(bool perfect, int moves)
+    {
+        string finished = "finished_" + GameManager.instance.nextPack.name + "_" + currentLevel;
+        string movesstr = "moves_" + GameManager.instance.nextPack.name + "_" + currentLevel;
+        int oldfinished = PlayerPrefs.GetInt(finished, 0);
+        if(oldfinished < 2) PlayerPrefs.SetInt(finished, perfect ? 2 : 1);
+        int oldBest = PlayerPrefs.GetInt(movesstr, int.MaxValue);
+        if(oldBest < moves) PlayerPrefs.SetInt(movesstr, moves);
+        // Desbloquear el siguiente
+        completeRect.Open();
+    }
+
+    public void UndoMove()
+    {
+        BM.UndoMove();
     }
 
     public void UpdateInfo(int moves, int percentage, int curFlows, int totalFlows)
@@ -49,5 +86,17 @@ public class LevelManager : MonoBehaviour
         movesText.text = "moves: " + moves;
         pipeText.text = "pipe: " + percentage + "%";
         flowsText.text = "flows: " + curFlows + "/" + totalFlows;
+    }
+
+    public void GiveHint()
+    {
+        if (GameManager.instance.hints > 0)
+        {
+            BM.GiveHint();
+            GameManager.instance.hints--;
+        }
+            
+        if(GameManager.instance.hints > 0) hintsText.text = GameManager.instance.hints + " x";
+        else hintsText.text = "+";
     }
 }

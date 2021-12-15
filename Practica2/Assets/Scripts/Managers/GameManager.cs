@@ -16,8 +16,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] public LevelBundle[] levelBundles;
     [SerializeField] public LevelManager LM;
 
+    int _hints = 0;
+    public int hints { get { return _hints; } set { _hints = value; PlayerPrefs.SetInt("hints", _hints); } }
     public LevelPack nextPack;
     public string nextLevel;
+    public int levelIndex = 0;
 #if UNITY_EDITOR
     public int bundle, pack, level;
 #endif
@@ -27,6 +30,9 @@ public class GameManager : MonoBehaviour
         if (instance == null)
         {
             instance = this;
+            int h = PlayerPrefs.GetInt("hints", -1);
+            if (h < 0) hints = 3; // TODO: mas seguro, en su propio manager?
+            else hints = h;
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -50,12 +56,35 @@ public class GameManager : MonoBehaviour
         GoToLevelSelect();
     }
 
+    public static void LoadNextLevel()
+    {
+        if (instance.levelIndex > instance.nextPack.numLevels) return; // TODO desactivar boton
+        instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[++instance.levelIndex];
+        Debug.Log("Cargando " + instance.levelIndex);
+        instance.LM.ResetLevel();
+        instance.LM.LoadLevel(instance.nextLevel);
+    }
+    public static void LoadPrevLevel()
+    {
+        if (instance.levelIndex < 0) return;
+        instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[--instance.levelIndex];
+        Debug.Log("Cargando " + instance.levelIndex);
+        instance.LM.ResetLevel();
+        instance.LM.LoadLevel(instance.nextLevel);
+    }
+
+    public static void ResetLevel()
+    {
+        instance.LM.ResetLevel();
+        instance.LM.LoadLevel(instance.nextLevel);
+    }
 
     /// <summary>
     /// Se le comunica al Game Manager qu� nivel se va a jugar
     /// </summary>
     public static void NextLevel(int level)
     {
+        instance.levelIndex = level;
         instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[level];
         SceneManager.LoadScene("Level");
     }
