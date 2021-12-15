@@ -213,7 +213,7 @@ public class BoardManager : MonoBehaviour
             Tile tile = board[end.pos.x, end.pos.y];
             tile.SetFlowEnd();
             //Módulo para que si no hay suficientes colores se repitan; i++ / 2 para pasar de color cada dos extremos
-            tile.SetColor(colorPool[((i++) % colorPool.Length) / 2]);
+            tile.SetColor(colorPool[((i++) / 2) % colorPool.Length]);
         }
 
         foreach (var tile in map.tileBoard)
