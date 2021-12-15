@@ -18,6 +18,8 @@ public class LevelManager : MonoBehaviour
     [SerializeField] Text levelText;
     [SerializeField] Text sizeText;
     [SerializeField] Text hintsText;
+    [SerializeField] Text youCompletedText;
+    [SerializeField] Text levelCompleteText;
     [SerializeField] DeactivateButton nextLevelButton;
     [SerializeField] Image finishedStar;
     [SerializeField] Image finishedTick;
@@ -71,9 +73,12 @@ public class LevelManager : MonoBehaviour
         int oldfinished = PlayerPrefs.GetInt(finished, 0);
         if(oldfinished < 2) PlayerPrefs.SetInt(finished, perfect ? 2 : 1);
         int oldBest = PlayerPrefs.GetInt(movesstr, int.MaxValue);
-        if(oldBest < moves) PlayerPrefs.SetInt(movesstr, moves);
+        if(moves < oldBest) PlayerPrefs.SetInt(movesstr, moves);
         // Desbloquear el siguiente
         completeRect.Open();
+
+        youCompletedText.text = "You completed the level in " + moves + " moves.";
+        levelCompleteText.text = perfect ? "Perfect!" : "Level complete!";
     }
 
     public void UndoMove()
