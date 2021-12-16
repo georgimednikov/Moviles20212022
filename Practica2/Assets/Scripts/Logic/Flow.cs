@@ -31,14 +31,14 @@ public class Flow
     public LogicTile[] GetPositions(int p = 0) {
         return positions.GetRange(p, positions.Count - p).ToArray(); 
     }
-    public void RemovePositions(int p)
+    public void RemovePositions(int p = 0)
     {
         if (positions.Count == 0) return;
         if(positions.Count - p > 0) completed = false;
         positions.RemoveRange(p, positions.Count - p);
     }
 
-    public void Solve()
+    /*public void Solve()
     {
         positions.Clear();
         int i = 0;
@@ -51,6 +51,15 @@ public class Flow
             AddFlow(tile);
             sol = sol.Next; i++;
         }
+    }*/
+
+    public LogicTile[] GetSolution()
+    {
+        LogicTile[] sol = new LogicTile[solution.Count];
+        var node = solution.First;
+        for (int i = 0; i < solution.Count; i++, node = node.Next)
+            sol[i] = node.Value;
+        return sol;
     }
 
     public void UndoMove(LogicTile[] p)

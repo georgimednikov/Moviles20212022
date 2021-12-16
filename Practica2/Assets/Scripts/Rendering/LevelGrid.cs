@@ -8,6 +8,7 @@ public class LevelGrid : MonoBehaviour
     [SerializeField] LevelItem[] levels;
     [SerializeField] Text descriptionText;
     int ind;
+
     public void SetIndexStart(int index)
     {
         ind = index;

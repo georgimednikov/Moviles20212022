@@ -22,12 +22,11 @@ public class LevelManager : MonoBehaviour
     [SerializeField] Text youCompletedText;
     [SerializeField] Text levelCompleteText;
     [SerializeField] DeactivateButton nextLevelButton;
+    [SerializeField] DeactivateButton prevLevelButton;
     [SerializeField] Image finishedStar;
     [SerializeField] Image finishedTick;
     [SerializeField] CompleteRect completeRect;
     [SerializeField] CanvasScaler canvasScaler;
-    [SerializeField] GameObject animationStar;
-    [SerializeField] GameObject animationTick;
 
     // TODO: comprobacion de errores
     public bool LoadLevel(string level)
@@ -51,13 +50,14 @@ public class LevelManager : MonoBehaviour
         BM.SetBoard(sizeX, sizeY);
         BM.LoadMap(levelRows); // Quita el primer valor de levelRows que es la info del nivel y no un flow
 
-        nextLevelButton.SetLimit(GameManager.instance.nextPack.numLevels);
+        nextLevelButton.SetLimit(GameManager.instance.nextPack.numLevels - currentLevel);
+        prevLevelButton.SetLimit(currentLevel);
 
         var levelsave = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, currentLevel);
         finishedStar.enabled = levelsave.completed == 2;
         finishedTick.enabled = levelsave.completed == 1;
         int bestMoves = levelsave.bestmoves;
-        bestMovesText.text = "best: " + (bestMoves == 0 ? "-" : bestMoves.ToString());
+        bestMovesText.text = "best: " + (bestMoves == int.MaxValue ? "-" : bestMoves.ToString());
 
         if (GameManager.instance.hints > 0) hintsText.text = GameManager.instance.hints + " x";
         else hintsText.text = "+";
@@ -82,7 +82,7 @@ public class LevelManager : MonoBehaviour
         if (oldfinished < 2) levelsaved.completed = perfect ? 2 : 1;
 
         bestMovesText.text = "best: " + moves;
-        levelsaved.bestmoves = moves;
+        if(levelsaved.bestmoves > moves) levelsaved.bestmoves = moves;
 
         // Desbloquear el siguiente
         completeRect.Open();
@@ -124,7 +124,7 @@ public class LevelManager : MonoBehaviour
         if (GameManager.instance.hints > 0)
         {
             BM.GiveHint();
-            GameManager.instance.hints--;
+            //GameManager.instance.hints--;
         }
 
         if (GameManager.instance.hints > 0) hintsText.text = GameManager.instance.hints + " x";

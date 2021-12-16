@@ -504,7 +504,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 403.3, y: 0}
+  m_AnchoredPosition: {x: 261, y: 0}
   m_SizeDelta: {x: 0, y: 150}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &165831927
@@ -1538,12 +1538,11 @@ MonoBehaviour:
   youCompletedText: {fileID: 301212301}
   levelCompleteText: {fileID: 405064016}
   nextLevelButton: {fileID: 1553667413}
+  prevLevelButton: {fileID: 628193833}
   finishedStar: {fileID: 889790968}
   finishedTick: {fileID: 1309659476}
   completeRect: {fileID: 1810411334}
   canvasScaler: {fileID: 748195277}
-  animationStar: {fileID: 0}
-  animationTick: {fileID: 0}
 --- !u!4 &595818644
 Transform:
   m_ObjectHideFlags: 0
@@ -2581,7 +2580,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 250}
+  m_SizeDelta: {x: 0, y: 240}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &973420248
 GameObject:
@@ -4264,7 +4263,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1810411332}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 2}
+  m_LocalPosition: {x: 0, y: 0, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2020477662}

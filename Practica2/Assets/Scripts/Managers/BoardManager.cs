@@ -87,6 +87,7 @@ public class BoardManager : MonoBehaviour
             tile.SetTick();
             tile.GetComponent<TileAnimation>().PlayWave();
         }
+        RenderReset();
         RenderFlows();
         // Reducir en 1 las pistas TODO
     }
