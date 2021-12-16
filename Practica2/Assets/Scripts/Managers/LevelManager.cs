@@ -22,12 +22,11 @@ public class LevelManager : MonoBehaviour
     [SerializeField] Text youCompletedText;
     [SerializeField] Text levelCompleteText;
     [SerializeField] DeactivateButton nextLevelButton;
+    [SerializeField] DeactivateButton prevLevelButton;
     [SerializeField] Image finishedStar;
     [SerializeField] Image finishedTick;
     [SerializeField] CompleteRect completeRect;
     [SerializeField] CanvasScaler canvasScaler;
-    [SerializeField] GameObject animationStar;
-    [SerializeField] GameObject animationTick;
 
     // TODO: comprobacion de errores
     public bool LoadLevel(string level)
@@ -51,7 +50,8 @@ public class LevelManager : MonoBehaviour
         BM.SetBoard(sizeX, sizeY);
         BM.LoadMap(levelRows); // Quita el primer valor de levelRows que es la info del nivel y no un flow
 
-        nextLevelButton.SetLimit(GameManager.instance.nextPack.numLevels);
+        nextLevelButton.SetLimit(GameManager.instance.nextPack.numLevels - currentLevel);
+        prevLevelButton.SetLimit(currentLevel);
 
         var levelsave = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, currentLevel);
         finishedStar.enabled = levelsave.completed == 2;

@@ -62,7 +62,6 @@ public class GameManager : MonoBehaviour
     {
         if (instance.levelIndex > instance.nextPack.numLevels) return; // TODO desactivar boton
         instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[++instance.levelIndex];
-        Debug.Log("Cargando " + instance.levelIndex);
         instance.LM.ResetLevel();
         instance.LM.LoadLevel(instance.nextLevel);
     }
@@ -70,7 +69,6 @@ public class GameManager : MonoBehaviour
     {
         if (instance.levelIndex < 0) return;
         instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[--instance.levelIndex];
-        Debug.Log("Cargando " + instance.levelIndex);
         instance.LM.ResetLevel();
         instance.LM.LoadLevel(instance.nextLevel);
     }
