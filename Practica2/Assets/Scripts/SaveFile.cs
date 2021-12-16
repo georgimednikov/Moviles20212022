@@ -15,7 +15,7 @@ public class LevelSave
 {
     public int id;
     public int completed; // 0 = no, 1 = si, 2 = perfect
-    public int bestmoves;
+    public int bestmoves = int.MaxValue;
     public int locked = -1; // -1 = por defecto (hay que poner el valor de verdad), 0 = no, 1 = si
 }
 

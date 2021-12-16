@@ -57,7 +57,7 @@ public class LevelManager : MonoBehaviour
         finishedStar.enabled = levelsave.completed == 2;
         finishedTick.enabled = levelsave.completed == 1;
         int bestMoves = levelsave.bestmoves;
-        bestMovesText.text = "best: " + (bestMoves == 0 ? "-" : bestMoves.ToString());
+        bestMovesText.text = "best: " + (bestMoves == int.MaxValue ? "-" : bestMoves.ToString());
 
         if (GameManager.instance.hints > 0) hintsText.text = GameManager.instance.hints + " x";
         else hintsText.text = "+";
@@ -83,7 +83,7 @@ public class LevelManager : MonoBehaviour
         if (oldfinished < 2) levelsaved.completed = perfect ? 2 : 1;
 
         bestMovesText.text = "best: " + moves;
-        levelsaved.bestmoves = moves;
+        if(levelsaved.bestmoves > moves) levelsaved.bestmoves = moves;
 
         // Desbloquear el siguiente
         completeRect.Open();

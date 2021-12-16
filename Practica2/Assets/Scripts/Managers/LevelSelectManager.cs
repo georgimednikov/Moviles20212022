@@ -8,6 +8,7 @@ public class LevelSelectManager : MonoBehaviour
     [SerializeField] GameObject levelGridPrefab;
     [SerializeField] Text nameText;
     [SerializeField] Transform content;
+
     private void Start()
     {
         LoadLevels();
