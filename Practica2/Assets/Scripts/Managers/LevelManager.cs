@@ -112,11 +112,15 @@ public class LevelManager : MonoBehaviour
         BM.UndoMove();
     }
 
-    public void UpdateInfo(int moves, int percentage, int curFlows, int totalFlows)
+    public void UpdateInfo(int moves, int curFlows, int totalFlows)
     {
         movesText.text = "moves: " + moves;
-        pipeText.text = "pipe: " + percentage + "%";
         flowsText.text = "flows: " + curFlows + "/" + totalFlows;
+    }
+
+    public void UpdateFlowInfo(int percentage)
+    {
+        pipeText.text = "pipe: " + percentage + "%";
     }
 
     public void GiveHint()

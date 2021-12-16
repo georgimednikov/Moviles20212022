@@ -189,7 +189,10 @@ public class Map
             if (DifferentFlowEnd(tile)) return;
             CheckFlowCollision(tile);
             if (touchingFlow.AddFlow(tile))
+            {
                 flowsToRender[touchingIndex] = true;
+            }
+            CalculatePercentage();
         }
     }
 
@@ -205,16 +208,23 @@ public class Map
         }
         touchingFlow = null;
         touchingIndex = -1;
+        CalculateFlows();
+    }
+
+    private void CalculatePercentage()
+    {
         float sum = 0;
+        foreach (var flow in flows)
+            sum += flow.GetNumPipes() - 2;
+        percentageFull = (int)(100 * (sum / ((Width * Height) - 2 * flows.Length - emptyTiles)));
+    }
+
+    private void CalculateFlows()
+    {
         int numComp = 0;
         foreach (var flow in flows)
-        {
-            sum += flow.GetNumPipes() - 2;
             if (flow.completed) numComp++;
-        }
-
         numFlowsComplete = numComp;
-        percentageFull = (int)(100 * (sum / ((Width * Height) - 2 * flows.Length - emptyTiles)));
     }
 
     public LogicTile TileToBump()

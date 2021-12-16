@@ -120,6 +120,7 @@ public class BoardManager : MonoBehaviour
 
         RenderReset();
         RenderFlows();
+        LM.UpdateFlowInfo(map.percentageFull);
     }
 
     private void RenderFlows()
@@ -219,7 +220,7 @@ public class BoardManager : MonoBehaviour
             prevLooseEnd.SetLooseEnd(true);
         }
 
-        LM.UpdateInfo(map.movements, map.percentageFull, map.numFlowsComplete, map.GetNumFlows());
+        LM.UpdateInfo(map.movements, map.numFlowsComplete, map.GetNumFlows());
         if (!alreadyOver && map.IsGameSolved())
         {
             alreadyOver = true;
@@ -291,6 +292,6 @@ public class BoardManager : MonoBehaviour
             }
         }
 
-        LM.UpdateInfo(map.movements, map.percentageFull, 0, map.GetNumFlows());
+        LM.UpdateInfo(map.movements, 0, map.GetNumFlows());
     }
 }
