@@ -74,6 +74,8 @@ public class Map
         lastMovedMovements = movements;
         lastMovedIndex = -1;
 
+        //Se actualiza el porcentaje, el resto de info cuando se deja de hacer click
+        CalculatePercentage();
         return touchingIndex;
     }
 
@@ -192,7 +194,7 @@ public class Map
             {
                 flowsToRender[touchingIndex] = true;
             }
-            CalculatePercentage();
+            CalculatePercentage(); //Se ha modificado un flow -> Se actualiza el porcentaje
         }
     }
 
@@ -208,7 +210,7 @@ public class Map
         }
         touchingFlow = null;
         touchingIndex = -1;
-        CalculateFlows();
+        CalculateFlows(); //Solo se actualiza la información cuando se deja de hacer click y la acción es definitiva
     }
 
     private void CalculatePercentage()
