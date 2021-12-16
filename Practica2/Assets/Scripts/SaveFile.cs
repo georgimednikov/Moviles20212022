@@ -23,6 +23,6 @@ public class LevelSave
 public class SaveFile
 {
     public List<LevelPackSave> packSaves = new List<LevelPackSave>();
-    public int hints;
+    public int hints = 3;
     public bool disabledAds;
 }

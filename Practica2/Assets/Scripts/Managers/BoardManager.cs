@@ -89,6 +89,7 @@ public class BoardManager : MonoBehaviour
         }
         RenderReset();
         RenderFlows();
+        LM.UpdateFlowInfo(map.percentageFull);
         // Reducir en 1 las pistas TODO
     }
 
