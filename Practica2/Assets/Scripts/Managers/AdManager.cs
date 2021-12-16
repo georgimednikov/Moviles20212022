@@ -114,7 +114,7 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     #region Show
     public void ShowAd(AdId adId)
     {
-        if (!adsDisabled)
+        if (!adsDisabled && Random.Range(0.0f, 1.0f) < 0.3333)
         {
             if (!adId.init)
                 Advertisement.Show(adId.id, this);

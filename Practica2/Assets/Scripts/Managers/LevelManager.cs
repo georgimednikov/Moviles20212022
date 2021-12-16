@@ -71,7 +71,7 @@ public class LevelManager : MonoBehaviour
 
     public void setInfoRectHeight(float h)
     {
-        infoRect.anchoredPosition = new Vector2(infoRect.anchoredPosition.x, h * canvasScaler.referenceResolution.y / 2);
+        //infoRect.anchoredPosition = new Vector2(infoRect.anchoredPosition.x, h * canvasScaler.referenceResolution.y / 2);
     }
 
     public void GameFinished(bool perfect, int moves)

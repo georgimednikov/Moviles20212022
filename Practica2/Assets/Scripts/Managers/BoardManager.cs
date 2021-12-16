@@ -74,6 +74,7 @@ public class BoardManager : MonoBehaviour
         if (i == -1) return;
         RenderReset();
         RenderFlow(i);
+        LM.UpdateFlowInfo(map.percentageFull);
     }
 
     public void GiveHint()

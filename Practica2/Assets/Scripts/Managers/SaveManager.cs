@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 
 public class SaveManager : MonoBehaviour
 {
@@ -24,7 +26,6 @@ public class SaveManager : MonoBehaviour
         string json = JsonUtility.ToJson(saveFile);
         string destination = Application.persistentDataPath + fileString + ".json";
         StreamWriter file = new StreamWriter(destination);
-        Debug.Log(json);
         file.Write(json);
         file.Flush();
     }
@@ -38,9 +39,11 @@ public class SaveManager : MonoBehaviour
     }
 
     // TODO: hacer (Pablo)
-    public void Hash()
+    public byte[] Hash(string json)
     {
-        throw new NotImplementedException();
+        byte[] test = Encoding.ASCII.GetBytes(json);
+        SHA256 sHA = SHA256.Create();
+        return sHA.ComputeHash(test);
     }
 
     public void StoreHint(int hint)

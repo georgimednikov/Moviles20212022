@@ -26,3 +26,10 @@ public class SaveFile
     public int hints = 3;
     public bool disabledAds;
 }
+
+ [System.Serializable]
+public class SaveFileHash
+{
+    public SaveFile file;
+    public byte[] hash;
+}

@@ -262,6 +262,8 @@ public class Map
         flow.UndoMove(lastMovedFlow);
         movements = lastMovedMovements;
         touchingIndex = lastMovedIndex;
+        //Se actualiza el porcentaje, el resto de info cuando se deja de hacer click
+        CalculatePercentage();
         return touchingIndex;
     }
 
