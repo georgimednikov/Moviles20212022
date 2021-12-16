@@ -10,40 +10,71 @@ public class SaveManager : MonoBehaviour
 {
     SaveFile saveFile;
 
+    public string saveDirection = "/save";
+    string pimienta = "https://gl.wikipedia.org/wiki/Pementa";
+
     private void Awake()
     {
-        LoadFromFile("/save");
+        if (!LoadFromFile(saveDirection))
+        {
+            Debug.LogError("Oh no datos corruptos");
+            saveFile = new SaveFile();
+        }
     }
 
     private void OnApplicationQuit()
     {
-        SaveToFile("/save");
+        SaveToFile(saveDirection);
     }
 
     // Guarda en Application.persistentDataPath + fileString + ".json"
     public void SaveToFile(string fileString)
     {
-        string json = JsonUtility.ToJson(saveFile);
         string destination = Application.persistentDataPath + fileString + ".json";
-        StreamWriter file = new StreamWriter(destination);
-        file.Write(json);
-        file.Flush();
+        using (StreamWriter sw = new StreamWriter(destination))
+        {
+            saveFile.hash = "";
+            string json = JsonUtility.ToJson(saveFile);
+            saveFile.hash = Hash(pimienta.Substring(0, 16) + json + pimienta.Substring(15, 21));
+            string jsonhash = JsonUtility.ToJson(saveFile);
+            sw.Write(jsonhash);
+        }
     }
 
-    public void LoadFromFile(string fileString)
+    public bool LoadFromFile(string fileString)
     {
         string source = Application.persistentDataPath + fileString + ".json";
         if (File.Exists(source))
-            saveFile = JsonUtility.FromJson<SaveFile>(string.Concat(File.ReadAllLines(source)));
-        else saveFile = new SaveFile();
+            saveFile = JsonUtility.FromJson<SaveFile>(File.ReadAllText(source));
+        else
+        {
+            saveFile = new SaveFile();
+            return true;
+        }
+
+        string hash = saveFile.hash;
+        saveFile.hash = "";
+        string json = JsonUtility.ToJson(saveFile);
+        string hashNew = Hash(pimienta.Substring(0, 16) + json + pimienta.Substring(15, 21));
+        return hash == hashNew;
     }
 
-    // TODO: hacer (Pablo)
-    public byte[] Hash(string json)
+    public string Hash(string json)
     {
-        byte[] test = Encoding.ASCII.GetBytes(json);
-        SHA256 sHA = SHA256.Create();
-        return sHA.ComputeHash(test);
+        // Create a SHA256
+        using (SHA256 sha256Hash = SHA256.Create())
+        {
+            // ComputeHash - returns byte array
+            byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(json));
+
+            // Convert byte array to a string
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                builder.Append(bytes[i].ToString("x2"));
+            }
+            return builder.ToString();
+        }
     }
 
     public void StoreHint(int hint)
@@ -58,7 +89,7 @@ public class SaveManager : MonoBehaviour
 
     public void StoreNumCompleted(string packName, int ncompleted)
     {
-       saveFile.packSaves.Find(p => p.name.Equals(packName)).numCompleted = ncompleted;
+        saveFile.packSaves.Find(p => p.name.Equals(packName)).numCompleted = ncompleted;
     }
 
     public int RestoreHint()
@@ -94,7 +125,7 @@ public class SaveManager : MonoBehaviour
     public int RestoreNumCompleted(string packName)
     {
         var a = saveFile.packSaves.Find(p => p.name.Equals(packName));
-        if(a == null) // Esta comprobacion es para cuando se carga por primera vez el juego, para que se rellene solo el savefile
+        if (a == null) // Esta comprobacion es para cuando se carga por primera vez el juego, para que se rellene solo el savefile
         {
             a = new LevelPackSave();
             a.name = packName;

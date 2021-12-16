@@ -76,7 +76,8 @@ public class LevelManager : MonoBehaviour
 
     public void GameFinished(bool perfect, int moves)
     {
-        var levelsaved = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, currentLevel);
+        var SM = GameManager.instance.GetComponent<SaveManager>();
+        var levelsaved = SM.RestoreLevel(GameManager.instance.nextPack.levelName, currentLevel);
 
         int oldfinished = levelsaved.completed;
         if (oldfinished < 2) levelsaved.completed = perfect ? 2 : 1;
@@ -97,14 +98,15 @@ public class LevelManager : MonoBehaviour
 
         if (currentLevel < GameManager.instance.nextPack.numLevels - 1)
         {
-            var nextLevel = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, currentLevel + 1);
+            var nextLevel = SM.RestoreLevel(GameManager.instance.nextPack.levelName, currentLevel + 1);
             nextLevel.locked = 0; // No es una copia
         }
 
 
-        int packNumCompleted = GameManager.instance.GetComponent<SaveManager>().RestoreNumCompleted(GameManager.instance.nextPack.levelName);
+        int packNumCompleted = SM.RestoreNumCompleted(GameManager.instance.nextPack.levelName);
         if (oldfinished < 1) packNumCompleted++;
-        GameManager.instance.GetComponent<SaveManager>().StoreNumCompleted(GameManager.instance.nextPack.levelName, packNumCompleted);
+        SM.StoreNumCompleted(GameManager.instance.nextPack.levelName, packNumCompleted);
+        SM.SaveToFile(GameManager.instance.GetComponent<SaveManager>().saveDirection);
     }
 
     public void UndoMove()

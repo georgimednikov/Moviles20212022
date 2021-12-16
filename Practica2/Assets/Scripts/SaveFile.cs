@@ -22,14 +22,8 @@ public class LevelSave
 [System.Serializable]
 public class SaveFile
 {
+    public string hash;
     public List<LevelPackSave> packSaves = new List<LevelPackSave>();
     public int hints = 3;
     public bool disabledAds;
-}
-
- [System.Serializable]
-public class SaveFileHash
-{
-    public SaveFile file;
-    public byte[] hash;
 }
