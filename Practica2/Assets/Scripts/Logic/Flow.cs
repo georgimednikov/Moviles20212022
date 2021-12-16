@@ -63,7 +63,7 @@ public class Flow
     }
 
     public LogicTile GetLastPosition() {
-        if (positions.Count == 0) return new LogicTile(new Vector2Int(-1, -1));
+        if (positions.Count == 0) return null;
         return positions[positions.Count - 1]; 
     }
 

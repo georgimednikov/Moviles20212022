@@ -80,9 +80,9 @@ public class Tile : MonoBehaviour
         flowEnd.SetActive(true);
     }
 
-    public void SetLooseEnd()
+    public void SetLooseEnd(bool state)
     {
-        looseEnd.SetActive(true);
+        looseEnd.SetActive(state);
     }
 
     public void SetTick()

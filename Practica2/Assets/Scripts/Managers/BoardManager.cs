@@ -13,6 +13,7 @@ public class BoardManager : MonoBehaviour
     [SerializeField] GameObject tick;
 
     Tile[,] board;
+    Tile prevLooseEnd;
     Map map;
     Vector2 camSize;
     Vector2 baseOffset;
@@ -52,14 +53,15 @@ public class BoardManager : MonoBehaviour
         topHeight = 0;
         botHeight = 0;
         refWidth = 0;
+        tileSize = 0;
         foreach (Tile t in board)
         {
             Destroy(t.gameObject);
         }
         board = null;
         map = null;
+        prevLooseEnd = null;
         camSize = Vector2.zero;
-        tileSize = 0;
         baseOffset = Vector2.zero;
         transform.position = Vector3.zero;
         transform.localScale = Vector3.one;
@@ -194,14 +196,27 @@ public class BoardManager : MonoBehaviour
                 map.flowsToRender[i] = false;
             }
 
-        //Si se ha commiteado el flow y hay que animar una tile por un corte se anima
-        LogicTile tw = map.TileToWave();
-        if (tw != null) board[tw.pos.x, tw.pos.y].GetComponent<TileAnimation>().PlayWave();
+        //Se hace la animación en la última casilla de los flows que han sido cortados
+        bool[] tw = map.TilesToWave();
+        for (int i = 0; i < tw.Length; i++)
+        {
+            if (tw[i])
+            {
+                LogicTile[] flow = map.GetFlow(i);
+                LogicTile t = flow[flow.Length - 1];
+                if (t != null) board[t.pos.x, t.pos.y].GetComponent<TileAnimation>().PlayWave();
+            }
+        }
 
         map.StoppedTouching();
 
-        tw = map.TileIncomplete();
-        if (tw != null) board[tw.pos.x, tw.pos.y].SetLooseEnd();
+        LogicTile looseEnd = map.TileLooseEnd();
+        if (looseEnd != null)
+        {
+            if (prevLooseEnd != null) prevLooseEnd.SetLooseEnd(false);
+            prevLooseEnd = board[looseEnd.pos.x, looseEnd.pos.y];
+            prevLooseEnd.SetLooseEnd(true);
+        }
 
         LM.UpdateInfo(map.movements, map.percentageFull, map.numFlowsComplete, map.GetNumFlows());
         if (!alreadyOver && map.IsGameSolved())
