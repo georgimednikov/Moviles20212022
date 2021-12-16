@@ -6,7 +6,6 @@ using UnityEngine;
 public class Map
 {
     Flow[] flows;
-    List<int> hintFlows;
     Flow touchingFlow;
     LogicTile[] lastMovedFlow;
     LogicTile[] flowEnds;
@@ -16,23 +15,21 @@ public class Map
 
     int lastMovedIndex;
     int lastMovedMovements;
+    int prevTouchingIndex, startTouchFlowSize;
+    int emptyTiles = 0;
+    public int Width { get; set; }
+    public int Height { get; set; }
     public int touchingIndex { get; private set; }
     public int movements { get; private set; }
     public int percentageFull { get; private set; }
     public int numFlowsComplete { get; private set; }
-    int prevTouchingIndex, startTouchFlowSize;
-
     public bool[] flowsToRender { get; private set; }
+
     public List<LogicTile> posToReset { get; private set; }
-
-    public int Width { get; set; }
-    public int Height { get; set; }
-
     public LogicTile[] GetFlow(int i) { return flows[i].GetPositions(); }
 
     public LogicTile[,] tileBoard;
 
-    int emptyTiles = 0;
 
     public Map()
     {
@@ -46,23 +43,33 @@ public class Map
     public int GiveHint()
     {
         // TODO: no es solo random, coge al mas molesto, y ademas no coge flows solved
-        if (hintFlows.Count == 0) return -1;
+        if (IsGameSolved()) return -1;
 
-        int randomIndex = UnityEngine.Random.Range(0, hintFlows.Count - 1);
-        flows[hintFlows[randomIndex]].Solve();
+        int randomIndex;
+        do
+        {
+            randomIndex = UnityEngine.Random.Range(0, flows.Length);
+        } while (flows[randomIndex].IsSolved());
 
         //Se asignan los touching para que cuando se deje de hacer click
         //en la pista se procesa como si se hubiera realizado un movimiento
-        touchingFlow = flows[hintFlows[randomIndex]];
-        touchingIndex = hintFlows[randomIndex];
+        touchingIndex = randomIndex;
+        touchingFlow = flows[randomIndex];
 
-        for (int i = 0; i < flows.Length; ++i)
+        AddToReset(touchingIndex);
+        touchingFlow.RemovePositions();
+        LogicTile[] solution = touchingFlow.GetSolution();
+        foreach(LogicTile t in solution)
         {
-            CommitFlow(i);
-            flowsToRender[i] = true;
+            CheckFlowCollision(t);
+            touchingFlow.AddFlow(t);
+        }
+        for (int j = 0; j < flows.Length; ++j)
+        {
+            CommitFlow(j);
+            flowsToRender[j] = true;
         }
 
-        hintFlows.RemoveAt(randomIndex);
         lastMovedFlow = null;
         lastMovedMovements = movements;
         lastMovedIndex = -1;
@@ -88,11 +95,6 @@ public class Map
     public void LoadMap(string[] flowStrings, string[] levelInfo)
     {
         flows = new Flow[flowStrings.Length];
-        hintFlows = new List<int>();
-        for (int i = 0; i < flows.Length; ++i)
-        {
-            hintFlows.Add(i);
-        }
         flowsToRender = new bool[flows.Length];
         brokenFlows = new bool[flows.Length];
         posToReset = new List<LogicTile>();
