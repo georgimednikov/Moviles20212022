@@ -64,12 +64,14 @@ public class TileAnimation : MonoBehaviour
 
     public void PlayBump(float wait = -1)
     {
+        if (bump.active) return;
         bump.active = true;
         bump.waitTime = wait;
     }
 
     public void PlayWave(float wait = -1)
     {
+        if (wave.active) return;
         wave.active = true;
         wave.waitTime = wait;
         flowWave = Instantiate(flowMid, transform);

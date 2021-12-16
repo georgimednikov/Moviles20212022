@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Advertisements;
-
+using UnityEngine.SceneManagement;
 
 
 
@@ -19,11 +19,10 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     [SerializeField] string _androidGameId;
     [SerializeField] string _iOSGameId;
     [SerializeField] bool _testMode = true;
-    [SerializeField] Button _showAdButton;
     private string _gameId;
     public AdId[] _AdUnitId;
     string _bannerAdUnitId;
-    static bool initInit = false;
+    bool initInit = false, adsDisabled = false;
     public struct AdId
     {
         public string id;
@@ -33,7 +32,7 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     void Awake()
     {
         InitializeAds();
-
+        SceneManager.sceneLoaded += OnLevelFinishedLoading;
         _AdUnitId = new AdId[2];
 #if UNITY_IOS
 		_adUnitId = _rewardAdIdIOS;
@@ -46,13 +45,18 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
         _AdUnitId[1].id = _intersicialAdIdAndroid;
         _bannerAdUnitId = _bannerAdIdAndroid;
 #endif
+    }
 
-        Advertisement.Banner.SetPosition(BannerPosition.BOTTOM_CENTER);
-        LoadAd(_AdUnitId[0]);
-        LoadAd(_AdUnitId[1]);
-        //LoadAd(_videoAdUnitId);
-        LoadBanner();
-        ShowBannerAd();
+    void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode)
+    {
+        if (!adsDisabled)
+        {
+            Advertisement.Banner.SetPosition(BannerPosition.BOTTOM_CENTER);
+            LoadAd(_AdUnitId[0]);
+            LoadAd(_AdUnitId[1]);
+            LoadBanner();
+            ShowBannerAd();
+        }
     }
 
     #region Initialize
@@ -81,10 +85,13 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     #region Load
     public void LoadAd(AdId AdUnitId)
     {
-        if (!AdUnitId.init)
-            Advertisement.Load(AdUnitId.id, this);
-        else
-            Advertisement.Load(AdUnitId.id);
+        if (!adsDisabled)
+        {
+            if (!AdUnitId.init)
+                Advertisement.Load(AdUnitId.id, this);
+            else
+                Advertisement.Load(AdUnitId.id);
+        }
     }
 
     public void OnUnityAdsAdLoaded(string adUnitId)
@@ -100,16 +107,19 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
 
     }
 
-    public void OnUnityAdsFailedToLoad(string adUnitId, UnityAdsLoadError error, string message) {}
+    public void OnUnityAdsFailedToLoad(string adUnitId, UnityAdsLoadError error, string message) { }
     #endregion
 
     #region Show
     public void ShowAd(AdId adId)
     {
-        if (!adId.init)
-            Advertisement.Show(adId.id, this);
-        else
-            Advertisement.Show(adId.id);
+        if (!adsDisabled)
+        {
+            if (!adId.init)
+                Advertisement.Show(adId.id, this);
+            else
+                Advertisement.Show(adId.id);
+        }
     }
 
     public void OnUnityAdsShowFailure(string adUnitId, UnityAdsShowError error, string message)
@@ -141,15 +151,18 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     // Implement a method to call when the Load Banner button is clicked:
     public void LoadBanner()
     {
-        // Set up options to notify the SDK of load events:
-        BannerLoadOptions options = new BannerLoadOptions
+        if (!adsDisabled)
         {
-            loadCallback = OnBannerLoaded,
-            errorCallback = OnBannerError
-        };
+            // Set up options to notify the SDK of load events:
+            BannerLoadOptions options = new BannerLoadOptions
+            {
+                loadCallback = OnBannerLoaded,
+                errorCallback = OnBannerError
+            };
 
-        // Load the Ad Unit with banner content:
-        Advertisement.Banner.Load(_bannerAdUnitId, options);
+            // Load the Ad Unit with banner content:
+            Advertisement.Banner.Load(_bannerAdUnitId, options);
+        }
     }
 
     // Implement code to execute when the loadCallback event triggers:
@@ -168,15 +181,18 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     // Implement a method to call when the Show Banner button is clicked:
     void ShowBannerAd()
     {
-        // Set up options to notify the SDK of show events:
-        BannerOptions options = new BannerOptions
+        if (!adsDisabled)
         {
-            clickCallback = OnBannerClicked,
-            hideCallback = OnBannerHidden,
-            showCallback = OnBannerShown
-        };
+            // Set up options to notify the SDK of show events:
+            BannerOptions options = new BannerOptions
+            {
+                clickCallback = OnBannerClicked,
+                hideCallback = OnBannerHidden,
+                showCallback = OnBannerShown
+            };
 
-        Advertisement.Banner.Show(_bannerAdUnitId, options);
+            Advertisement.Banner.Show(_bannerAdUnitId, options);
+        }
     }
 
     void OnBannerClicked() { }
