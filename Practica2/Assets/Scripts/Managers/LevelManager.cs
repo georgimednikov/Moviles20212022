@@ -52,13 +52,14 @@ public class LevelManager : MonoBehaviour
 
         nextLevelButton.SetLimit(GameManager.instance.nextPack.numLevels);
 
-        int finished = PlayerPrefs.GetInt("finished_" + GameManager.instance.nextPack.name + "_" + currentLevel, 0);
-        finishedStar.enabled = finished == 2;
-        finishedTick.enabled = finished == 1;
-        int bestMoves = PlayerPrefs.GetInt("moves_" + GameManager.instance.nextPack.name + "_" + currentLevel, 0);
+        var levelsave = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, currentLevel);
+        finishedStar.enabled = levelsave.completed == 2;
+        finishedTick.enabled = levelsave.completed == 1;
+        int bestMoves = levelsave.bestmoves;
         bestMovesText.text = "best: " + (bestMoves == 0 ? "-" : bestMoves.ToString());
 
-        hintsText.text = GameManager.instance.hints + " x";
+        if (GameManager.instance.hints > 0) hintsText.text = GameManager.instance.hints + " x";
+        else hintsText.text = "+";
 
         return true;
     }
@@ -70,16 +71,13 @@ public class LevelManager : MonoBehaviour
 
     public void GameFinished(bool perfect, int moves)
     {
-        string finishedstr = "finished_" + GameManager.instance.nextPack.name + "_" + currentLevel;
-        string movesstr = "moves_" + GameManager.instance.nextPack.name + "_" + currentLevel;
-        string ncompletedstr = "ncompleted_" + GameManager.instance.nextPack.name;
+        var levelsaved = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, currentLevel);
 
-        int oldfinished = PlayerPrefs.GetInt(finishedstr, 0);
-        if(oldfinished < 2) PlayerPrefs.SetInt(finishedstr, perfect ? 2 : 1);
+        int oldfinished = levelsaved.completed;
+        if (oldfinished < 2) levelsaved.completed = perfect ? 2 : 1;
 
         bestMovesText.text = "best: " + moves;
-        int oldBest = PlayerPrefs.GetInt(movesstr, int.MaxValue);
-        if(moves < oldBest) PlayerPrefs.SetInt(movesstr, moves);
+        levelsaved.bestmoves = moves;
 
         // Desbloquear el siguiente
         completeRect.Open();
@@ -88,15 +86,20 @@ public class LevelManager : MonoBehaviour
         {
             finishedStar.enabled = perfect;
             finishedTick.enabled = !perfect;
-        } 
+        }
         youCompletedText.text = "You completed the level in " + moves + " moves.";
         levelCompleteText.text = perfect ? "Perfect!" : "Level complete!";
 
-        if(currentLevel < GameManager.instance.nextPack.numLevels - 1) PlayerPrefs.SetInt("locked_" + GameManager.instance.nextPack.name + "_" + (currentLevel + 1), 0);
+        if (currentLevel < GameManager.instance.nextPack.numLevels - 1)
+        {
+            var nextLevel = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, currentLevel + 1);
+            nextLevel.locked = 0; // No es una copia
+        }
 
-        int packNumCompleted = PlayerPrefs.GetInt(ncompletedstr, 0);
+
+        int packNumCompleted = GameManager.instance.GetComponent<SaveManager>().RestoreNumCompleted(GameManager.instance.nextPack.levelName);
         if (oldfinished < 1) packNumCompleted++;
-        PlayerPrefs.SetInt(ncompletedstr, packNumCompleted);
+        GameManager.instance.GetComponent<SaveManager>().StoreNumCompleted(GameManager.instance.nextPack.levelName, packNumCompleted);
     }
 
     public void UndoMove()
@@ -118,8 +121,8 @@ public class LevelManager : MonoBehaviour
             BM.GiveHint();
             GameManager.instance.hints--;
         }
-            
-        if(GameManager.instance.hints > 0) hintsText.text = GameManager.instance.hints + " x";
+
+        if (GameManager.instance.hints > 0) hintsText.text = GameManager.instance.hints + " x";
         else hintsText.text = "+";
     }
 

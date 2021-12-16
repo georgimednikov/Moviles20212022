@@ -13,12 +13,21 @@ public class LevelGrid : MonoBehaviour
         ind = index;
         for(int i = 0; i < levels.Length; ++i){
             levels[i].SetLevelIndex(i + 1);
-            int finished = PlayerPrefs.GetInt("finished_" + GameManager.instance.nextPack.name + "_" + (index + i + 1), 0); // TODO: meter en un playerprefs manager
+            var levelsave = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, i + 1 + index);
+            int finished = levelsave.completed;
             if (finished == 2) levels[i].SetStar(true);
             if (finished == 1) levels[i].SetTick(true);
-            int locked = PlayerPrefs.GetInt("locked_" + GameManager.instance.nextPack.name + "_" + (index + i + 1), -1); // Si es -1, no se ha guardado en playerprefs (comportamiento segun el pack) TODO: playerprefsmanager
-            if(locked == 1 || locked == -1 && GameManager.instance.nextPack.locked && (i != 0 || index != 0)) levels[i].SetLevelLocked();
-            else levels[i].SetButtonEvent(index + i);
+            int locked = levelsave.locked;
+            if (locked == 1 || locked == -1 && GameManager.instance.nextPack.locked && (i != 0 || index != 0))
+            {
+                levels[i].SetLevelLocked();
+                levelsave.locked = 1; // Si es -1, hay que ponerle el valor de verdad
+            }
+            else
+            {
+                levels[i].SetButtonEvent(index + i);
+                levelsave.locked = 0; // Si es -1, hay que ponerle el valor de verdad
+            }
         }
     }
 

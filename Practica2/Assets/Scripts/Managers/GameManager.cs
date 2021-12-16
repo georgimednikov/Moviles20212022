@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] public LevelManager LM;
 
     int _hints = 0;
-    public int hints { get { return _hints; } set { _hints = value; PlayerPrefs.SetInt("hints", _hints); } }
+    public int hints { get { return _hints; } set { _hints = value; instance.GetComponent<SaveManager>().StoreHint(_hints);} }
     public LevelPack nextPack;
     public LevelBundle nextBundle;
     public string nextLevel;
@@ -32,9 +32,7 @@ public class GameManager : MonoBehaviour
         if (instance == null)
         {
             instance = this;
-            int h = PlayerPrefs.GetInt("hints", -1);
-            if (h < 0) hints = 3; // TODO: mas seguro, en su propio manager?
-            else hints = h;
+            hints = instance.GetComponent<SaveManager>().RestoreHint(); // TODO: comprobar si no existia antes
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -114,7 +112,7 @@ public class GameManager : MonoBehaviour
     internal void addHint()
     {
         hints++;
-        PlayerPrefs.SetInt("hints", _hints);
+        instance.GetComponent<SaveManager>().StoreHint(hints);
         LM.UpdateHints();
     }
 

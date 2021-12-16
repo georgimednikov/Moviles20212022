@@ -33,7 +33,7 @@ public class PackSelect : MonoBehaviour
             ui.SetPackTotalLevels(bundle.packs[i].numLevels);
             ui.SetColor(bundle.bundleColor);
             ui.SetButtonEvent(bundleIndex, i);
-            ui.SetPackCompletedLevels(PlayerPrefs.GetInt("ncompleted_" + bundle.packs[i].name, 0));
+            ui.SetPackCompletedLevels(GameManager.instance.GetComponent<SaveManager>().RestoreNumCompleted(bundle.packs[i].levelName));
         }
     }
 }
