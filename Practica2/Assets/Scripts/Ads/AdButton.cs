@@ -11,7 +11,6 @@ public class AdButton : MonoBehaviour
         Intersicial
     }
     public AdType id;
-    // Start is called before the first frame update
     void Start()
     {
         AdManager AD = GameManager.instance.GetComponent<AdManager>();

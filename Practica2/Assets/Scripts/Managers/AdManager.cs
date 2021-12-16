@@ -33,6 +33,7 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     {
         InitializeAds();
         SceneManager.sceneLoaded += OnLevelFinishedLoading;
+        // Se crean los structs de los 2 tipos de anuncios
         _AdUnitId = new AdId[2];
 #if UNITY_IOS
 		_adUnitId = _rewardAdIdIOS;
@@ -78,7 +79,7 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
 
     public void OnInitializationFailed(UnityAdsInitializationError error, string message)
     {
-        Debug.Log($"Unity Ads Initialization Failed: {error.ToString()} - {message}");
+        Debug.LogError($"Unity Ads Initialization Failed: {error.ToString()} - {message}");
     }
     #endregion
 
@@ -124,8 +125,7 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
 
     public void OnUnityAdsShowFailure(string adUnitId, UnityAdsShowError error, string message)
     {
-        Debug.Log($"Error showing Ad Unit {adUnitId}: {error.ToString()} - {message}");
-        // Optionally execute code if the Ad Unit fails to show, such as loading another ad.
+        Debug.LogError($"Error showing Ad Unit {adUnitId}: {error.ToString()} - {message}");
     }
     public void OnUnityAdsShowStart(string adUnitId) { GameManager.instance.LM.BM.ToggleInput(false); }
     public void OnUnityAdsShowClick(string adUnitId) { }
@@ -148,37 +148,29 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     #endregion
 
     #region Banner
-    // Implement a method to call when the Load Banner button is clicked:
     public void LoadBanner()
     {
         if (!adsDisabled)
         {
-            // Set up options to notify the SDK of load events:
             BannerLoadOptions options = new BannerLoadOptions
             {
                 loadCallback = OnBannerLoaded,
                 errorCallback = OnBannerError
             };
-
-            // Load the Ad Unit with banner content:
             Advertisement.Banner.Load(_bannerAdUnitId, options);
         }
     }
 
-    // Implement code to execute when the loadCallback event triggers:
     void OnBannerLoaded()
     {
         Debug.Log("Banner loaded");
     }
 
-    // Implement code to execute when the load errorCallback event triggers:
     void OnBannerError(string message)
     {
-        Debug.Log($"Banner Error: {message}");
-        // Optionally execute additional code, such as attempting to load another ad.
+        Debug.LogError($"Banner Error: {message}");
     }
 
-    // Implement a method to call when the Show Banner button is clicked:
     void ShowBannerAd()
     {
         if (!adsDisabled)

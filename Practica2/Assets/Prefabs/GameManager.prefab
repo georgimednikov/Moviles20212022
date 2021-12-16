@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8284359497429419071}
   - component: {fileID: 4199122799030511052}
   - component: {fileID: 6130830578384431271}
+  - component: {fileID: 1576025642}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -54,9 +55,9 @@ MonoBehaviour:
   nextBundle: {fileID: 0}
   nextLevel: 
   levelIndex: 0
-  bundle: 0
+  bundle: 2
   pack: 0
-  level: 0
+  level: 29
 --- !u!114 &6130830578384431271
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -69,3 +70,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cef6556457fa40142a48c695aa9e6f02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1576025642
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813670203940205170}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b6bcf6d36bef77409c87ebb4889d13f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _intersicialAdIdAndroid: Interstitial_Android
+  _intersicialAdIdIOS: Interstitial_iOS
+  _rewardAdIdAndroid: Rewarded_Android
+  _rewardAdIdIOS: Rewarded_iOS
+  _bannerAdIdAndroid: Banner_Android
+  _bannerAdIdIOS: Banner_iOS
+  _androidGameId: 4505885
+  _iOSGameId: 4505884
+  _testMode: 1
