@@ -24,9 +24,6 @@ public class TileAnimation : MonoBehaviour
         wave = new GameAnimation(waveDuration);
         bump = new GameAnimation(bumpDuration);
 
-        flowWave = Instantiate(flowMid, transform);
-        waveRenderer = flowWave.GetComponent<SpriteRenderer>();
-
         originalScale = flowEnd.transform.localScale;
         baseSize = flowEnd.transform.localScale.x;
     }
@@ -60,8 +57,7 @@ public class TileAnimation : MonoBehaviour
             }
             else
             {
-                flowWave.transform.localScale = originalScale;
-                flowWave.SetActive(false);
+                Destroy(flowWave);
             }
         }
     }
@@ -76,6 +72,8 @@ public class TileAnimation : MonoBehaviour
     {
         wave.active = true;
         wave.waitTime = wait;
+        flowWave = Instantiate(flowMid, transform);
         flowWave.SetActive(true);
+        waveRenderer = flowWave.GetComponent<SpriteRenderer>();
     }
 }

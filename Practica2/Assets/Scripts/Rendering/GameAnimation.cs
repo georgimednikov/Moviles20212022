@@ -24,6 +24,7 @@ public struct GameAnimation
         if (elapsedTime >= waitTime)
         {
             elapsedTime = 0;
+            waitTime = -1;
             return false;
         }
         else

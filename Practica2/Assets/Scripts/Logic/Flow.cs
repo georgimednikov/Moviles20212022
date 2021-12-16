@@ -23,6 +23,11 @@ public class Flow
         return positions.Count + 1;
     }
 
+    public LogicTile GetPosition(int p)
+    {
+        return positions[p];
+    }
+
     public LogicTile[] GetPositions(int p = 0) {
         return positions.GetRange(p, positions.Count - p).ToArray(); 
     }
@@ -58,13 +63,18 @@ public class Flow
     }
 
     public LogicTile GetLastPosition() {
-        if (positions.Count == 0) return new LogicTile(new Vector2Int(-1, -1));
+        if (positions.Count == 0) return null;
         return positions[positions.Count - 1]; 
     }
 
     public void CommitChanges(int p) {
         if (positions.Count - p > 0) completed = false;
         positions.RemoveRange(p, positions.Count - p);
+    }
+
+    public bool IsComplete()
+    {
+        return completed;
     }
 
     public bool IsSolved()

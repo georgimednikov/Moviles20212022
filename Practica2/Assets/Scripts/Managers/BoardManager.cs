@@ -13,11 +13,13 @@ public class BoardManager : MonoBehaviour
     [SerializeField] GameObject tick;
 
     Tile[,] board;
+    Tile prevLooseEnd;
     Map map;
-    float topHeight, botHeight, refWidth;
-    float tileSize;
     Vector2 camSize;
     Vector2 baseOffset;
+    float topHeight, botHeight, refWidth;
+    float tileSize;
+    bool alreadyOver = false;
 
     public void SetUIHeight(float topHeight, float botHeight, float refWidth)
     {
@@ -51,17 +53,19 @@ public class BoardManager : MonoBehaviour
         topHeight = 0;
         botHeight = 0;
         refWidth = 0;
+        tileSize = 0;
         foreach (Tile t in board)
         {
             Destroy(t.gameObject);
         }
         board = null;
         map = null;
+        prevLooseEnd = null;
         camSize = Vector2.zero;
-        tileSize = 0;
         baseOffset = Vector2.zero;
         transform.position = Vector3.zero;
         transform.localScale = Vector3.one;
+        alreadyOver = false;
     }
 
     public void UndoMove()
@@ -76,6 +80,13 @@ public class BoardManager : MonoBehaviour
     {
         int i = map.GiveHint();
         if (i == -1) return;
+        LogicTile[] ends = map.GetFlowEnds(map.touchingIndex);
+        foreach (LogicTile t in ends)
+        {
+            Tile tile = board[t.pos.x, t.pos.y];
+            tile.SetTick();
+            tile.GetComponent<TileAnimation>().PlayWave();
+        }
         RenderFlows();
         // Reducir en 1 las pistas TODO
     }
@@ -88,13 +99,25 @@ public class BoardManager : MonoBehaviour
         cursor.SetActive(true);
         cursor.transform.position = pos;
         cursor.transform.Translate(Vector3.forward * 11);
-        // cursor.getComponent<Image>().setColor() TODO
+        Color color = Color.white; color.a /= 2;
+        SpriteRenderer cursorRender = cursor.GetComponent<SpriteRenderer>();
+        cursorRender.color = color;
 
         if (x < 0 || x >= map.Width || y < 0 || y >= map.Height) return;
         map.TouchedHere(new Vector2Int(x, y));
 
+        //Si se está tocando un flow se cambia el color del cursor
+        if (map.touchingIndex != -1)
+        {
+            color = GameManager.instance.skinPack.colors[map.touchingIndex]; color.a /= 2;
+            cursorRender.color = color;
+        }
+
+        //Si hay una tile que animar (se ha hecho click en el final de un flow) se anima
+        LogicTile t = map.TileToBump();
+        if (t != null) board[t.pos.x, t.pos.y].GetComponent<TileAnimation>().PlayBump();
+
         RenderReset();
-        map.posToReset.Clear();
         RenderFlows();
     }
 
@@ -117,6 +140,7 @@ public class BoardManager : MonoBehaviour
         {
             board[p.pos.x, p.pos.y].Reset();
         }
+        map.posToReset.Clear();
     }
 
     private void RenderFlow(int flowToRender)
@@ -124,7 +148,7 @@ public class BoardManager : MonoBehaviour
         LogicTile[] flow = map.GetFlow(flowToRender);
         //Si el flow no tiene longitud (pasa al hacerle undo a un flow con un único movimiento) no se renderiza
         if (flow.Length == 0) return;
-
+        
         LogicTile[] touchingFlow = map.GetFlow(map.touchingIndex);
         board[flow[0].pos.x, flow[0].pos.y].Reset();
         for (int i = 1; i < flow.Length; ++i)
@@ -145,6 +169,11 @@ public class BoardManager : MonoBehaviour
                 if (collWithTouching) break;
             }
             if (p.tileType != LogicTile.TileType.BRIDGE) tile.Reset();
+            if (map.IsFlowSolved(flowToRender))
+            {
+                tilePrev.DrawTick();
+                tile.DrawTick();
+            }
             tile.SetColor(GameManager.instance.skinPack.colors[flowToRender]);
             Direction opposite;
             Direction dir = Flow.VectorsToDir(p.pos, prev.pos, out opposite);
@@ -167,12 +196,39 @@ public class BoardManager : MonoBehaviour
                 map.flowsToRender[i] = false;
             }
 
-        map.StoppedTouching();
-        LM.UpdateInfo(map.movements, map.percentageFull, map.numFlowsComplete, map.GetNumFlows());
-        if (map.IsSolved())
+        //Se hace la animación en la última casilla de los flows que han sido cortados
+        bool[] tw = map.TilesToWave();
+        for (int i = 0; i < tw.Length; i++)
         {
+            if (tw[i])
+            {
+                LogicTile[] flow = map.GetFlow(i);
+                LogicTile t = flow[flow.Length - 1];
+                if (t != null) board[t.pos.x, t.pos.y].GetComponent<TileAnimation>().PlayWave();
+            }
+        }
+
+        map.StoppedTouching();
+
+        LogicTile looseEnd = map.TileLooseEnd();
+        if (looseEnd != null)
+        {
+            if (prevLooseEnd != null) prevLooseEnd.SetLooseEnd(false);
+            prevLooseEnd = board[looseEnd.pos.x, looseEnd.pos.y];
+            prevLooseEnd.SetLooseEnd(true);
+        }
+
+        LM.UpdateInfo(map.movements, map.percentageFull, map.numFlowsComplete, map.GetNumFlows());
+        if (!alreadyOver && map.IsGameSolved())
+        {
+            alreadyOver = true;
             ToggleInput(false);
             FadeOutAnimation fadeOut = Instantiate(map.movements == map.GetNumFlows() ? star : tick).GetComponent<FadeOutAnimation>();
+            LogicTile[] ends = map.GetFlowEnds();
+            foreach (LogicTile t in ends)
+            {
+                board[t.pos.x, t.pos.y].GetComponent<TileAnimation>().PlayWave(Random.Range(0f, 0.2f));
+            }
             fadeOut.AddListener(ShowEndScreen);
         }
     }
@@ -191,20 +247,23 @@ public class BoardManager : MonoBehaviour
     {
         float boardScreenMaxHeight = Camera.main.orthographicSize * 2 * (1 - (topHeight + botHeight) / Camera.main.scaledPixelHeight * Camera.main.scaledPixelWidth / refWidth);
         float cameraWidthSize = Camera.main.orthographicSize * 2 * Camera.main.aspect;
-        if (cameraWidthSize > boardScreenMaxHeight)//hay muchas tiles en vertical
+        camSize = new Vector2(Camera.main.orthographicSize * Camera.main.aspect, Camera.main.orthographicSize);
+        if (map.Width / (float)map.Height < cameraWidthSize / boardScreenMaxHeight)//hay muchas tiles en vertical
         {
             // Hay que coger el height como valor limite de la pantalla
+            tileSize = boardScreenMaxHeight / map.Height;
             transform.localScale = new Vector3(boardScreenMaxHeight / (map.Height), boardScreenMaxHeight / (map.Height), 1);
         }
         else
         {
-            camSize = new Vector2(Camera.main.orthographicSize * Camera.main.aspect, Camera.main.orthographicSize);
             tileSize = camSize.x * 2.0f / map.Width;
-            baseOffset = new Vector2(-tileSize * map.Width / 2.0f, -tileSize * map.Height / 2.0f);
             transform.localScale = new Vector3(cameraWidthSize / (map.Width), cameraWidthSize / (map.Width), 1);
         }
+        baseOffset = new Vector2(-tileSize * map.Width / 2.0f, -tileSize * map.Height / 2.0f);
         //Se offsetea en Y en base a los márgenes del canvas
         transform.Translate(0, (botHeight - topHeight) / Camera.main.scaledPixelHeight * Camera.main.orthographicSize * Camera.main.scaledPixelWidth / refWidth, 0);
+        float y = (tileSize * map.Height / 2 + transform.position.y) / camSize.y;
+        LM.setInfoRectHeight(y);
     }
 
     public void LoadMap(string[] flows)

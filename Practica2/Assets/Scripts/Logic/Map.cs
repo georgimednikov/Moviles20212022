@@ -9,13 +9,17 @@ public class Map
     List<int> hintFlows;
     Flow touchingFlow;
     LogicTile[] lastMovedFlow;
+    LogicTile[] flowEnds;
+    LogicTile tileToBump; //Tile que se anima al empezar un flow. Se actualiza al empezar a hacer click
+    bool[] brokenFlows; //Flows que se han cortado. Se actualiza al dejar de hacer click
+    int incompleteFlow; //Flow incompleto cuya última tile hay que dejar abierta
+
     int lastMovedIndex;
     int lastMovedMovements;
     public int touchingIndex { get; private set; }
     public int movements { get; private set; }
     public int percentageFull { get; private set; }
     public int numFlowsComplete { get; private set; }
-    LogicTile[] flowEnds;
     int prevTouchingIndex, startTouchFlowSize;
 
     public bool[] flowsToRender { get; private set; }
@@ -66,7 +70,12 @@ public class Map
         return touchingIndex;
     }
 
-    public bool IsSolved()
+    public bool IsFlowSolved(int flow)
+    {
+        return flows[flow].IsSolved();
+    }
+
+    public bool IsGameSolved()
     {
         foreach (Flow f in flows)
         {
@@ -85,6 +94,7 @@ public class Map
             hintFlows.Add(i);
         }
         flowsToRender = new bool[flows.Length];
+        brokenFlows = new bool[flows.Length];
         posToReset = new List<LogicTile>();
         tileBoard = new LogicTile[Width, Height];
         for (int i = 0; i < Width; i++)
@@ -153,6 +163,8 @@ public class Map
     public void TouchedHere(Vector2Int pos)
     {
         LogicTile tile = tileBoard[pos.x, pos.y];
+        tileToBump = null; //Hasta que no se vea que se ha hecho click en un flow suponemos que no hay nada que animar
+        incompleteFlow = -1; //Suponemos que deja de estar incompleto el último flow
         if (touchingFlow == null)
         {
             if (GetFlow(pos))
@@ -162,6 +174,7 @@ public class Map
                 lastMovedIndex = touchingIndex;
                 if (touchingFlow.IsEnd(tile))
                 {
+                    tileToBump = tileBoard[pos.x, pos.y]; //Si se da la condición se asigna
                     AddToReset(touchingIndex, 0);
                     if (touchingFlow.StartNewFlow(tile))
                         flowsToRender[touchingIndex] = true;
@@ -180,13 +193,18 @@ public class Map
 
     public void StoppedTouching()
     {
+        brokenFlows = new bool[flows.Length]; //Si había waves de roturas de flow que animar ya se han hecho en la llamada del BM
         if (touchingFlow != null && touchingIndex != prevTouchingIndex && touchingFlow.GetPositions().Length != startTouchFlowSize) movements++;
         //Solo se reasigna si has tocado en un lugar válido
-        if (touchingFlow != null) prevTouchingIndex = touchingIndex;
+        if (touchingFlow != null)
+        {
+            if (!flows[touchingIndex].IsComplete()) incompleteFlow = touchingIndex;
+            prevTouchingIndex = touchingIndex;
+        }
+        touchingFlow = null;
         touchingIndex = -1;
         float sum = 0;
         int numComp = 0;
-        touchingFlow = null;
         foreach (var flow in flows)
         {
             sum += flow.GetNumPipes() - 2;
@@ -195,6 +213,31 @@ public class Map
 
         numFlowsComplete = numComp;
         percentageFull = (int)(100 * (sum / ((Width * Height) - 2 * flows.Length - emptyTiles)));
+    }
+
+    public LogicTile TileToBump()
+    {
+        //Si hay que animar una tile se coge el extremo contrario al que se ha pulsado
+        if (tileToBump != null)
+        {
+            LogicTile[] ends = GetFlowEnds(touchingIndex);
+            foreach (LogicTile t in ends)
+                if (tileToBump != t)
+                    return t;
+        }
+        return null;
+    }
+
+    public bool[] TilesToWave()
+    {
+        return brokenFlows;
+    }
+
+    public LogicTile TileLooseEnd()
+    {
+        if (incompleteFlow == -1) return null;
+        //flowsToRender[incompleteFlow] = true;
+        return flows[incompleteFlow].GetLastPosition();
     }
 
     public int UndoMove()
@@ -211,6 +254,15 @@ public class Map
     public int GetNumFlows()
     {
         return flows.Length;
+    }
+
+    public LogicTile[] GetFlowEnds(int flow)
+    {
+        if (flowEnds == null) GetFlowEnds();
+        LogicTile[] tiles = new LogicTile[2];
+        tiles[0] = flowEnds[flow * 2];
+        tiles[1] = flowEnds[flow * 2 + 1];
+        return tiles;
     }
 
     public LogicTile[] GetFlowEnds()
@@ -278,7 +330,7 @@ public class Map
             Flow f = flows[i];
             int coll = f.CollidesWithFlow(p);
 
-            //Si hay colisión y no es con el flow que se está modificando (no te cortas a ti mismo)
+            //Si hay colisión y no es con el último elemento del flow que se está tocando
             if (coll != -1 && !(i == touchingIndex && p == touchingFlow.GetLastPosition()))
             {
                 //Si se pasa sobre un puente y se recorre en direcciones distintas no hay colisión
@@ -295,7 +347,10 @@ public class Map
                 // Si es otro flujo, hay que quitar un indice mas porque la posicion que se comprueba pasa a ser del touchingFlow
                 // Si es el mismo flow no hace falta porque sigue perteneciendo a el
                 if (touchingIndex != i)
+                {
                     coll--;
+                    brokenFlows[i] = true;
+                }
                 AddToReset(i, coll);
                 return;
             }

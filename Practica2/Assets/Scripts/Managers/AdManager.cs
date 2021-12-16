@@ -4,34 +4,53 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Advertisements;
 
+
+
+
+
 public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowListener, IUnityAdsInitializationListener
 {
-    [SerializeField] string _androidAdUnitId = "Interstitial_Android";
-    [SerializeField] string _iOsAdUnitId = "Interstitial_iOS";
+    [SerializeField] string _intersicialAdIdAndroid = "Interstitial_Android";
+    [SerializeField] string _intersicialAdIdIOS = "Interstitial_iOS";
+    [SerializeField] string _rewardAdIdAndroid = "Rewarded_Android";
+    [SerializeField] string _rewardAdIdIOS = "Rewarded_iOS";
+    [SerializeField] string _bannerAdIdAndroid = "Banner_Android";
+    [SerializeField] string _bannerAdIdIOS = "Banner_iOS";
     [SerializeField] string _androidGameId;
     [SerializeField] string _iOSGameId;
     [SerializeField] bool _testMode = true;
     [SerializeField] Button _showAdButton;
     private string _gameId;
-    string _adUnitId;
-    static bool showInit = false, loadInit = false, initInit = false;
-
+    public AdId[] _AdUnitId;
+    string _bannerAdUnitId;
+    static bool initInit = false;
+    public struct AdId
+    {
+        public string id;
+        public bool init;
+    }
 
     void Awake()
     {
         InitializeAds();
 
-        _adUnitId = null; 
+        _AdUnitId = new AdId[2];
 #if UNITY_IOS
-		_adUnitId = _iOsAdUnitId;
+		_adUnitId = _rewardAdIdIOS;
         _gameId = _iOSGameId;
+        _nextLeveladUnitId = _intersicialAdIdIOS;
+        _bannerAdUnitId = _bannerAdIdIOS;
 #elif UNITY_ANDROID
-        _adUnitId = _androidAdUnitId;
+        _AdUnitId[0].id = _rewardAdIdAndroid;
         _gameId = _androidGameId;
+        _AdUnitId[1].id = _intersicialAdIdAndroid;
+        _bannerAdUnitId = _bannerAdIdAndroid;
 #endif
 
         Advertisement.Banner.SetPosition(BannerPosition.BOTTOM_CENTER);
-        LoadAd();
+        LoadAd(_AdUnitId[0]);
+        LoadAd(_AdUnitId[1]);
+        //LoadAd(_videoAdUnitId);
         LoadBanner();
         ShowBannerAd();
     }
@@ -57,38 +76,40 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     {
         Debug.Log($"Unity Ads Initialization Failed: {error.ToString()} - {message}");
     }
-#endregion
+    #endregion
 
     #region Load
-    public void LoadAd()
+    public void LoadAd(AdId AdUnitId)
     {
-        if (!loadInit)
-            Advertisement.Load(_adUnitId, this);
+        if (!AdUnitId.init)
+            Advertisement.Load(AdUnitId.id, this);
         else
-            Advertisement.Load(_adUnitId);
-
+            Advertisement.Load(AdUnitId.id);
     }
 
     public void OnUnityAdsAdLoaded(string adUnitId)
     {
-        if (adUnitId.Equals(_adUnitId))
+        if (adUnitId.Equals(_AdUnitId[0].id))
         {
-            loadInit = true;
+            _AdUnitId[0].init = true;
         }
+        else if (adUnitId.Equals(_AdUnitId[1].id))
+        {
+            _AdUnitId[1].init = true;
+        }
+
     }
 
-    public void OnUnityAdsFailedToLoad(string adUnitId, UnityAdsLoadError error, string message)
-    {
-    }
+    public void OnUnityAdsFailedToLoad(string adUnitId, UnityAdsLoadError error, string message) {}
     #endregion
 
     #region Show
-    public void ShowAd()
+    public void ShowAd(AdId adId)
     {
-        if (!showInit)
-            Advertisement.Show(_adUnitId, this);
+        if (!adId.init)
+            Advertisement.Show(adId.id, this);
         else
-            Advertisement.Show(_adUnitId);
+            Advertisement.Show(adId.id);
     }
 
     public void OnUnityAdsShowFailure(string adUnitId, UnityAdsShowError error, string message)
@@ -100,11 +121,18 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     public void OnUnityAdsShowClick(string adUnitId) { }
     public void OnUnityAdsShowComplete(string adUnitId, UnityAdsShowCompletionState showCompletionState)
     {
-        if (adUnitId.Equals(_adUnitId) && showCompletionState.Equals(UnityAdsShowCompletionState.COMPLETED))
+        if (showCompletionState.Equals(UnityAdsShowCompletionState.COMPLETED))
         {
             GameManager.instance.LM.BM.ToggleInput(true);
-            GameManager.instance.addHint();
-            showInit = true;
+            if (adUnitId.Equals(_AdUnitId[0].id))
+            {
+                _AdUnitId[0].init = true;
+                GameManager.instance.addHint();
+            }
+            else if (adUnitId.Equals(_AdUnitId[1].id))
+            {
+                _AdUnitId[1].init = true;
+            }
         }
     }
     #endregion
@@ -121,7 +149,7 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
         };
 
         // Load the Ad Unit with banner content:
-        Advertisement.Banner.Load(_adUnitId, options);
+        Advertisement.Banner.Load(_bannerAdUnitId, options);
     }
 
     // Implement code to execute when the loadCallback event triggers:
@@ -148,7 +176,7 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
             showCallback = OnBannerShown
         };
 
-        Advertisement.Banner.Show(_adUnitId, options);
+        Advertisement.Banner.Show(_bannerAdUnitId, options);
     }
 
     void OnBannerClicked() { }
