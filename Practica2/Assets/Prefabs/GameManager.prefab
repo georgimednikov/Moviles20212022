@@ -88,6 +88,7 @@ MonoBehaviour:
   _rewardAdIdIOS: Rewarded_iOS
   _bannerAdIdAndroid: Banner_Android
   _bannerAdIdIOS: Banner_iOS
-  _androidGameId: 4505885
-  _iOSGameId: 4505884
+  _androidGameId: 4505913
+  _iOSGameId: 4505912
   _testMode: 1
+  test: {fileID: 0}

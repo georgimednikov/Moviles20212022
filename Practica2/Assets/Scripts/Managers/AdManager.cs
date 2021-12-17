@@ -19,6 +19,7 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     [SerializeField] string _androidGameId;
     [SerializeField] string _iOSGameId;
     [SerializeField] bool _testMode = true;
+    public GameObject test;
     private string _gameId;
     public AdId[] _AdUnitId;
     string _bannerAdUnitId;
@@ -36,9 +37,9 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
         // Se crean los structs de los 2 tipos de anuncios
         _AdUnitId = new AdId[2];
 #if UNITY_IOS
-		_adUnitId = _rewardAdIdIOS;
+		_AdUnitId[0].id = _rewardAdIdIOS;
         _gameId = _iOSGameId;
-        _nextLeveladUnitId = _intersicialAdIdIOS;
+        __AdUnitId[1].id = _intersicialAdIdIOS;
         _bannerAdUnitId = _bannerAdIdIOS;
 #elif UNITY_ANDROID
         _AdUnitId[0].id = _rewardAdIdAndroid;
@@ -114,7 +115,7 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     #region Show
     public void ShowAd(AdId adId)
     {
-        if (!adsDisabled && Random.Range(0.0f, 1.0f) < 0.3333)
+        if (!adsDisabled && Advertisement.isInitialized && (adId.id == _AdUnitId[0].id || (adId.id == _AdUnitId[1].id && Random.Range(0.0f, 1.0f) < 0.3333)))
         {
             if (!adId.init)
                 Advertisement.Show(adId.id, this);
@@ -131,6 +132,7 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     public void OnUnityAdsShowClick(string adUnitId) { }
     public void OnUnityAdsShowComplete(string adUnitId, UnityAdsShowCompletionState showCompletionState)
     {
+        test.SetActive(false);
         if (showCompletionState.Equals(UnityAdsShowCompletionState.COMPLETED))
         {
             GameManager.instance.LM.BM.ToggleInput(true);
