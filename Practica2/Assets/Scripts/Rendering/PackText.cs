@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Clase encargada de controlar cada item de la lista de packs instanciada por PackSelect
+/// </summary>
 public class PackText : MonoBehaviour
 {
     [SerializeField] Text nameText;
@@ -11,6 +14,9 @@ public class PackText : MonoBehaviour
     int totalLevels;
     int completedLevels;
 
+    /// <summary>
+    /// Añade al click del boton la carga del pack dado
+    /// </summary>
     public void SetButtonEvent(int bundle, int pack)
     {
         GameManager.OnClickBundle b = new GameManager.OnClickBundle();

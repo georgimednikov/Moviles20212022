@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Clase encargada de renderizar cada boton de nivel de la escena de seleccion de nivel
+/// </summary>
 public class LevelItem : MonoBehaviour
 {
     [SerializeField] Image backgroundImg;
@@ -13,6 +16,9 @@ public class LevelItem : MonoBehaviour
     [SerializeField] Image transparentImg;
     [SerializeField] Image[] transparentSides;
 
+    /// <summary>
+    /// Añade el evento que hace que se cargue el nivel level al ser pulsado el boton
+    /// </summary>
     public void SetButtonEvent(int level)
     {
         GetComponent<Button>().onClick.AddListener(() => { GameManager.NextLevel(level); });
@@ -43,11 +49,17 @@ public class LevelItem : MonoBehaviour
         backgroundImg.enabled = true;
     }
 
+    /// <summary>
+    /// Pone el texto del boton a "index"
+    /// </summary>
     public void SetLevelIndex(int index)
     {
         indexText.text = index.ToString();
     }
 
+    /// <summary>
+    /// Activa el candado del boton, y desactiva la imagen de color de fondo
+    /// </summary>
     public void SetLevelLocked()
     {
         levelLock.enabled = true;

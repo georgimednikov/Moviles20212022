@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Clase encargada de mostrar las distintas opciones de skins que hay cargandolas del GameManager.
+/// Da la funcionalidad de cambiar de skin
+/// </summary>
 public class ColorDropdown : MonoBehaviour
 {
     float height;

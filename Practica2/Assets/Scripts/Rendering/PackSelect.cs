@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Serialization;
 
+/// <summary>
+/// Clase encargada de instanciar los botones de seleccion de pack para el bundle dado
+/// </summary>
 public class PackSelect : MonoBehaviour
 {
     [Header("Pack")]
@@ -22,6 +25,9 @@ public class PackSelect : MonoBehaviour
         bundle = GameManager.instance.levelBundles[index];
     }
 
+    /// <summary>
+    /// Instancia los botones del pack, les coloca su color y pone el numero de completados de cada uno
+    /// </summary>
     public void LoadPacks()
     {
         nameText.text = bundle.bundleName;

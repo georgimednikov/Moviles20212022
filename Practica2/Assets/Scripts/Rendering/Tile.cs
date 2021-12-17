@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-
+/// <summary>
+/// Clase encargada del renderizado de las tiles que conforman el mapa de juego
+/// </summary>
 public class Tile : MonoBehaviour
 {
     [SerializeField] GameObject flowEnd;
@@ -28,6 +30,10 @@ public class Tile : MonoBehaviour
         tick.SetActive(false);
     }
 
+    /// <summary>
+    /// Pone una tuberia desde el centro de la tile hacia cada direccion de dirs.
+    /// Activa ademas el circulo de esquina
+    /// </summary>
     public void SetConnectedDirections(params Direction[] dirs)
     {
         for (int i = 0; i < dirs.Length; i++)
@@ -37,6 +43,9 @@ public class Tile : MonoBehaviour
         corner.SetActive(true);
     }
 
+    /// <summary>
+    /// Activa las paredes segun las direcciones dadas
+    /// </summary>
     public void SetWalls(params int[] dirs)
     {
         for (int i = 0; i < dirs.Length; i++)
@@ -45,6 +54,10 @@ public class Tile : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Desactiva las tuberias segun las direcciones dadas.
+    /// Si estan todas desactivadas, desactiva el circulo de esquina
+    /// </summary>
     public void DisconnectDirections(params Direction[] dirs)
     {
         for (int i = 0; i < dirs.Length; i++)
@@ -59,6 +72,9 @@ public class Tile : MonoBehaviour
         corner.SetActive(!allInactive);
     }
 
+    /// <summary>
+    /// Desactiva las tuberias, el tick y los circulos centrales
+    /// </summary>
     public void Reset()
     {
         looseEnd.SetActive(false);
@@ -75,16 +91,25 @@ public class Tile : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Activa el circulo grande
+    /// </summary>
     public void SetFlowEnd()
     {
         flowEnd.SetActive(true);
     }
 
+    /// <summary>
+    /// Activa el circulo medio segun state
+    /// </summary>
     public void SetLooseEnd(bool state)
     {
         looseEnd.SetActive(state);
     }
 
+    /// <summary>
+    /// Informa a la tile si deberia mostrar el tick cuando el flow esta completo
+    /// </summary>
     public void SetTick()
     {
         hinted = true;

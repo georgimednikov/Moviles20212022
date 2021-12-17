@@ -3,12 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Clase encargada de cargar los botones de seleccion de nivel para la "pagina" dada
+/// </summary>
 public class LevelGrid : MonoBehaviour
 {
     [SerializeField] LevelItem[] levels;
     [SerializeField] Text descriptionText;
     int ind;
 
+    /// <summary>
+    /// A partir de index, crea 30 botones y les asigna la accion de cargar el nivel (index + i), siendo i el numero del boton creado
+    /// Coloca en los botones si se ha completado el nivel y si esta bloqueado
+    /// Si es la primera vez que se carga el pack, se encarga de asignarle al nivel si debe estar bloqueado o no, segun si es el primero de los instanciados o no
+    /// </summary>
+    /// <param name="index">Index desde el que se crean 30 botones</param>
     public void SetIndexStart(int index)
     {
         ind = index;
@@ -32,11 +41,17 @@ public class LevelGrid : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Pone desc como descripcion del minipack que controla
+    /// </summary>
     public void SetDescriptionText(string desc)
     {
         descriptionText.text = desc;
     }
 
+    /// <summary>
+    /// Pone el color col a los botones
+    /// </summary>
     public void SetColor(Color32 col)
     {
         foreach (LevelItem i in levels)
