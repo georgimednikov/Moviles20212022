@@ -13,9 +13,10 @@ public class GameManager : MonoBehaviour
 
     public static GameManager instance;
 
-    [SerializeField] public SkinPack skinPack;
-    [SerializeField] public LevelBundle[] levelBundles;
-    [SerializeField] public LevelManager LM;
+    public SkinPack currSkin;
+    public SkinPack[] skinPacks;
+    public LevelBundle[] levelBundles;
+    public LevelManager LM;
 
     int _hints = 0;
     public int hints { get { return _hints; } set { _hints = value; instance.GetComponent<SaveManager>().StoreHint(_hints);} }
@@ -32,8 +33,10 @@ public class GameManager : MonoBehaviour
         if (instance == null)
         {
             instance = this;
-            hints = instance.GetComponent<SaveManager>().RestoreHint(); // TODO: comprobar si no existia antes
+            currSkin = skinPacks[0];
+            hints = instance.GetComponent<SaveManager>().RestoreHint();
             DontDestroyOnLoad(gameObject);
+            currSkin = skinPacks[instance.GetComponent<SaveManager>().RestoreSkin()];
         }
         else
         {
@@ -109,9 +112,10 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Se le comunica al Game Manager un nuevo skin pack que usar
     /// </summary>
-    public void ChangeSkin(SkinPack skin)
+    public void ChangeSkin(int skin)
     {
-        skinPack = skin;
+        currSkin = skinPacks[skin];
+        GetComponent<SaveManager>().StoreSkin(skin);
     }
 
     public static void GoToMainMenu()

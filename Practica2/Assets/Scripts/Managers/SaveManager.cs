@@ -26,9 +26,10 @@ public class SaveManager : MonoBehaviour
     {
         SaveToFile(saveDirection);
     }
-
-    // Guarda en Application.persistentDataPath + fileString + ".json"
-    public void SaveToFile(string fileString) // TODO: permitir tener DLCs sin perder tus datos
+    /// <summary>
+    /// Guarda la informacion de guardado en el archivo Application.persistentDataPath + fileString + ".json", utilizando sal y pimienta
+    /// </summary>
+    public void SaveToFile(string fileString)
     {
         string destination = Application.persistentDataPath + fileString + ".json";
         using (StreamWriter sw = new StreamWriter(destination))
@@ -41,6 +42,10 @@ public class SaveManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Carga la informacion del jugador guardada desde el archivo Application.persistentDataPath + fileString + ".json"
+    /// </summary>
+    /// <returns>true si no ha habido ningun problema de corrupcion o se ha creado un nuevo archivo ya que no existia, false si no</returns>
     public bool LoadFromFile(string fileString)
     {
         string source = Application.persistentDataPath + fileString + ".json";
@@ -59,6 +64,9 @@ public class SaveManager : MonoBehaviour
         return hash == hashNew;
     }
 
+    /// <summary>
+    /// Utilizando SHA256, devuelve un hash en formato de string con el json recibido
+    /// </summary>
     public string Hash(string json)
     {
         // Create a SHA256
@@ -77,27 +85,52 @@ public class SaveManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Guarda el numero de hints dado
+    /// </summary>
     public void StoreHint(int hint)
     {
         saveFile.hints = hint;
     }
 
+    /// <summary>
+    /// Guarda si se ha comprado la desactivacion de anuncios
+    /// </summary>
     public void StoreNoAds(bool ads)
     {
         saveFile.disabledAds = ads;
     }
 
+    /// <summary>
+    /// Guarda el numero de niveles completados del pack dado
+    /// </summary>
     public void StoreNumCompleted(string packName, int ncompleted)
     {
         saveFile.packSaves.Find(p => p.name.Equals(packName)).numCompleted = ncompleted;
     }
 
+    /// <summary>
+    /// Guarda el indice de la skin dada
+    /// </summary>
+    public void StoreSkin(int index)
+    {
+        saveFile.skinIndex = index;
+    }
+
+    /// <summary>
+    /// Recupera el numero de hints guardadas
+    /// </summary>
     public int RestoreHint()
     {
         return saveFile.hints;
     }
 
-    // Devuelve la referencia al level (si se modifica, se modifica en el save)
+    /// <summary>
+    /// Recupera el estado del nivel dado, devolviendolo como una referencia modificable. 
+    /// Si no encuentra el nivel o el pack, lo añade a la lista de guardado
+    /// </summary>
+    /// <param name="packName">El pack al que pertenece</param>
+    /// <param name="level">Indice del nivel dentro de ese pack</param>
     public LevelSave RestoreLevel(string packName, int level)
     {
         var a = saveFile.packSaves.Find(p => p.name.Equals(packName));
@@ -118,11 +151,18 @@ public class SaveManager : MonoBehaviour
         return b;
     }
 
+    /// <summary>
+    /// Recupera si se ha comprado la desactivacion de anuncios
+    /// </summary>
     public bool RestoreNoAds()
     {
         return saveFile.disabledAds;
     }
 
+    /// <summary>
+    /// Recupera el numero de niveles completos del pack dado.
+    /// Si no existe el pack, lo añade a la lista de guardado
+    /// </summary>
     public int RestoreNumCompleted(string packName)
     {
         var a = saveFile.packSaves.Find(p => p.name.Equals(packName));
@@ -133,5 +173,13 @@ public class SaveManager : MonoBehaviour
             saveFile.packSaves.Add(a);
         }
         return a.numCompleted;
+    }
+
+    /// <summary>
+    /// Recupera el indice de la skin seleccionada
+    /// </summary>
+    public int RestoreSkin()
+    {
+        return saveFile.skinIndex;
     }
 }

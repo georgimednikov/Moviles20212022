@@ -11,7 +11,7 @@ public class Map
     LogicTile[] flowEnds;
     LogicTile tileToBump; //Tile que se anima al empezar un flow. Se actualiza al empezar a hacer click
     bool[] brokenFlows; //Flows que se han cortado. Se actualiza al dejar de hacer click
-    int incompleteFlow; //Flow incompleto cuya última tile hay que dejar abierta
+    int incompleteFlow; //Flow incompleto cuya ï¿½ltima tile hay que dejar abierta
 
     int lastMovedIndex;
     int lastMovedMovements;
@@ -40,9 +40,36 @@ public class Map
         numFlowsComplete = 0;
     }
 
+    public bool IsFlowSolved(int flow)
+    {
+        return flows[flow].IsSolved();
+    }
+
+    public bool IsGameSolved()
+    {
+        foreach (Flow f in flows)
+        {
+            if (!f.IsSolved())
+                return false;
+        }
+        return true;
+    }
+
+    public int UndoMove()
+    {
+        if (lastMovedFlow == null) return -1;
+        Flow flow = flows[lastMovedIndex];
+        AddToReset(lastMovedIndex);
+        flow.UndoMove(lastMovedFlow);
+        movements = lastMovedMovements;
+        touchingIndex = lastMovedIndex;
+        //Se actualiza el porcentaje, el resto de info cuando se deja de hacer click
+        CalculatePercentage();
+        return touchingIndex;
+    }
+
     public int GiveHint()
     {
-        // TODO: no es solo random, coge al mas molesto, y ademas no coge flows solved
         if (IsGameSolved()) return -1;
 
         int randomIndex;
@@ -59,7 +86,7 @@ public class Map
         AddToReset(touchingIndex);
         touchingFlow.RemovePositions();
         LogicTile[] solution = touchingFlow.GetSolution();
-        foreach(LogicTile t in solution)
+        foreach (LogicTile t in solution)
         {
             CheckFlowCollision(t);
             touchingFlow.AddFlow(t);
@@ -79,21 +106,6 @@ public class Map
         return touchingIndex;
     }
 
-    public bool IsFlowSolved(int flow)
-    {
-        return flows[flow].IsSolved();
-    }
-
-    public bool IsGameSolved()
-    {
-        foreach (Flow f in flows)
-        {
-            if (!f.IsSolved())
-                return false;
-        }
-        return true;
-    }
-    // TODO: comprobacion de errores
     public void LoadMap(string[] flowStrings, string[] levelInfo)
     {
         flows = new Flow[flowStrings.Length];
@@ -104,7 +116,6 @@ public class Map
         for (int i = 0; i < Width; i++)
             for (int j = 0; j < Height; j++)
                 tileBoard[i, j] = new LogicTile(new Vector2Int(i, j));
-
         for (int i = 0; i < flowStrings.Length; i++)
         {
             string[] pos = flowStrings[i].Split(','); //Dividimos el string del flow en "numeros"
@@ -168,7 +179,7 @@ public class Map
     {
         LogicTile tile = tileBoard[pos.x, pos.y];
         tileToBump = null; //Hasta que no se vea que se ha hecho click en un flow suponemos que no hay nada que animar
-        incompleteFlow = -1; //Suponemos que deja de estar incompleto el último flow
+        incompleteFlow = -1; //Suponemos que deja de estar incompleto el ï¿½ltimo flow
         if (touchingFlow == null)
         {
             if (GetFlow(pos))
@@ -178,7 +189,7 @@ public class Map
                 lastMovedIndex = touchingIndex;
                 if (touchingFlow.IsEnd(tile))
                 {
-                    tileToBump = tileBoard[pos.x, pos.y]; //Si se da la condición se asigna
+                    tileToBump = tileBoard[pos.x, pos.y]; //Si se da la condiciï¿½n se asigna
                     AddToReset(touchingIndex, 0);
                     if (touchingFlow.StartNewFlow(tile))
                         flowsToRender[touchingIndex] = true;
@@ -200,9 +211,9 @@ public class Map
 
     public void StoppedTouching()
     {
-        brokenFlows = new bool[flows.Length]; //Si había waves de roturas de flow que animar ya se han hecho en la llamada del BM
+        brokenFlows = new bool[flows.Length]; //Si habï¿½a waves de roturas de flow que animar ya se han hecho en la llamada del BM
         if (touchingFlow != null && touchingIndex != prevTouchingIndex && touchingFlow.GetPositions().Length != startTouchFlowSize) movements++;
-        //Solo se reasigna si has tocado en un lugar válido
+        //Solo se reasigna si has tocado en un lugar vï¿½lido
         if (touchingFlow != null)
         {
             if (!flows[touchingIndex].IsComplete()) incompleteFlow = touchingIndex;
@@ -210,7 +221,7 @@ public class Map
         }
         touchingFlow = null;
         touchingIndex = -1;
-        CalculateFlows(); //Solo se actualiza la información cuando se deja de hacer click y la acción es definitiva
+        CalculateFlows(); //Solo se actualiza la informaciï¿½n cuando se deja de hacer click y la acciï¿½n es definitiva
     }
 
     private void CalculatePercentage()
@@ -250,21 +261,7 @@ public class Map
     public LogicTile TileLooseEnd()
     {
         if (incompleteFlow == -1) return null;
-        //flowsToRender[incompleteFlow] = true;
         return flows[incompleteFlow].GetLastPosition();
-    }
-
-    public int UndoMove()
-    {
-        if (lastMovedFlow == null) return -1;
-        Flow flow = flows[lastMovedIndex];
-        AddToReset(lastMovedIndex);
-        flow.UndoMove(lastMovedFlow);
-        movements = lastMovedMovements;
-        touchingIndex = lastMovedIndex;
-        //Se actualiza el porcentaje, el resto de info cuando se deja de hacer click
-        CalculatePercentage();
-        return touchingIndex;
     }
 
     public int GetNumFlows()
@@ -297,12 +294,12 @@ public class Map
     public void CommitFlow(int flowIndex)
     {
         //Si es el mismo flow que es el que estaba modificando no se actualiza el flow
-        //porque no se ha podido romper con otro (se rompería el otro no este)
+        //porque no se ha podido romper con otro (se romperï¿½a el otro no este)
         if (flowIndex == touchingIndex) return;
 
         //Se comprueba para cada flow si colisiona con otro.
         //Si lo hace se guardan los cambios (el flow que se estaba tocando
-        //invadió su camino y tiene que retroceder el invadido)
+        //invadiï¿½ su camino y tiene que retroceder el invadido)
         for (int i = 1; i < flows[flowIndex].GetPositions().Length; ++i)
         {
             LogicTile fpos = flows[flowIndex].GetPositions()[i];
@@ -316,6 +313,7 @@ public class Map
         }
     }
 
+    //True si hay un flow en esa posiciï¿½n
     private bool GetFlow(Vector2Int p)
     {
         int i = 0;
@@ -346,10 +344,10 @@ public class Map
             Flow f = flows[i];
             int coll = f.CollidesWithFlow(p);
 
-            //Si hay colisión y no es con el último elemento del flow que se está tocando
+            //Si hay colisiï¿½n y no es con el ï¿½ltimo elemento del flow que se estï¿½ tocando
             if (coll != -1 && !(i == touchingIndex && p == touchingFlow.GetLastPosition()))
             {
-                //Si se pasa sobre un puente y se recorre en direcciones distintas no hay colisión
+                //Si se pasa sobre un puente y se recorre en direcciones distintas no hay colisiï¿½n
                 if (p.tileType == LogicTile.TileType.BRIDGE)
                 {
                     LogicTile[] flowPositions = f.GetPositions();
@@ -357,7 +355,7 @@ public class Map
                     Direction prevBridgeDir1;
                     Direction prevBridgeDir2 = Flow.VectorsToDir(flowPositions[coll - 1].pos, flowPositions[coll].pos, out prevBridgeDir1);
 
-                    //Comprobar que no vayan en el mismo eje = dirección perpendicular
+                    //Comprobar que no vayan en el mismo eje = direcciï¿½n perpendicular
                     if (newBridgeDir != prevBridgeDir1 && newBridgeDir != prevBridgeDir2) continue;
                 }
                 // Si es otro flujo, hay que quitar un indice mas porque la posicion que se comprueba pasa a ser del touchingFlow
@@ -373,6 +371,7 @@ public class Map
         }
     }
 
+    //Se aï¿½ade desde posIndex en adelante las posiciones del flowIndex a la lista de Tiles que resetear
     private void AddToReset(int flowIndex, int posIndex = 0)
     {
         Flow f = flows[flowIndex];

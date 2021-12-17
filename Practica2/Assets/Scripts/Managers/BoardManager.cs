@@ -22,7 +22,7 @@ public class BoardManager : MonoBehaviour
     bool alreadyOver = false;
     bool animating = false;
 
-    //Variables que guardan cómo guardar el siguiente tablero
+    //Variables que guardan cï¿½mo guardar el siguiente tablero
     //que hay que mantener entre animaciones de swap
     string[] boardToLoad;
     int boardSizeX;
@@ -46,13 +46,15 @@ public class BoardManager : MonoBehaviour
         map.Width = boardSizeX;
         map.Height = boardSizeY;
         board = new Tile[boardSizeX, boardSizeY];
+        Color32 color = GameManager.instance.nextBundle.bundleColor;
         for (int i = 0; i < board.GetLength(0); i++)
         {
             for (int j = 0; j < board.GetLength(1); j++)
             {
-                //Se offsetean las posiciones de las tiles para que la posición del gameObject padre cuadren con el centro del tablero
+                //Se offsetean las posiciones de las tiles para que la posiciï¿½n del gameObject padre cuadren con el centro del tablero
                 GameObject tile = Instantiate(tilePref, new Vector2(i - (map.Width - 1) / 2.0f, j - (map.Height - 1) / 2.0f), Quaternion.identity, transform);
                 board[i, j] = tile.GetComponent<Tile>();
+                board[i, j].SetBorderColor(color);
             }
         }
         ArrangeInScreen();
@@ -92,7 +94,7 @@ public class BoardManager : MonoBehaviour
             transform.localScale = new Vector3(cameraWidthSize / (map.Width), cameraWidthSize / (map.Width), 1);
         }
         baseOffset = new Vector2(-tileSize * map.Width / 2.0f, -tileSize * map.Height / 2.0f);
-        //Se offsetea en Y en base a los márgenes del canvas
+        //Se offsetea en Y en base a los mï¿½rgenes del canvas
         transform.Translate(0, (botHeight - topHeight) / Camera.main.scaledPixelHeight * Camera.main.orthographicSize * Camera.main.scaledPixelWidth / refWidth, 0);
     }
 
@@ -107,7 +109,7 @@ public class BoardManager : MonoBehaviour
         {
             Tile tile = board[end.pos.x, end.pos.y];
             tile.SetFlowEnd();
-            //Módulo para que si no hay suficientes colores se repitan; i++ / 2 para pasar de color cada dos extremos
+            //Mï¿½dulo para que si no hay suficientes colores se repitan; i++ / 2 para pasar de color cada dos extremos
             tile.SetColor(colorPool[((i++) / 2) % colorPool.Length]);
         }
 
@@ -200,10 +202,10 @@ public class BoardManager : MonoBehaviour
         if (x < 0 || x >= map.Width || y < 0 || y >= map.Height) return;
         map.TouchedHere(new Vector2Int(x, y));
 
-        //Si se está tocando un flow se cambia el color del cursor
+        //Si se estï¿½ tocando un flow se cambia el color del cursor
         if (map.touchingIndex != -1)
         {
-            color = GameManager.instance.skinPack.colors[map.touchingIndex]; color.a /= 2;
+            color = GameManager.instance.currSkin.colors[map.touchingIndex]; color.a /= 2;
             cursorRender.color = color;
         }
 
@@ -227,7 +229,7 @@ public class BoardManager : MonoBehaviour
                 map.flowsToRender[i] = false;
             }
 
-        //Se hace la animación en la última casilla de los flows que han sido cortados
+        //Se hace la animaciï¿½n en la ï¿½ltima casilla de los flows que han sido cortados
         bool[] tw = map.TilesToWave();
         for (int i = 0; i < tw.Length; i++)
         {
@@ -285,7 +287,7 @@ public class BoardManager : MonoBehaviour
     private void RenderFlow(int flowToRender)
     {
         LogicTile[] flow = map.GetFlow(flowToRender);
-        //Si el flow no tiene longitud (pasa al hacerle undo a un flow con un único movimiento) no se renderiza
+        //Si el flow no tiene longitud (pasa al hacerle undo a un flow con un ï¿½nico movimiento) no se renderiza
         if (flow.Length == 0) return;
 
         LogicTile[] touchingFlow = map.GetFlow(map.touchingIndex);
@@ -313,7 +315,7 @@ public class BoardManager : MonoBehaviour
                 tilePrev.DrawTick();
                 tile.DrawTick();
             }
-            tile.SetColor(GameManager.instance.skinPack.colors[flowToRender]);
+            tile.SetColor(GameManager.instance.currSkin.colors[flowToRender]);
             Direction opposite;
             Direction dir = Flow.VectorsToDir(p.pos, prev.pos, out opposite);
             if (dir != Direction.NONE)
@@ -321,7 +323,7 @@ public class BoardManager : MonoBehaviour
                 tile.SetConnectedDirections(dir);
                 tilePrev.SetConnectedDirections(opposite);
             }
-            tilePrev.SetColor(GameManager.instance.skinPack.colors[flowToRender]);
+            tilePrev.SetColor(GameManager.instance.currSkin.colors[flowToRender]);
         }
     }
 
@@ -346,6 +348,5 @@ public class BoardManager : MonoBehaviour
 
     public void AnimationFinished() { 
         animating = false;
-        Debug.Log("AnimationFinished");
     }
 }
