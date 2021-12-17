@@ -117,10 +117,16 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     {
         if (!adsDisabled && Advertisement.isInitialized && (adId.id == _AdUnitId[0].id || (adId.id == _AdUnitId[1].id && Random.Range(0.0f, 1.0f) < 0.3333)))
         {
+            // Pedro Pablo: en el editor parece que funciona de manera diferente a en el movil, añadiendo todo el rato a los listeners en el primero, y en el segundo quitandolo cuando acaba.
+            // Lo hemos puesto asi ya que creemos que es un error de la version 4.0.0 de la APi de ads
+#if (!UNITY_ANDROID && !UNITY_IOS) || UNITY_EDITOR
             if (!adId.init)
-                Advertisement.Show(adId.id, this);
+#endif
+            Advertisement.Show(adId.id, this);
+#if !UNITY_ANDROID && !UNITY_IOS || UNITY_EDITOR
             else
                 Advertisement.Show(adId.id);
+#endif
         }
     }
 
@@ -128,11 +134,12 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     {
         Debug.LogError($"Error showing Ad Unit {adUnitId}: {error.ToString()} - {message}");
     }
-    public void OnUnityAdsShowStart(string adUnitId) { GameManager.instance.LM.BM.ToggleInput(false); }
+    public void OnUnityAdsShowStart(string adUnitId) { Debug.Log("Espero que sea legible"); GameManager.instance.LM.BM.ToggleInput(false); }
     public void OnUnityAdsShowClick(string adUnitId) { }
     public void OnUnityAdsShowComplete(string adUnitId, UnityAdsShowCompletionState showCompletionState)
     {
-        test.SetActive(false);
+        Debug.Log("Espero que sea legible");
+        test?.SetActive(false);
         if (showCompletionState.Equals(UnityAdsShowCompletionState.COMPLETED))
         {
             GameManager.instance.LM.BM.ToggleInput(true);
