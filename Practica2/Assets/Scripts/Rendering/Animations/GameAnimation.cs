@@ -28,7 +28,9 @@ public struct GameAnimation
             return false;
         }
         else
+        {
             return true;
+        }
     }
 
     public bool UpdateTime()

@@ -29,7 +29,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] CanvasScaler canvasScaler;
 
     // TODO: comprobacion de errores
-    public bool LoadLevel(string level)
+    public bool LoadLevel(string level, bool animate = true)
     {
         int sizeX, sizeY = 0;
         string[] levelRows = level.Split(';');
@@ -47,8 +47,7 @@ public class LevelManager : MonoBehaviour
         // completionAmount.sprite = ; TODO
 
         BM.SetUIHeight(topRect.rect.height, botRect.rect.height, canvasScaler.referenceResolution.x);
-        BM.SetBoard(sizeX, sizeY);
-        BM.LoadMap(levelRows); // Quita el primer valor de levelRows que es la info del nivel y no un flow
+        BM.ChangeBoard(levelRows, sizeX, sizeY, animate);
 
         nextLevelButton.SetLimit(GameManager.instance.nextPack.numLevels - currentLevel + 1);
         prevLevelButton.SetLimit(currentLevel);
@@ -67,11 +66,6 @@ public class LevelManager : MonoBehaviour
     public void ResetLevel()
     {
         BM.ResetLevel();
-    }
-
-    public void setInfoRectHeight(float h)
-    {
-        //infoRect.anchoredPosition = new Vector2(infoRect.anchoredPosition.x, h * canvasScaler.referenceResolution.y / 2);
     }
 
     public void GameFinished(bool perfect, int moves)

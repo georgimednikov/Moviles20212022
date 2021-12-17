@@ -20,6 +20,13 @@ public class BoardManager : MonoBehaviour
     float topHeight, botHeight, refWidth;
     float tileSize;
     bool alreadyOver = false;
+    bool animating = false;
+
+    //Variables que guardan cómo guardar el siguiente tablero
+    //que hay que mantener entre animaciones de swap
+    string[] boardToLoad;
+    int boardSizeX;
+    int boardSizeY;
 
     public void SetUIHeight(float topHeight, float botHeight, float refWidth)
     {
@@ -28,13 +35,14 @@ public class BoardManager : MonoBehaviour
         this.refWidth = refWidth;
     }
 
-    public void SetBoard(int sizeX, int sizeY)
+    public void SetBoard()
     {
-        sizeY = sizeY == 0 ? sizeX : sizeY;
+        ResetBoard();
+        boardSizeY = boardSizeY == 0 ? boardSizeX : boardSizeY;
         map = new Map();
-        map.Width = sizeX;
-        map.Height = sizeY;
-        board = new Tile[sizeX, sizeY];
+        map.Width = boardSizeX;
+        map.Height = boardSizeY;
+        board = new Tile[boardSizeX, boardSizeY];
         for (int i = 0; i < board.GetLength(0); i++)
         {
             for (int j = 0; j < board.GetLength(1); j++)
@@ -44,15 +52,19 @@ public class BoardManager : MonoBehaviour
                 board[i, j] = tile.GetComponent<Tile>();
             }
         }
-
         ArrangeInScreen();
+        LoadBoard();
     }
 
     public void ResetLevel()
     {
-        topHeight = 0;
-        botHeight = 0;
-        refWidth = 0;
+        if (animating) return;
+        ResetBoard();
+    }
+
+    private void ResetBoard()
+    {
+        if (board == null) return;
         tileSize = 0;
         foreach (Tile t in board)
         {
@@ -70,6 +82,7 @@ public class BoardManager : MonoBehaviour
 
     public void UndoMove()
     {
+        if (animating) return;
         int i = map.UndoMove();
         if (i == -1) return;
         RenderReset();
@@ -79,6 +92,7 @@ public class BoardManager : MonoBehaviour
 
     public void GiveHint()
     {
+        if (animating) return;
         int i = map.GiveHint();
         if (i == -1) return;
         LogicTile[] ends = map.GetFlowEnds(map.touchingIndex);
@@ -96,6 +110,7 @@ public class BoardManager : MonoBehaviour
 
     public void TouchedHere(Vector3 pos)
     {
+        if (animating) return;
         int x = Mathf.FloorToInt((pos.x - baseOffset.x - transform.position.x) / tileSize),
             y = Mathf.FloorToInt((pos.y - baseOffset.y - transform.position.y) / tileSize);
 
@@ -152,7 +167,7 @@ public class BoardManager : MonoBehaviour
         LogicTile[] flow = map.GetFlow(flowToRender);
         //Si el flow no tiene longitud (pasa al hacerle undo a un flow con un único movimiento) no se renderiza
         if (flow.Length == 0) return;
-        
+
         LogicTile[] touchingFlow = map.GetFlow(map.touchingIndex);
         board[flow[0].pos.x, flow[0].pos.y].Reset();
         for (int i = 1; i < flow.Length; ++i)
@@ -193,6 +208,7 @@ public class BoardManager : MonoBehaviour
     public void StoppedTouching()
     {
         cursor.SetActive(false);
+        if (animating) return;
         for (int i = 0; i < map.flowsToRender.Length; i++)
             if (map.flowsToRender[i])
             {
@@ -266,14 +282,27 @@ public class BoardManager : MonoBehaviour
         baseOffset = new Vector2(-tileSize * map.Width / 2.0f, -tileSize * map.Height / 2.0f);
         //Se offsetea en Y en base a los márgenes del canvas
         transform.Translate(0, (botHeight - topHeight) / Camera.main.scaledPixelHeight * Camera.main.orthographicSize * Camera.main.scaledPixelWidth / refWidth, 0);
-        float y = (tileSize * map.Height / 2 + transform.position.y) / camSize.y;
-        LM.setInfoRectHeight(y);
     }
 
-    public void LoadMap(string[] flows)
+    public void ChangeBoard(string[] newBoard, int sizeX, int sizeY, bool animate)
+    {
+        boardToLoad = newBoard;
+        boardSizeX = sizeX;
+        boardSizeY = sizeY;
+        if (animate)
+        {
+            BoardAnimation anim = GetComponent<BoardAnimation>();
+            anim.AddListener(SetBoard);
+            anim.FlipOut();
+            animating = true;
+        }
+        else SetBoard();
+    }
+
+    public void LoadBoard()
     {
         // Nos saltamos 4 para quitar informacion inecesaria para Map
-        map.LoadMap(flows.Skip(1).ToArray(), flows[0].Split(',').Skip(4).ToArray());
+        map.LoadMap(boardToLoad.Skip(1).ToArray(), boardToLoad[0].Split(',').Skip(4).ToArray());
         LogicTile[] flowEnds = map.GetFlowEnds();
         int i = 0;
         Color32[] colorPool = GameManager.instance.skinPack.colors;
@@ -293,7 +322,18 @@ public class BoardManager : MonoBehaviour
                 if (tile.walls[j]) board[tile.pos.x, tile.pos.y].SetWalls(j);
             }
         }
-
         LM.UpdateInfo(map.movements, 0, map.GetNumFlows());
+
+        if (animating)
+        {
+            BoardAnimation anim = GetComponent<BoardAnimation>();
+            anim.AddListener(AnimationFinished);
+            anim.FlipIn();
+        }
+    }
+
+    public void AnimationFinished() { 
+        animating = false;
+        Debug.Log("AnimationFinished");
     }
 }

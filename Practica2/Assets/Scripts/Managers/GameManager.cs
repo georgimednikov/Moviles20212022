@@ -45,7 +45,7 @@ public class GameManager : MonoBehaviour
         nextPack = nextBundle.packs[pack];
         nextLevel = nextPack.levelMap.text.Split('\n')[level];
 #endif
-        instance.LM?.LoadLevel(instance.nextLevel);
+        instance.LM?.LoadLevel(instance.nextLevel, false);
     }
 
     /// <summary>
@@ -66,21 +66,18 @@ public class GameManager : MonoBehaviour
             return;
         }
         instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[++instance.levelIndex];
-        instance.LM.ResetLevel();
         instance.LM.LoadLevel(instance.nextLevel);
     }
     public static void LoadPrevLevel()
     {
         if (instance.levelIndex < 1) return;
         instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[--instance.levelIndex];
-        instance.LM.ResetLevel();
         instance.LM.LoadLevel(instance.nextLevel);
     }
 
     public static void ResetLevel()
     {
-        instance.LM.ResetLevel();
-        instance.LM.LoadLevel(instance.nextLevel);
+        instance.LM.LoadLevel(instance.nextLevel, false);
     }
 
     /// <summary>
