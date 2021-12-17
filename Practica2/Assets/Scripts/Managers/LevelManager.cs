@@ -21,8 +21,8 @@ public class LevelManager : MonoBehaviour
     [SerializeField] Text hintsText;
     [SerializeField] Text youCompletedText;
     [SerializeField] Text levelCompleteText;
-    [SerializeField] DeactivateButton nextLevelButton;
-    [SerializeField] DeactivateButton prevLevelButton;
+    [SerializeField] Button nextLevelButton;
+    [SerializeField] Button prevLevelButton;
     [SerializeField] Image finishedStar;
     [SerializeField] Image finishedTick;
     [SerializeField] CompleteRect completeRect;
@@ -40,9 +40,9 @@ public class LevelManager : MonoBehaviour
         // Si el mapa no es cuadrado, el levelSize tiene tamaño 2.
         sizeY = (levelSize.Length > 1) ? int.Parse(levelSize[1].Split('+')[0]) : 0; //Si es 0 es el valor inutil y no hay segunda dimension
 
-        currentLevel = int.Parse(levelInfo[2]);
+        currentLevel = int.Parse(levelInfo[2]) - 1;
 
-        levelText.text = "Level " + currentLevel;
+        levelText.text = "Level " + (currentLevel + 1);
         sizeText.text = sizeX + "x" + (sizeY == 0 ? sizeX : sizeY);
         // completionAmount.sprite = ; TODO
 
@@ -50,8 +50,7 @@ public class LevelManager : MonoBehaviour
         BM.SetBoard(sizeX, sizeY);
         BM.LoadMap(levelRows); // Quita el primer valor de levelRows que es la info del nivel y no un flow
 
-        nextLevelButton.SetLimit(GameManager.instance.nextPack.numLevels - currentLevel + 1);
-        prevLevelButton.SetLimit(currentLevel);
+        SetLevelButtonsInteractable();
 
         var levelsave = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, currentLevel);
         finishedStar.enabled = levelsave.completed == 2;
@@ -62,6 +61,27 @@ public class LevelManager : MonoBehaviour
         if (GameManager.instance.hints > 0) hintsText.text = GameManager.instance.hints + " x";
         else hintsText.text = "+";
         return true;
+    }
+
+    private void SetLevelButtonsInteractable()
+    {
+        if (currentLevel + 1 < GameManager.instance.nextPack.numLevels)
+        {
+            var nl = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, currentLevel + 1);
+            nextLevelButton.interactable = !((nl.locked == 1));
+        } else
+        {
+            nextLevelButton.interactable = false;
+        }
+
+        if (currentLevel - 1 >= 0)
+        {
+            var pl = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, currentLevel - 1);
+            prevLevelButton.interactable = !((pl.locked == 1));
+        } else
+        {
+            prevLevelButton.interactable = false;
+        }
     }
 
     public void ResetLevel()
@@ -107,6 +127,7 @@ public class LevelManager : MonoBehaviour
         if (oldfinished < 1) packNumCompleted++;
         SM.StoreNumCompleted(GameManager.instance.nextPack.levelName, packNumCompleted);
         SM.SaveToFile(GameManager.instance.GetComponent<SaveManager>().saveDirection);
+        SetLevelButtonsInteractable();
     }
 
     public void UndoMove()

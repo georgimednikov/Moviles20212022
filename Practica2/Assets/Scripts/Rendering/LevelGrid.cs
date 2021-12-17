@@ -14,7 +14,7 @@ public class LevelGrid : MonoBehaviour
         ind = index;
         for(int i = 0; i < levels.Length; ++i){
             levels[i].SetLevelIndex(i + 1);
-            var levelsave = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, i + 1 + index);
+            var levelsave = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, i + index);
             int finished = levelsave.completed;
             if (finished == 2) levels[i].SetStar(true);
             if (finished == 1) levels[i].SetTick(true);

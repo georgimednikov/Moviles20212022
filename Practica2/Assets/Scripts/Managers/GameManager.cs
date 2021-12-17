@@ -60,6 +60,8 @@ public class GameManager : MonoBehaviour
 
     public static void LoadNextLevel()
     {
+        var nl = instance.GetComponent<SaveManager>().RestoreLevel(instance.nextPack.levelName, instance.levelIndex);
+        if (nl.locked == 1 || nl.locked == -1 && instance.nextPack.locked && instance.levelIndex + 1 != 0) return;
         if (instance.levelIndex + 1 >= instance.nextPack.numLevels)
         {
             GoToPackSelect();
@@ -71,6 +73,8 @@ public class GameManager : MonoBehaviour
     }
     public static void LoadPrevLevel()
     {
+        var nl = instance.GetComponent<SaveManager>().RestoreLevel(instance.nextPack.levelName, instance.levelIndex);
+        if (nl.locked == 1 || nl.locked == -1 && instance.nextPack.locked && instance.levelIndex - 1 != 0) return; // por si acaso
         if (instance.levelIndex < 1) return;
         instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[--instance.levelIndex];
         instance.LM.ResetLevel();

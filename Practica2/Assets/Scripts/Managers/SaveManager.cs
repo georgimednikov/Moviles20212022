@@ -107,6 +107,7 @@ public class SaveManager : MonoBehaviour
             a.name = packName;
             saveFile.packSaves.Add(a);
         }
+        if (level < 0) return null;
         var b = a.levelstates.Find(l => l.id == level);
         if (b == null) // Esta comprobacion es para cuando se carga por primera vez el juego, para que se rellene solo el savefile
         {

@@ -10,7 +10,7 @@ public class DeactivateButton : MonoBehaviour
 
     private void Start()
     {
-        GetComponent<Button>().interactable = limit > 1;
+        GetComponent<Button>().interactable &= limit > 1;
     }
 
     public void Deactivate()
