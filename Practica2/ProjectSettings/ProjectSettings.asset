@@ -726,7 +726,7 @@ PlayerSettings:
   XboxOneOverrideIdentityPublisher: 
   vrEditorSettings: {}
   cloudServicesEnabled:
-    Analytics: 0
+    Analytics: 1
     Build: 0
     Collab: 0
     Game Performance: 0
@@ -746,7 +746,7 @@ PlayerSettings:
     m_VersionName: 
   apiCompatibilityLevel: 6
   activeInputHandler: 0
-  cloudProjectId: 1c5fc1b3-0a6f-4e1e-9cc6-731b73e7b8b8
+  cloudProjectId: 1369348c-cfaa-493c-8d02-10d8d1f9068f
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
   projectName: FlowNoTantoAd (1)

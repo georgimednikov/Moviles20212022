@@ -60,14 +60,18 @@ public class GameManager : MonoBehaviour
 
     public static void LoadNextLevel()
     {
-        if (instance.levelIndex > instance.nextPack.numLevels) return; // TODO desactivar boton
+        if (instance.levelIndex + 1 >= instance.nextPack.numLevels)
+        {
+            GoToPackSelect();
+            return;
+        }
         instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[++instance.levelIndex];
         instance.LM.ResetLevel();
         instance.LM.LoadLevel(instance.nextLevel);
     }
     public static void LoadPrevLevel()
     {
-        if (instance.levelIndex < 0) return;
+        if (instance.levelIndex < 1) return;
         instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[--instance.levelIndex];
         instance.LM.ResetLevel();
         instance.LM.LoadLevel(instance.nextLevel);

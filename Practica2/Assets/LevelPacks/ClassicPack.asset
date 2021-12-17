@@ -14,11 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelName: Classic Pack
   levelMap: {fileID: 4900000, guid: dc106376b5863f7429e6dd1341e0feef, type: 3}
-  numLevels: 150
+  numLevels: 300
   minipackName:
   - 5x5 - easy
   - 6x6
   - 7x7 - normal
   - 8x8
   - 9x9 - hard
+  - next
+  - next
+  - next
+  - next
+  - next
   locked: 0

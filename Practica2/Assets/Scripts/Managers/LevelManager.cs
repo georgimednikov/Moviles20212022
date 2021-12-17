@@ -50,7 +50,7 @@ public class LevelManager : MonoBehaviour
         BM.SetBoard(sizeX, sizeY);
         BM.LoadMap(levelRows); // Quita el primer valor de levelRows que es la info del nivel y no un flow
 
-        nextLevelButton.SetLimit(GameManager.instance.nextPack.numLevels - currentLevel);
+        nextLevelButton.SetLimit(GameManager.instance.nextPack.numLevels - currentLevel + 1);
         prevLevelButton.SetLimit(currentLevel);
 
         var levelsave = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, currentLevel);
