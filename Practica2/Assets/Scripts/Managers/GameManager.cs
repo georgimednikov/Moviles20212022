@@ -58,6 +58,9 @@ public class GameManager : MonoBehaviour
         GoToLevelSelect();
     }
 
+    /// <summary>
+    /// Se carga el siguiente nivel
+    /// </summary>
     public static void LoadNextLevel()
     {
         var nl = instance.GetComponent<SaveManager>().RestoreLevel(instance.nextPack.levelName, instance.levelIndex);
@@ -70,6 +73,10 @@ public class GameManager : MonoBehaviour
         instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[++instance.levelIndex];
         instance.LM.LoadLevel(instance.nextLevel);
     }
+
+    /// <summary>
+    /// Se carga el anterior nivel
+    /// </summary>
     public static void LoadPrevLevel()
     {
         var nl = instance.GetComponent<SaveManager>().RestoreLevel(instance.nextPack.levelName, instance.levelIndex);

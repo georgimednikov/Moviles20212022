@@ -35,6 +35,9 @@ public class BoardManager : MonoBehaviour
         this.refWidth = refWidth;
     }
 
+    /// <summary>
+    /// Instancia las tiles, las escala para que quepan en pantalla y carga el nivel
+    /// </summary>
     public void SetBoard()
     {
         ResetBoard();
@@ -54,6 +57,77 @@ public class BoardManager : MonoBehaviour
         }
         ArrangeInScreen();
         LoadBoard();
+    }
+
+    public void ChangeBoard(string[] newBoard, int sizeX, int sizeY, bool animate)
+    {
+        boardToLoad = newBoard;
+        boardSizeX = sizeX;
+        boardSizeY = sizeY;
+        if (animate)
+        {
+            BoardAnimation anim = GetComponent<BoardAnimation>();
+            anim.AddListener(SetBoard);
+            anim.FlipOut();
+            animating = true;
+        }
+        else SetBoard();
+    }
+
+    void ArrangeInScreen()
+    {
+        float boardScreenMaxHeight = Camera.main.orthographicSize * 2 * (1 - (topHeight + botHeight) / Camera.main.scaledPixelHeight * Camera.main.scaledPixelWidth / refWidth);
+        float cameraWidthSize = Camera.main.orthographicSize * 2 * Camera.main.aspect;
+        camSize = new Vector2(Camera.main.orthographicSize * Camera.main.aspect, Camera.main.orthographicSize);
+        if (map.Width / (float)map.Height < cameraWidthSize / boardScreenMaxHeight)//Si hay muchas tiles en vertical
+        {
+            // Hay que coger el height como valor limite de la pantalla
+            tileSize = boardScreenMaxHeight / map.Height;
+            transform.localScale = new Vector3(boardScreenMaxHeight / (map.Height), boardScreenMaxHeight / (map.Height), 1);
+        }
+        else
+        {
+            // Si no, la escala es el ancho de la pantalla
+            tileSize = camSize.x * 2.0f / map.Width;
+            transform.localScale = new Vector3(cameraWidthSize / (map.Width), cameraWidthSize / (map.Width), 1);
+        }
+        baseOffset = new Vector2(-tileSize * map.Width / 2.0f, -tileSize * map.Height / 2.0f);
+        //Se offsetea en Y en base a los márgenes del canvas
+        transform.Translate(0, (botHeight - topHeight) / Camera.main.scaledPixelHeight * Camera.main.orthographicSize * Camera.main.scaledPixelWidth / refWidth, 0);
+    }
+
+    public void LoadBoard()
+    {
+        // Nos saltamos 4 para quitar informacion inecesaria para Map
+        map.LoadMap(boardToLoad.Skip(1).ToArray(), boardToLoad[0].Split(',').Skip(4).ToArray());
+        LogicTile[] flowEnds = map.GetFlowEnds();
+        int i = 0;
+        Color32[] colorPool = GameManager.instance.skinPack.colors;
+        foreach (LogicTile end in flowEnds)
+        {
+            Tile tile = board[end.pos.x, end.pos.y];
+            tile.SetFlowEnd();
+            //Módulo para que si no hay suficientes colores se repitan; i++ / 2 para pasar de color cada dos extremos
+            tile.SetColor(colorPool[((i++) / 2) % colorPool.Length]);
+        }
+
+        // Se ponen las paredes
+        foreach (var tile in map.tileBoard)
+        {
+            if (tile.tileType == LogicTile.TileType.EMPTY) board[tile.pos.x, tile.pos.y].Deactivate();
+            for (int j = 0; j < tile.walls.Length; ++j)
+            {
+                if (tile.walls[j]) board[tile.pos.x, tile.pos.y].SetWalls(j);
+            }
+        }
+        LM.UpdateInfo(map.movements, 0, map.GetNumFlows());
+
+        if (animating)
+        {
+            BoardAnimation anim = GetComponent<BoardAnimation>();
+            anim.AddListener(AnimationFinished);
+            anim.FlipIn();
+        }
     }
 
     public void ResetLevel()
@@ -105,9 +179,11 @@ public class BoardManager : MonoBehaviour
         RenderReset();
         RenderFlows();
         LM.UpdateFlowInfo(map.percentageFull);
-        // Reducir en 1 las pistas TODO
     }
 
+    /// <summary>
+    /// Realiza un toque en la posicion del mundo dada.
+    /// </summary>
     public void TouchedHere(Vector3 pos)
     {
         if (animating) return;
@@ -140,6 +216,59 @@ public class BoardManager : MonoBehaviour
         LM.UpdateFlowInfo(map.percentageFull);
     }
 
+    public void StoppedTouching()
+    {
+        cursor.SetActive(false);
+        if (animating) return;
+        for (int i = 0; i < map.flowsToRender.Length; i++)
+            if (map.flowsToRender[i])
+            {
+                map.CommitFlow(i);
+                map.flowsToRender[i] = false;
+            }
+
+        //Se hace la animación en la última casilla de los flows que han sido cortados
+        bool[] tw = map.TilesToWave();
+        for (int i = 0; i < tw.Length; i++)
+        {
+            if (tw[i])
+            {
+                LogicTile[] flow = map.GetFlow(i);
+                LogicTile t = flow[flow.Length - 1];
+                if (t != null) board[t.pos.x, t.pos.y].GetComponent<TileAnimation>().PlayWave();
+            }
+        }
+
+        map.StoppedTouching();
+
+        // Se pone el final de flow si no ha terminado un final
+        LogicTile looseEnd = map.TileLooseEnd();
+        if (looseEnd != null)
+        {
+            if (prevLooseEnd != null) prevLooseEnd.SetLooseEnd(false);
+            prevLooseEnd = board[looseEnd.pos.x, looseEnd.pos.y];
+            prevLooseEnd.SetLooseEnd(true);
+        }
+
+        LM.UpdateInfo(map.movements, map.numFlowsComplete, map.GetNumFlows());
+        // Si se ha terminado la partida
+        if (!alreadyOver && map.IsGameSolved())
+        {
+            alreadyOver = true;
+            ToggleInput(false);
+            FadeOutAnimation fadeOut = Instantiate(map.movements == map.GetNumFlows() ? star : tick).GetComponent<FadeOutAnimation>();
+            LogicTile[] ends = map.GetFlowEnds();
+            foreach (LogicTile t in ends)
+            {
+                board[t.pos.x, t.pos.y].GetComponent<TileAnimation>().PlayWave(Random.Range(0f, 0.2f));
+            }
+            fadeOut.AddListener(ShowEndScreen);
+        }
+    }
+
+    /// <summary>
+    /// Pinta los flows que han sido puestos en flowsToRender
+    /// </summary>
     private void RenderFlows()
     {
         if (map.touchingIndex != -1)
@@ -151,15 +280,6 @@ public class BoardManager : MonoBehaviour
                 RenderFlow(i);
             }
         }
-    }
-
-    private void RenderReset()
-    {
-        foreach (LogicTile p in map.posToReset)
-        {
-            board[p.pos.x, p.pos.y].Reset();
-        }
-        map.posToReset.Clear();
     }
 
     private void RenderFlow(int flowToRender)
@@ -205,52 +325,13 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public void StoppedTouching()
+    private void RenderReset()
     {
-        cursor.SetActive(false);
-        if (animating) return;
-        for (int i = 0; i < map.flowsToRender.Length; i++)
-            if (map.flowsToRender[i])
-            {
-                map.CommitFlow(i);
-                map.flowsToRender[i] = false;
-            }
-
-        //Se hace la animación en la última casilla de los flows que han sido cortados
-        bool[] tw = map.TilesToWave();
-        for (int i = 0; i < tw.Length; i++)
+        foreach (LogicTile p in map.posToReset)
         {
-            if (tw[i])
-            {
-                LogicTile[] flow = map.GetFlow(i);
-                LogicTile t = flow[flow.Length - 1];
-                if (t != null) board[t.pos.x, t.pos.y].GetComponent<TileAnimation>().PlayWave();
-            }
+            board[p.pos.x, p.pos.y].Reset();
         }
-
-        map.StoppedTouching();
-
-        LogicTile looseEnd = map.TileLooseEnd();
-        if (looseEnd != null)
-        {
-            if (prevLooseEnd != null) prevLooseEnd.SetLooseEnd(false);
-            prevLooseEnd = board[looseEnd.pos.x, looseEnd.pos.y];
-            prevLooseEnd.SetLooseEnd(true);
-        }
-
-        LM.UpdateInfo(map.movements, map.numFlowsComplete, map.GetNumFlows());
-        if (!alreadyOver && map.IsGameSolved())
-        {
-            alreadyOver = true;
-            ToggleInput(false);
-            FadeOutAnimation fadeOut = Instantiate(map.movements == map.GetNumFlows() ? star : tick).GetComponent<FadeOutAnimation>();
-            LogicTile[] ends = map.GetFlowEnds();
-            foreach (LogicTile t in ends)
-            {
-                board[t.pos.x, t.pos.y].GetComponent<TileAnimation>().PlayWave(Random.Range(0f, 0.2f));
-            }
-            fadeOut.AddListener(ShowEndScreen);
-        }
+        map.posToReset.Clear();
     }
 
     public void ToggleInput(bool enabled)
@@ -261,75 +342,6 @@ public class BoardManager : MonoBehaviour
     public void ShowEndScreen()
     {
         LM.GameFinished(map.movements == map.GetNumFlows(), map.movements);
-    }
-
-    void ArrangeInScreen()
-    {
-        float boardScreenMaxHeight = Camera.main.orthographicSize * 2 * (1 - (topHeight + botHeight) / Camera.main.scaledPixelHeight * Camera.main.scaledPixelWidth / refWidth);
-        float cameraWidthSize = Camera.main.orthographicSize * 2 * Camera.main.aspect;
-        camSize = new Vector2(Camera.main.orthographicSize * Camera.main.aspect, Camera.main.orthographicSize);
-        if (map.Width / (float)map.Height < cameraWidthSize / boardScreenMaxHeight)//hay muchas tiles en vertical
-        {
-            // Hay que coger el height como valor limite de la pantalla
-            tileSize = boardScreenMaxHeight / map.Height;
-            transform.localScale = new Vector3(boardScreenMaxHeight / (map.Height), boardScreenMaxHeight / (map.Height), 1);
-        }
-        else
-        {
-            tileSize = camSize.x * 2.0f / map.Width;
-            transform.localScale = new Vector3(cameraWidthSize / (map.Width), cameraWidthSize / (map.Width), 1);
-        }
-        baseOffset = new Vector2(-tileSize * map.Width / 2.0f, -tileSize * map.Height / 2.0f);
-        //Se offsetea en Y en base a los márgenes del canvas
-        transform.Translate(0, (botHeight - topHeight) / Camera.main.scaledPixelHeight * Camera.main.orthographicSize * Camera.main.scaledPixelWidth / refWidth, 0);
-    }
-
-    public void ChangeBoard(string[] newBoard, int sizeX, int sizeY, bool animate)
-    {
-        boardToLoad = newBoard;
-        boardSizeX = sizeX;
-        boardSizeY = sizeY;
-        if (animate)
-        {
-            BoardAnimation anim = GetComponent<BoardAnimation>();
-            anim.AddListener(SetBoard);
-            anim.FlipOut();
-            animating = true;
-        }
-        else SetBoard();
-    }
-
-    public void LoadBoard()
-    {
-        // Nos saltamos 4 para quitar informacion inecesaria para Map
-        map.LoadMap(boardToLoad.Skip(1).ToArray(), boardToLoad[0].Split(',').Skip(4).ToArray());
-        LogicTile[] flowEnds = map.GetFlowEnds();
-        int i = 0;
-        Color32[] colorPool = GameManager.instance.skinPack.colors;
-        foreach (LogicTile end in flowEnds)
-        {
-            Tile tile = board[end.pos.x, end.pos.y];
-            tile.SetFlowEnd();
-            //Módulo para que si no hay suficientes colores se repitan; i++ / 2 para pasar de color cada dos extremos
-            tile.SetColor(colorPool[((i++) / 2) % colorPool.Length]);
-        }
-
-        foreach (var tile in map.tileBoard)
-        {
-            if (tile.tileType == LogicTile.TileType.EMPTY) board[tile.pos.x, tile.pos.y].Deactivate();
-            for (int j = 0; j < tile.walls.Length; ++j)
-            {
-                if (tile.walls[j]) board[tile.pos.x, tile.pos.y].SetWalls(j);
-            }
-        }
-        LM.UpdateInfo(map.movements, 0, map.GetNumFlows());
-
-        if (animating)
-        {
-            BoardAnimation anim = GetComponent<BoardAnimation>();
-            anim.AddListener(AnimationFinished);
-            anim.FlipIn();
-        }
     }
 
     public void AnimationFinished() { 

@@ -15,6 +15,7 @@ public class AdButton : MonoBehaviour
     void Start()
     {
         AdManager AD = GameManager.instance.GetComponent<AdManager>();
+        if (AdManager.adsDisabled && id == AdType.Reward) gameObject.SetActive(false);
         GetComponent<Button>().onClick.AddListener(() => { AD.ShowAd(AD._AdUnitId[(int)id]); });
     }
 }

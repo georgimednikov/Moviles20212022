@@ -145,7 +145,7 @@ public class LevelManager : MonoBehaviour
         if (GameManager.instance.hints > 0)
         {
             BM.GiveHint();
-            //GameManager.instance.hints--;
+            GameManager.instance.hints--;
         }
 
         if (GameManager.instance.hints > 0) hintsText.text = GameManager.instance.hints + " x";

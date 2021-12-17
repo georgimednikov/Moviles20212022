@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: 8x8Manias
   m_EditorClassIdentifier: 
   levelName: 8x8 Manias
-  levelMap: {fileID: 4900000, guid: 3d56b6100f2167b4abed5743c94127ea, type: 3}
+  levelMap: {fileID: 4900000, guid: 58f54917f48efc440b0035225d14ca0d, type: 3}
   numLevels: 150
   minipackName:
   - 1 - 30

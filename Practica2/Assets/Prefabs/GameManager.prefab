@@ -70,6 +70,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cef6556457fa40142a48c695aa9e6f02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  saveDirection: /save
 --- !u!114 &1576025642
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -91,4 +92,3 @@ MonoBehaviour:
   _androidGameId: 4505913
   _iOSGameId: 4505912
   _testMode: 1
-  test: {fileID: 0}

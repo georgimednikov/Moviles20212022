@@ -7,7 +7,6 @@ using UnityEngine.SceneManagement;
 
 
 
-
 public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowListener, IUnityAdsInitializationListener
 {
     [SerializeField] string _intersicialAdIdAndroid = "Interstitial_Android";
@@ -19,11 +18,12 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     [SerializeField] string _androidGameId;
     [SerializeField] string _iOSGameId;
     [SerializeField] bool _testMode = true;
-    public GameObject test;
     private string _gameId;
     public AdId[] _AdUnitId;
     string _bannerAdUnitId;
-    bool initInit = false, adsDisabled = false;
+    static bool initInit = false;
+    static public bool adsDisabled { get; private set; }
+
     public struct AdId
     {
         public string id;
@@ -54,11 +54,20 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
         if (!adsDisabled)
         {
             Advertisement.Banner.SetPosition(BannerPosition.BOTTOM_CENTER);
-            LoadAd(_AdUnitId[0]);
-            LoadAd(_AdUnitId[1]);
+            for ( int i= 0; i < _AdUnitId.Length; i++)
+            {
+                _AdUnitId[i].init = false;
+            }
             LoadBanner();
             ShowBannerAd();
         }
+    }
+
+    public void disableAds()
+    {
+        adsDisabled = true;
+        Debug.Log("Ads Disabled");
+        ShowBannerAd();
     }
 
     #region Initialize
@@ -138,7 +147,6 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     public void OnUnityAdsShowClick(string adUnitId) { }
     public void OnUnityAdsShowComplete(string adUnitId, UnityAdsShowCompletionState showCompletionState)
     {
-        test?.SetActive(false);
         if (showCompletionState.Equals(UnityAdsShowCompletionState.COMPLETED))
         {
             GameManager.instance.LM.BM.ToggleInput(true);
