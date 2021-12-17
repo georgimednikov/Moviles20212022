@@ -127,7 +127,7 @@ public class BoardManager : MonoBehaviour
         //Si se está tocando un flow se cambia el color del cursor
         if (map.touchingIndex != -1)
         {
-            color = GameManager.instance.skinPack.colors[map.touchingIndex]; color.a /= 2;
+            color = GameManager.instance.currSkin.colors[map.touchingIndex]; color.a /= 2;
             cursorRender.color = color;
         }
 
@@ -193,7 +193,7 @@ public class BoardManager : MonoBehaviour
                 tilePrev.DrawTick();
                 tile.DrawTick();
             }
-            tile.SetColor(GameManager.instance.skinPack.colors[flowToRender]);
+            tile.SetColor(GameManager.instance.currSkin.colors[flowToRender]);
             Direction opposite;
             Direction dir = Flow.VectorsToDir(p.pos, prev.pos, out opposite);
             if (dir != Direction.NONE)
@@ -201,7 +201,7 @@ public class BoardManager : MonoBehaviour
                 tile.SetConnectedDirections(dir);
                 tilePrev.SetConnectedDirections(opposite);
             }
-            tilePrev.SetColor(GameManager.instance.skinPack.colors[flowToRender]);
+            tilePrev.SetColor(GameManager.instance.currSkin.colors[flowToRender]);
         }
     }
 
@@ -305,7 +305,7 @@ public class BoardManager : MonoBehaviour
         map.LoadMap(boardToLoad.Skip(1).ToArray(), boardToLoad[0].Split(',').Skip(4).ToArray());
         LogicTile[] flowEnds = map.GetFlowEnds();
         int i = 0;
-        Color32[] colorPool = GameManager.instance.skinPack.colors;
+        Color32[] colorPool = GameManager.instance.currSkin.colors;
         foreach (LogicTile end in flowEnds)
         {
             Tile tile = board[end.pos.x, end.pos.y];
@@ -334,6 +334,5 @@ public class BoardManager : MonoBehaviour
 
     public void AnimationFinished() { 
         animating = false;
-        Debug.Log("AnimationFinished");
     }
 }

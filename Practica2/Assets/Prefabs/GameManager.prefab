@@ -45,7 +45,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67a39a00493c3a341974a40684114640, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skinPack: {fileID: 11400000, guid: 8e15ca9fd782a33429d1955ae1d20a4f, type: 2}
+  currSkin: {fileID: 0}
+  skinPacks:
+  - {fileID: 11400000, guid: 8e15ca9fd782a33429d1955ae1d20a4f, type: 2}
+  - {fileID: 11400000, guid: 2ff53947612a5a34bba7a970e07850cd, type: 2}
   levelBundles:
   - {fileID: 11400000, guid: d54d842e5c1254146936ed15ad47389d, type: 2}
   - {fileID: 11400000, guid: 1cb2ec5a3b5d13e45b17f660f2df17e4, type: 2}
@@ -70,6 +73,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cef6556457fa40142a48c695aa9e6f02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  saveDirection: /save
 --- !u!114 &1576025642
 MonoBehaviour:
   m_ObjectHideFlags: 0

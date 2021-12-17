@@ -16,7 +16,7 @@ public class LevelSelectManager : MonoBehaviour
 
     public void LoadLevels()
     {
-        SkinPack skin = GameManager.instance.skinPack;
+        SkinPack skin = GameManager.instance.currSkin;
         LevelPack pack = GameManager.instance.nextPack;
         nameText.text = pack.levelName;
         nameText.color = GameManager.instance.nextBundle.bundleColor;
