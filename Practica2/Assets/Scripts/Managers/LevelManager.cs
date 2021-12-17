@@ -44,6 +44,7 @@ public class LevelManager : MonoBehaviour
             currentLevel = int.Parse(levelInfo[2]) - 1;
 
             levelText.text = "Level " + (currentLevel + 1);
+            levelText.color = GameManager.instance.nextBundle.bundleColor;
             sizeText.text = sizeX + "x" + (sizeY == 0 ? sizeX : sizeY);
             // completionAmount.sprite = ; TODO
 

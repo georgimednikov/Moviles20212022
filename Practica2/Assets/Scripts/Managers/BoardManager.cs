@@ -50,6 +50,7 @@ public class BoardManager : MonoBehaviour
                 //Se offsetean las posiciones de las tiles para que la posición del gameObject padre cuadren con el centro del tablero
                 GameObject tile = Instantiate(tilePref, new Vector2(i - (map.Width - 1) / 2.0f, j - (map.Height - 1) / 2.0f), Quaternion.identity, transform);
                 board[i, j] = tile.GetComponent<Tile>();
+                board[i, j].SetBorderColor(GameManager.instance.nextBundle.bundleColor);
             }
         }
         ArrangeInScreen();

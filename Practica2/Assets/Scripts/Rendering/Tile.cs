@@ -11,6 +11,7 @@ public class Tile : MonoBehaviour
     [SerializeField] GameObject flowEnd;
     [SerializeField] GameObject[] flowDirections;
     [SerializeField] GameObject[] walls;
+    [SerializeField] GameObject[] borders;
     [SerializeField] GameObject looseEnd;
     [SerializeField] GameObject corner;
     [SerializeField] GameObject tick;
@@ -129,6 +130,14 @@ public class Tile : MonoBehaviour
         for (int i = 0; i < flowDirections.Length; i++)
         {
             flowDirections[i].GetComponent<SpriteRenderer>().color = col;
+        }
+    }
+
+    public void SetBorderColor(Color32 col)
+    {
+        foreach (GameObject b in borders)
+        {
+            b.GetComponent<SpriteRenderer>().color = col;
         }
     }
 }
