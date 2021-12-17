@@ -104,7 +104,8 @@ public class BoardManager : MonoBehaviour
         map.LoadMap(boardToLoad.Skip(1).ToArray(), boardToLoad[0].Split(',').Skip(4).ToArray());
         LogicTile[] flowEnds = map.GetFlowEnds();
         int i = 0;
-        Color32[] colorPool = GameManager.instance.skinPack.colors;
+        Color32[] colorPool = GameManager.instance.currSkin.colors;
+        Color32 color = GameManager.instance.nextBundle.bundleColor;
         foreach (LogicTile end in flowEnds)
         {
             Tile tile = board[end.pos.x, end.pos.y];
@@ -119,7 +120,7 @@ public class BoardManager : MonoBehaviour
             if (tile.tileType == LogicTile.TileType.EMPTY) board[tile.pos.x, tile.pos.y].Deactivate();
             for (int j = 0; j < tile.walls.Length; ++j)
             {
-                if (tile.walls[j]) board[tile.pos.x, tile.pos.y].SetWalls(j);
+                if (tile.walls[j]) board[tile.pos.x, tile.pos.y].SetWalls(j, color);
             }
         }
         LM.UpdateInfo(map.movements, 0, map.GetNumFlows());
