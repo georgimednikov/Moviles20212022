@@ -117,7 +117,7 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     {
         if (!adsDisabled && Advertisement.isInitialized && (adId.id == _AdUnitId[0].id || (adId.id == _AdUnitId[1].id && Random.Range(0.0f, 1.0f) < 0.3333)))
         {
-            // Pedro Pablo: en el editor parece que funciona de manera diferente a en el movil, añadiendo todo el rato a los listeners en el primero, y en el segundo quitandolo cuando acaba.
+            // Pedro Pablo: en el editor parece que funciona de manera diferente a en el movil, aï¿½adiendo todo el rato a los listeners en el primero, y en el segundo quitandolo cuando acaba.
             // Lo hemos puesto asi ya que creemos que es un error de la version 4.0.0 de la APi de ads
 #if (!UNITY_ANDROID && !UNITY_IOS) || UNITY_EDITOR
             if (!adId.init)
@@ -138,7 +138,6 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     public void OnUnityAdsShowClick(string adUnitId) { }
     public void OnUnityAdsShowComplete(string adUnitId, UnityAdsShowCompletionState showCompletionState)
     {
-        Debug.Log("Espero que sea legible");
         test?.SetActive(false);
         if (showCompletionState.Equals(UnityAdsShowCompletionState.COMPLETED))
         {
@@ -194,6 +193,7 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
 
             Advertisement.Banner.Show(_bannerAdUnitId, options);
         }
+        else Advertisement.Banner.Hide();
     }
 
     void OnBannerClicked() { }
