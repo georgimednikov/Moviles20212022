@@ -172,7 +172,7 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
 
     void OnBannerLoaded()
     {
-        Debug.Log("Banner loaded");
+        //Debug.Log("Banner loaded");
     }
 
     void OnBannerError(string message)
