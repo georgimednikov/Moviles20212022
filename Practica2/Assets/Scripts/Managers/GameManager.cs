@@ -36,6 +36,7 @@ public class GameManager : MonoBehaviour
             currSkin = skinPacks[0];
             hints = instance.GetComponent<SaveManager>().RestoreHint(); // TODO: comprobar si no existia antes
             DontDestroyOnLoad(gameObject);
+            currSkin = skinPacks[instance.GetComponent<SaveManager>().RestoreSkin()];
         }
         else
         {
@@ -107,6 +108,7 @@ public class GameManager : MonoBehaviour
     public void ChangeSkin(int skin)
     {
         currSkin = skinPacks[skin];
+        GetComponent<SaveManager>().StoreSkin(skin);
     }
 
     public static void GoToMainMenu()

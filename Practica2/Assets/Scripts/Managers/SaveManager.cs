@@ -92,6 +92,11 @@ public class SaveManager : MonoBehaviour
         saveFile.packSaves.Find(p => p.name.Equals(packName)).numCompleted = ncompleted;
     }
 
+    public void StoreSkin(int index)
+    {
+        saveFile.skinIndex = index;
+    }
+
     public int RestoreHint()
     {
         return saveFile.hints;
@@ -133,5 +138,10 @@ public class SaveManager : MonoBehaviour
             saveFile.packSaves.Add(a);
         }
         return a.numCompleted;
+    }
+
+    public int RestoreSkin()
+    {
+        return saveFile.skinIndex;
     }
 }
