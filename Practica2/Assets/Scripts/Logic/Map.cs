@@ -42,7 +42,6 @@ public class Map
 
     public int GiveHint()
     {
-        // TODO: no es solo random, coge al mas molesto, y ademas no coge flows solved
         if (IsGameSolved()) return -1;
 
         int randomIndex;
@@ -59,7 +58,7 @@ public class Map
         AddToReset(touchingIndex);
         touchingFlow.RemovePositions();
         LogicTile[] solution = touchingFlow.GetSolution();
-        foreach(LogicTile t in solution)
+        foreach (LogicTile t in solution)
         {
             CheckFlowCollision(t);
             touchingFlow.AddFlow(t);
@@ -93,7 +92,7 @@ public class Map
         }
         return true;
     }
-    // TODO: comprobacion de errores
+
     public void LoadMap(string[] flowStrings, string[] levelInfo)
     {
         flows = new Flow[flowStrings.Length];
@@ -104,7 +103,6 @@ public class Map
         for (int i = 0; i < Width; i++)
             for (int j = 0; j < Height; j++)
                 tileBoard[i, j] = new LogicTile(new Vector2Int(i, j));
-
         for (int i = 0; i < flowStrings.Length; i++)
         {
             string[] pos = flowStrings[i].Split(','); //Dividimos el string del flow en "numeros"

@@ -29,7 +29,7 @@ public class SaveManager : MonoBehaviour
     /// <summary>
     /// Guarda la informacion de guardado en el archivo Application.persistentDataPath + fileString + ".json", utilizando sal y pimienta
     /// </summary>
-    public void SaveToFile(string fileString) // TODO: permitir tener DLCs sin perder tus datos
+    public void SaveToFile(string fileString)
     {
         string destination = Application.persistentDataPath + fileString + ".json";
         using (StreamWriter sw = new StreamWriter(destination))

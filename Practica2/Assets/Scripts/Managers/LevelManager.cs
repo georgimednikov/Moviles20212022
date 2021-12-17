@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
+using System;
 
 public class LevelManager : MonoBehaviour
 {
@@ -28,38 +29,46 @@ public class LevelManager : MonoBehaviour
     [SerializeField] CompleteRect completeRect;
     [SerializeField] CanvasScaler canvasScaler;
 
-    // TODO: comprobacion de errores
     public bool LoadLevel(string level, bool animate = true)
     {
-        int sizeX, sizeY = 0;
-        string[] levelRows = level.Split(';');
-        string[] levelInfo = levelRows[0].Split(',');
+        try {
+            int sizeX, sizeY = 0;
+            string[] levelRows = level.Split(';');
+            string[] levelInfo = levelRows[0].Split(',');
 
-        string[] levelSize = levelInfo[0].Split(':');
-        sizeX = int.Parse(levelSize[0]);
-        // Si el mapa no es cuadrado, el levelSize tiene tamaño 2.
-        sizeY = (levelSize.Length > 1) ? int.Parse(levelSize[1].Split('+')[0]) : 0; //Si es 0 es el valor inutil y no hay segunda dimension
+            string[] levelSize = levelInfo[0].Split(':');
+            sizeX = int.Parse(levelSize[0]);
+            // Si el mapa no es cuadrado, el levelSize tiene tamaño 2.
+            sizeY = (levelSize.Length > 1) ? int.Parse(levelSize[1].Split('+')[0]) : 0; //Si es 0 es el valor inutil y no hay segunda dimension
 
-        currentLevel = int.Parse(levelInfo[2]) - 1;
+            currentLevel = int.Parse(levelInfo[2]) - 1;
 
-        levelText.text = "Level " + (currentLevel + 1);
-        sizeText.text = sizeX + "x" + (sizeY == 0 ? sizeX : sizeY);
-        // completionAmount.sprite = ; TODO
+            levelText.text = "Level " + (currentLevel + 1);
+            sizeText.text = sizeX + "x" + (sizeY == 0 ? sizeX : sizeY);
+            // completionAmount.sprite = ; TODO
 
-        BM.SetUIHeight(topRect.rect.height, botRect.rect.height, canvasScaler.referenceResolution.x);
-        BM.ChangeBoard(levelRows, sizeX, sizeY, animate);
+            BM.SetUIHeight(topRect.rect.height, botRect.rect.height, canvasScaler.referenceResolution.x);
+            BM.ChangeBoard(levelRows, sizeX, sizeY, animate);
 
-        SetLevelButtonsInteractable();
+            SetLevelButtonsInteractable();
 
-        var levelsave = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, currentLevel);
-        finishedStar.enabled = levelsave.completed == 2;
-        finishedTick.enabled = levelsave.completed == 1;
-        int bestMoves = levelsave.bestmoves;
-        bestMovesText.text = "best: " + (bestMoves == int.MaxValue ? "-" : bestMoves.ToString());
+            var levelsave = GameManager.instance.GetComponent<SaveManager>().RestoreLevel(GameManager.instance.nextPack.levelName, currentLevel);
+            finishedStar.enabled = levelsave.completed == 2;
+            finishedTick.enabled = levelsave.completed == 1;
+            int bestMoves = levelsave.bestmoves;
+            bestMovesText.text = "best: " + (bestMoves == int.MaxValue ? "-" : bestMoves.ToString());
 
-        if (GameManager.instance.hints > 0) hintsText.text = GameManager.instance.hints + " x";
-        else hintsText.text = "+";
-        return true;
+            if (GameManager.instance.hints > 0) hintsText.text = GameManager.instance.hints + " x";
+            else hintsText.text = "+";
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error al cargar el nivel");
+            Debug.LogError(e);
+            GameManager.GoToLevelSelect();
+            return false;
+        }
     }
 
     private void SetLevelButtonsInteractable()
