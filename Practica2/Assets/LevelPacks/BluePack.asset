@@ -15,3 +15,10 @@ MonoBehaviour:
   levelName: Blue Pack
   levelMap: {fileID: 4900000, guid: 9880585324b1fbb4d92bdbc1063fbb40, type: 3}
   numLevels: 150
+  minipackName:
+  - Light Blue
+  - Dark Blue
+  - Cyan
+  - Cobalt
+  - Teal
+  locked: 0

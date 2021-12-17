@@ -15,3 +15,10 @@ MonoBehaviour:
   levelName: Green Pack
   levelMap: {fileID: 4900000, guid: 4ef1e8d2c19c9ef4cbf7d0db9b7d35bf, type: 3}
   numLevels: 150
+  minipackName:
+  - Light Green
+  - Dark Green
+  - Emerald
+  - Lime
+  - Seaweed
+  locked: 0
