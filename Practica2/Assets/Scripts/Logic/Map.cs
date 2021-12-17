@@ -40,6 +40,34 @@ public class Map
         numFlowsComplete = 0;
     }
 
+    public bool IsFlowSolved(int flow)
+    {
+        return flows[flow].IsSolved();
+    }
+
+    public bool IsGameSolved()
+    {
+        foreach (Flow f in flows)
+        {
+            if (!f.IsSolved())
+                return false;
+        }
+        return true;
+    }
+
+    public int UndoMove()
+    {
+        if (lastMovedFlow == null) return -1;
+        Flow flow = flows[lastMovedIndex];
+        AddToReset(lastMovedIndex);
+        flow.UndoMove(lastMovedFlow);
+        movements = lastMovedMovements;
+        touchingIndex = lastMovedIndex;
+        //Se actualiza el porcentaje, el resto de info cuando se deja de hacer click
+        CalculatePercentage();
+        return touchingIndex;
+    }
+
     public int GiveHint()
     {
         // TODO: no es solo random, coge al mas molesto, y ademas no coge flows solved
@@ -79,21 +107,6 @@ public class Map
         return touchingIndex;
     }
 
-    public bool IsFlowSolved(int flow)
-    {
-        return flows[flow].IsSolved();
-    }
-
-    public bool IsGameSolved()
-    {
-        foreach (Flow f in flows)
-        {
-            if (!f.IsSolved())
-                return false;
-        }
-        return true;
-    }
-    // TODO: comprobacion de errores
     public void LoadMap(string[] flowStrings, string[] levelInfo)
     {
         flows = new Flow[flowStrings.Length];
@@ -250,21 +263,7 @@ public class Map
     public LogicTile TileLooseEnd()
     {
         if (incompleteFlow == -1) return null;
-        //flowsToRender[incompleteFlow] = true;
         return flows[incompleteFlow].GetLastPosition();
-    }
-
-    public int UndoMove()
-    {
-        if (lastMovedFlow == null) return -1;
-        Flow flow = flows[lastMovedIndex];
-        AddToReset(lastMovedIndex);
-        flow.UndoMove(lastMovedFlow);
-        movements = lastMovedMovements;
-        touchingIndex = lastMovedIndex;
-        //Se actualiza el porcentaje, el resto de info cuando se deja de hacer click
-        CalculatePercentage();
-        return touchingIndex;
     }
 
     public int GetNumFlows()
@@ -316,6 +315,7 @@ public class Map
         }
     }
 
+    //True si hay un flow en esa posición
     private bool GetFlow(Vector2Int p)
     {
         int i = 0;
@@ -373,6 +373,7 @@ public class Map
         }
     }
 
+    //Se añade desde posIndex en adelante las posiciones del flowIndex a la lista de Tiles que resetear
     private void AddToReset(int flowIndex, int posIndex = 0)
     {
         Flow f = flows[flowIndex];

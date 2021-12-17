@@ -19,9 +19,14 @@ public class Flow
     public int GetNumPipes()
     {
         if (completed) return positions.Count;
+        //Los extremos siempre cuentan, aunque no se hayan metido todavía en el flow
         if (positions.Count < 2) return 2;
+        //+1 por el extremo que no está todavía en el flow
         return positions.Count + 1;
     }
+
+    public LogicTile GetFirstEnd() { return solution.First.Value; }
+    public LogicTile GetLastEnd() { return solution.Last.Value; }
 
     public LogicTile GetPosition(int p)
     {
@@ -31,53 +36,16 @@ public class Flow
     public LogicTile[] GetPositions(int p = 0) {
         return positions.GetRange(p, positions.Count - p).ToArray(); 
     }
-    public void RemovePositions(int p = 0)
-    {
-        if (positions.Count == 0) return;
-        if(positions.Count - p > 0) completed = false;
-        positions.RemoveRange(p, positions.Count - p);
-    }
-
-    /*public void Solve()
-    {
-        positions.Clear();
-        int i = 0;
-        var sol = solution.First;
-        while (sol != null)
-        {
-            LogicTile tile =  new LogicTile(sol.Value.pos);
-            tile.tileType = sol.Value.tileType;
-            tile.walls = sol.Value.walls;
-            AddFlow(tile);
-            sol = sol.Next; i++;
-        }
-    }*/
-
-    public LogicTile[] GetSolution()
-    {
-        LogicTile[] sol = new LogicTile[solution.Count];
-        var node = solution.First;
-        for (int i = 0; i < solution.Count; i++, node = node.Next)
-            sol[i] = node.Value;
-        return sol;
-    }
-
-    public void UndoMove(LogicTile[] p)
-    {
-        positions.Clear();
-        foreach (LogicTile t in p)
-        {
-            AddFlow(t);
-        }
-    }
 
     public LogicTile GetLastPosition() {
         if (positions.Count == 0) return null;
         return positions[positions.Count - 1]; 
     }
 
-    public void CommitChanges(int p) {
-        if (positions.Count - p > 0) completed = false;
+    public void RemovePositions(int p = 0)
+    {
+        if (positions.Count == 0) return;
+        if(positions.Count - p > 0) completed = false;
         positions.RemoveRange(p, positions.Count - p);
     }
 
@@ -113,6 +81,33 @@ public class Flow
         return solved = !end;
     }
 
+    public bool IsEnd(LogicTile p)
+    {
+        return p.pos == GetFirstEnd().pos || p.pos == GetLastEnd().pos;
+    }
+
+    public LogicTile[] GetSolution()
+    {
+        LogicTile[] sol = new LogicTile[solution.Count];
+        var node = solution.First;
+        for (int i = 0; i < solution.Count; i++, node = node.Next)
+            sol[i] = node.Value;
+        return sol;
+    }
+
+    public void UndoMove(LogicTile[] p)
+    {
+        positions.Clear();
+        foreach (LogicTile t in p)
+        {
+            AddFlow(t);
+        }
+    }
+    public void CommitChanges(int p) {
+        if (positions.Count - p > 0) completed = false;
+        positions.RemoveRange(p, positions.Count - p);
+    }
+
     public bool StartNewFlow(LogicTile flow)
     {
         int size = positions.Count;
@@ -140,9 +135,6 @@ public class Flow
         return true;
     }
 
-    public LogicTile GetFirstEnd() { return solution.First.Value; }
-    public LogicTile GetLastEnd() { return solution.Last.Value; }
-
     public bool BeingTouched(LogicTile p)
     {
         if (IsEnd(p)) return true;
@@ -161,11 +153,6 @@ public class Flow
             if (positions[i] == p) return i;
         }
         return -1;
-    }
-
-    public bool IsEnd(LogicTile p)
-    {
-        return p.pos == GetFirstEnd().pos || p.pos == GetLastEnd().pos;
     }
 
     bool CanPlaceFlow(LogicTile p)
