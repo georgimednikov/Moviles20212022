@@ -43,6 +43,7 @@ public class BoardManager : MonoBehaviour
         map.Width = boardSizeX;
         map.Height = boardSizeY;
         board = new Tile[boardSizeX, boardSizeY];
+        Color32 color = GameManager.instance.nextBundle.bundleColor;
         for (int i = 0; i < board.GetLength(0); i++)
         {
             for (int j = 0; j < board.GetLength(1); j++)
@@ -50,7 +51,7 @@ public class BoardManager : MonoBehaviour
                 //Se offsetean las posiciones de las tiles para que la posición del gameObject padre cuadren con el centro del tablero
                 GameObject tile = Instantiate(tilePref, new Vector2(i - (map.Width - 1) / 2.0f, j - (map.Height - 1) / 2.0f), Quaternion.identity, transform);
                 board[i, j] = tile.GetComponent<Tile>();
-                board[i, j].SetBorderColor(GameManager.instance.nextBundle.bundleColor);
+                board[i, j].SetBorderColor(color);
             }
         }
         ArrangeInScreen();
@@ -315,12 +316,13 @@ public class BoardManager : MonoBehaviour
             tile.SetColor(colorPool[((i++) / 2) % colorPool.Length]);
         }
 
+        Color32 color = GameManager.instance.nextBundle.bundleColor;
         foreach (var tile in map.tileBoard)
         {
             if (tile.tileType == LogicTile.TileType.EMPTY) board[tile.pos.x, tile.pos.y].Deactivate();
             for (int j = 0; j < tile.walls.Length; ++j)
             {
-                if (tile.walls[j]) board[tile.pos.x, tile.pos.y].SetWalls(j);
+                if (tile.walls[j]) board[tile.pos.x, tile.pos.y].SetWalls(j, color);
             }
         }
         LM.UpdateInfo(map.movements, 0, map.GetNumFlows());

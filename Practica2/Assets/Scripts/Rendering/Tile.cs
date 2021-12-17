@@ -47,12 +47,10 @@ public class Tile : MonoBehaviour
     /// <summary>
     /// Activa las paredes segun las direcciones dadas
     /// </summary>
-    public void SetWalls(params int[] dirs)
+    public void SetWalls(int dirs, Color32 col)
     {
-        for (int i = 0; i < dirs.Length; i++)
-        {
-            walls[dirs[i]].SetActive(true);
-        }
+        walls[dirs].SetActive(true);
+        walls[dirs].GetComponent<SpriteRenderer>().color = col;
     }
 
     /// <summary>
