@@ -143,7 +143,7 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
     {
         Debug.LogError($"Error showing Ad Unit {adUnitId}: {error.ToString()} - {message}");
     }
-    public void OnUnityAdsShowStart(string adUnitId) { Debug.Log("Espero que sea legible"); GameManager.instance.LM.BM.ToggleInput(false); }
+    public void OnUnityAdsShowStart(string adUnitId) { GameManager.instance.LM.BM.ToggleInput(false); }
     public void OnUnityAdsShowClick(string adUnitId) { }
     public void OnUnityAdsShowComplete(string adUnitId, UnityAdsShowCompletionState showCompletionState)
     {
