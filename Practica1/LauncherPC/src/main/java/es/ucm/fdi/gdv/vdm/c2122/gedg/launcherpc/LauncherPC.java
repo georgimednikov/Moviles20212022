@@ -7,13 +7,13 @@ public class LauncherPC {
     public static void main(String[] args){
 
         EnginePC pc = new EnginePC();
+        pc.init("0hn0");
 
         pc.getGraphics().scale(400, 600);
 
         OhnOIntro g = new OhnOIntro();
 
-        pc.setApplication(g);
-        g.setEngine(pc);
+        pc.changeState(g);
         pc.run();
     }
 }

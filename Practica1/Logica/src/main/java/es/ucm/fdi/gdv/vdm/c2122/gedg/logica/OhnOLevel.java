@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.ApplicationCommon;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.State;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
-public class OhnOLevel extends ApplicationCommon {
+public class OhnOLevel implements State {
 
     //Frases de victoria
     private final String[] YOU_WIN_TEXTS = new String[] {
@@ -20,6 +21,8 @@ public class OhnOLevel extends ApplicationCommon {
         "INCREÍBLE",
         "PARABIÉN"
     };
+
+    Engine eng_;
 
     //Constantes de renderizado
 
@@ -103,7 +106,8 @@ public class OhnOLevel extends ApplicationCommon {
     }
 
     @Override
-    public void init() {
+    public void init(Engine eng) {
+        eng_ = eng;
         Graphics g = eng_.getGraphics();
 
         //Se calculan las variables de asignacion dinamica
@@ -145,7 +149,7 @@ public class OhnOLevel extends ApplicationCommon {
         //Se procesan los eventos de input
         TouchEvent event;
         next:
-        while ((event = eng_.getInput().getEvent()) != null) {
+        while ((event = eng_.getInput().dequeueEvent()) != null) {
             if (event.type != TouchEvent.TouchType.PRESS) continue;
             //Para cada celda se comprueba si se ha hecho click en ella
             for (int i = 0; i < boardSize; ++i) {
@@ -259,7 +263,7 @@ public class OhnOLevel extends ApplicationCommon {
         if (fadeOut) {
             if (elapsedTime >= SCENE_FADE_DURATION) {
                 OhnOMenu app = new OhnOMenu();
-                eng_.setApplication(app);
+                eng_.changeState(app);
             }
             else elapsedTime += deltaTime;
         }
@@ -333,13 +337,13 @@ public class OhnOLevel extends ApplicationCommon {
             CellLogic cell = previousMoves.remove(previousMoves.size() - 1);
             switch (cell.revertState()) {
                 case BLUE:
-                    text = "Esta celda a vuelto a azul";
+                    text = "Esta celda ha vuelto a azul";
                     break;
                 case GREY:
-                    text = "Esta celda a vuelto a gris";
+                    text = "Esta celda ha vuelto a gris";
                     break;
                 case RED:
-                    text = "Esta celda a vuelto a rojo";
+                    text = "Esta celda ha vuelto a rojo";
                     break;
             }
             CellLogic.STATE currState = cell.getCurrState();

@@ -4,69 +4,54 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Tiene una pool de eventos por dentro a la que se puede acceder con addEvent(), lo que hace que
- * se meta un evento en la lista de eventos a la que tiene acceso el usuario mediante getEvent().
- * El usuario tiene que llamar a getEvent() en un bucle para recoger todos los eventos emitidos
+ * Tiene una pool de eventos por dentro a la que se puede acceder con enqueueEvent(), lo que hace que
+ * se meta un evento en la cola de eventos a la que tiene acceso el usuario mediante dequeueEvent().
+ * El usuario tiene que llamar a dequeueEvent() en un bucle para recoger todos los eventos emitidos
  * durante el frame.
  */
 public abstract class InputCommon implements Input {
     private final List<TouchEvent> events_;
     private final List<TouchEvent> freeEvents_;
 
-    private int curPoolNumber_ = 0;
-
-    private final int INITIAL_POOL_NUMBER = 20;
-    // Para evitar que se llene toda la memoria de eventos
-    private final int MAX_SIZE = 1000;
-
     protected InputCommon(){
         events_ = new ArrayList<>();
         freeEvents_ = new ArrayList<>();
-        increasePool();
     }
 
-    /**
-     * Aumenta el tamaño de la lista de eventos libres, si no ha llegado ya al tamaño maximo.
-     */
-    private void increasePool() {
-        if(curPoolNumber_ < MAX_SIZE) {
-            curPoolNumber_ += INITIAL_POOL_NUMBER;
-            for (int i = 0; i < INITIAL_POOL_NUMBER; ++i) freeEvents_.add(new TouchEvent());
-        }
-    }
 
     /**
-    * Devuelve un evento de la lista de eventos libres para modificarlo, y lo mete en la lista de eventos utilizados.
-    * Si la lista de eventos libres esta vacia (para evitar llenar demasiado la memoria), se coge del primer
-    * evento de la lista de eventos vacios.
+    * Devuelve un evento de la cola de eventos libres para modificarlo, y lo mete en la cola de eventos utilizados.
+    * Si la cola de eventos libres esta vacia, se coge del primer
+    * evento de la cola de eventos vacios.
     */
-    synchronized public TouchEvent addEvent(){
+    synchronized public void enqueueEvent(int x, int y, int finger, TouchEvent.TouchType type){
         if(freeEvents_.isEmpty()){
-            increasePool();
+            // TODO: hacer bien
+            for (int i = 0; i < 10; ++i) freeEvents_.add(new TouchEvent());
         }
-        TouchEvent aux;
-        if(!freeEvents_.isEmpty()) {
-            aux = freeEvents_.remove(0);
-        } else {
-            aux = events_.remove(0);
-        }
+        TouchEvent aux = freeEvents_.remove(0);
         events_.add(aux);
-        aux.x = 0;
-        aux.y = 0;
-        aux.finger = 0;
-        aux.type = null;
-        return aux;
+        aux.x = x;
+        aux.y = y;
+        aux.finger = finger;
+        aux.type = type;
     }
 
     /**
-     *  Quita el ultimo evento de la pila y lo devuelve, null si no quedan.
+     *  Quita el primer evento de la cola y lo devuelve, null si no quedan.
      */
-    synchronized public TouchEvent getEvent(){
+    synchronized public TouchEvent dequeueEvent(){
         TouchEvent e = null;
+        TouchEvent copy = null;
         if(!events_.isEmpty()) {
-            e = events_.remove(events_.size() - 1);
+            copy = new TouchEvent();
+            e = events_.remove(0);
+            copy.finger = e.finger;
+            copy.type = e.type;
+            copy.x = e.x;
+            copy.y = e.y;
             freeEvents_.add(e);
         }
-        return e;
+        return copy;
     }
 }

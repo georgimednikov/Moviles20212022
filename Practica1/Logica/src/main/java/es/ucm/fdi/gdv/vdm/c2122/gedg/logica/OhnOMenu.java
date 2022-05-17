@@ -1,18 +1,18 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.ApplicationCommon;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.State;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
-public class OhnOMenu extends ApplicationCommon {
+public class OhnOMenu implements State {
+
+    Engine eng_;
 
     //Escenas a las que puede transicionar esta
     private enum POSSIBLE_SCENES {
@@ -59,7 +59,8 @@ public class OhnOMenu extends ApplicationCommon {
      * Inicializa la escena para su actualizacion/renderizado
      */
     @Override
-    public void init() {
+    public void init(Engine eng) {
+        eng_ = eng;
         Graphics g = eng_.getGraphics();
         int paintArea = g.getWidth() - 2 * MENU_OFFSET_X;
         cellRadius = (int)((paintArea * 0.9) / 2) / ROW_SIZE;
@@ -100,7 +101,7 @@ public class OhnOMenu extends ApplicationCommon {
         //Se procesan los eventos
         TouchEvent event;
         next:
-        while ((event = eng_.getInput().getEvent()) != null) {
+        while ((event = eng_.getInput().dequeueEvent()) != null) {
             if (event.type != TouchEvent.TouchType.PRESS) continue;
             //Se mira si ha activado el boton
             if (checkCollisionCircle(eng_.getGraphics().getWidth() / 2, QUIT_POS_Y, BUTTON_SIZE, event.x, event.y)) {
@@ -168,11 +169,11 @@ public class OhnOMenu extends ApplicationCommon {
                 switch (nextScene) {
                     case INTRO:
                         OhnOIntro intro = new OhnOIntro();
-                        eng_.setApplication(intro);
+                        eng_.changeState(intro);
                         break;
                     case MENU:
                         OhnOLevel level = new OhnOLevel(selectedSize);
-                        eng_.setApplication(level);
+                        eng_.changeState(level);
                         break;
                 }
             }

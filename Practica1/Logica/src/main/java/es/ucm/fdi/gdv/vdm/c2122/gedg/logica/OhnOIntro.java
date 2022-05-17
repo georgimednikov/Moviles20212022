@@ -3,12 +3,15 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 import java.util.ArrayList;
 import java.util.List;
 
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.ApplicationCommon;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.State;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
-public class OhnOIntro extends ApplicationCommon {
+public class OhnOIntro implements State {
+
+    Engine eng_;
 
     //Constantes de renderizado
     private final int LOGO_POS_Y = 130;
@@ -38,7 +41,8 @@ public class OhnOIntro extends ApplicationCommon {
      * Inicializa la escena para su actualizacion/renderizado
      */
     @Override
-    public void init() {
+    public void init(Engine eng) {
+        eng_ = eng;
         Graphics g = eng_.getGraphics();
         logoText = new TextRender(g.newFont("assets/fonts/Molle-Regular.ttf", new Color(0, 0, 0, 255), 85, false),"Oh nO", true);
         playText = new TextRender(g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(0, 0, 0, 255), 60, false), "Jugar", true);
@@ -64,7 +68,7 @@ public class OhnOIntro extends ApplicationCommon {
 
         //Se procesan los eventos de input
         TouchEvent event;
-        while ((event = eng_.getInput().getEvent()) != null) {
+        while ((event = eng_.getInput().dequeueEvent()) != null) {
             if (event.type != TouchEvent.TouchType.PRESS) continue;
             //Si se ha hecho click en el texto
             if (checkCollisionBox(
@@ -111,7 +115,7 @@ public class OhnOIntro extends ApplicationCommon {
         if (fadeOut) {
             if (elapsedTime >= SCENE_FADE_DURATION) {
                 OhnOMenu app = new OhnOMenu();
-                eng_.setApplication(app);
+                eng_.changeState(app);
             }
             else elapsedTime += deltaTime;
         }

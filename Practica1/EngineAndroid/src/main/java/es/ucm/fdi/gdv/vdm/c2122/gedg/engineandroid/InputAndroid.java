@@ -24,34 +24,25 @@ public class InputAndroid extends InputCommon implements View.OnTouchListener {
     public boolean onTouch(View view, MotionEvent e) {
         int pointerIndex = ((e.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT);
         int pointerId = 0;
-        TouchEvent event = addEvent();
         try {
             int mActivePointerId = e.getPointerId(pointerIndex);
             pointerId = e.findPointerIndex(mActivePointerId);
-            event.finger = pointerId;
-        switch (e.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_POINTER_DOWN:
-                event.type = TouchEvent.TouchType.PRESS;
-                event.x = g_.toVirtualX((int)e.getX(pointerId));
-                event.y = g_.toVirtualY((int)e.getY(pointerId));
-                event.finger = pointerId;
-                break;
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_POINTER_UP:
-                event.type = TouchEvent.TouchType.LIFT;
-                event.x = g_.toVirtualX((int)e.getX(pointerId));
-                event.y = g_.toVirtualY((int)e.getY(pointerId));
-                event.finger = pointerId;
-                break;
-            case MotionEvent.ACTION_MOVE:
-                event.type = TouchEvent.TouchType.DRAG;
-                event.x = g_.toVirtualX((int)e.getX(pointerId));
-                event.y = g_.toVirtualY((int)e.getY(pointerId));
-                event.finger = pointerId;
-                break;
-        }
+            TouchEvent.TouchType type = null;
+            switch (e.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    type = TouchEvent.TouchType.PRESS;
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                case MotionEvent.ACTION_POINTER_UP:
+                    type = TouchEvent.TouchType.LIFT;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    type = TouchEvent.TouchType.DRAG;
+                    break;
+            }
+            enqueueEvent(g_.toVirtualX((int)e.getX(pointerId)), g_.toVirtualY((int)e.getY(pointerId)), pointerId, type);
         }catch (Exception f){
             f.printStackTrace();
         }

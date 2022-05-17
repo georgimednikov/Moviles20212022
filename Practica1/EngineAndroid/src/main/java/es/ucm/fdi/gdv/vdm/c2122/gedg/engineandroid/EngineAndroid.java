@@ -3,11 +3,10 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 import android.content.Context;
 import android.view.SurfaceView;
 
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.ApplicationCommon;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Application;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.State;
 
 public class EngineAndroid implements Engine, Runnable {
 
@@ -21,7 +20,7 @@ public class EngineAndroid implements Engine, Runnable {
 
     private InputAndroid input_;
     private GraphicsAndroid graphics_;
-    private Application app_;
+    private State app_;
 
     public EngineAndroid(Context context) {
         graphics_ = new GraphicsAndroid(context);
@@ -80,9 +79,15 @@ public class EngineAndroid implements Engine, Runnable {
         }
         while(running_ && !graphics_.init()); //Se espera a que se inicialicen los graficos
         lastFrameTime_ = System.nanoTime();
-        Application currApp;
+        State currApp = null;
         while(running_) { //Bucle principal
-            currApp = app_; //Se actualiza la aplicacion con la que se trabaja
+
+            //Se actualiza la aplicacion con la que se trabaja
+            if(currApp != app_){
+                currApp = app_;
+                currApp.init(this);
+            }
+
             updateDeltaTime();
             currApp.update();
             graphics_.lock(); //Se fija un canvas
@@ -93,14 +98,12 @@ public class EngineAndroid implements Engine, Runnable {
     }
 
     /**
-     * Asigna una nueva aplicacion y la inicializa
+     * Asigna una nueva aplicacion
      * El siguiente frame se empieza a actualizar y renderizar
      */
     @Override
-    public void setApplication(Application a) {
+    public void changeState(State a) {
         app_ = a;
-        ((ApplicationCommon)a).setEngine(this);
-        app_.init();
     }
     @Override
     public Graphics getGraphics() {
@@ -110,8 +113,4 @@ public class EngineAndroid implements Engine, Runnable {
     public Input getInput() {
         return input_;
     }
-
-    //No se usa en este caso init
-    @Override
-    public boolean init() { return true; }
 }

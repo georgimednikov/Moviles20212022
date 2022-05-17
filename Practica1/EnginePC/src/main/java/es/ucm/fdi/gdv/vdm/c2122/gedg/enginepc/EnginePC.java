@@ -4,8 +4,7 @@ import java.awt.image.BufferStrategy;
 
 import javax.swing.JFrame;
 
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Application;
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.ApplicationCommon;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.State;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
@@ -13,7 +12,7 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
 public class EnginePC implements Engine {
 
     JFrame jf_;
-    Application a_;
+    State a_;
     GraphicsPC g_;
     Input i_;
     java.awt.Graphics Jgraphics_;
@@ -22,13 +21,8 @@ public class EnginePC implements Engine {
     private double deltaTime_;
     private double lastFrameTime_;
 
-    public EnginePC(){
-        init();
-    }
-
-    @Override
-    public boolean init() {
-        jf_ = new JFrame("0hn0");
+    public boolean init(String windowName) {
+        jf_ = new JFrame(windowName);
         jf_.setSize(600,400);
         jf_.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jf_.setIgnoreRepaint(true);
@@ -74,25 +68,30 @@ public class EnginePC implements Engine {
     }
 
     /**
-     * Asigna una nueva aplicacion y la inicializa
+     * Asigna una nueva aplicacion
      * El siguiente frame se empieza a actualizar y renderizar
      */
     @Override
-    public void setApplication(Application a) {
+    public void changeState(State a) {
         this.a_ = a;
-        ((ApplicationCommon)a).setEngine(this);
-        a_.init();
     }
 
     /**
      * Ejecuta el bucle principal de la aplicacion
      */
-    @Override
     public void run() {
+        State currApp = null;
         while(running){
             lastFrameTime_ = System.nanoTime();
-            Application currApp = a_; //Se actualiza la aplicacion con la que se trabaja
+
+            //Se actualiza la aplicacion con la que se trabaja
+            if(currApp != a_){
+                currApp = a_;
+                currApp.init(this);
+            }
+
             currApp.update();
+
             do {
                 do {
                     //Se consigue la estrategia de renderizado y la aplicacion le dice que dibujar

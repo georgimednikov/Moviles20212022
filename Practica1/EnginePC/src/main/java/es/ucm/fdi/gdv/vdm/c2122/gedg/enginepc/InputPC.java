@@ -46,12 +46,7 @@ public class InputPC extends InputCommon implements MouseListener, MouseMotionLi
      * @param type Tipo del evento
      */
     private void passEvent(MouseEvent e, TouchEvent.TouchType type) {
-        TouchEvent event = addEvent();
-        event.type = type;
-
         //Se transforman a coordenas virtuales para la logica
-        event.x = g_.toVirtualX((int)e.getX());
-        event.y = g_.toVirtualY((int)e.getY());
-        event.finger = 0;
+        enqueueEvent(g_.toVirtualX((int)e.getX()), g_.toVirtualY((int)e.getY()), 0, type);
     }
 }

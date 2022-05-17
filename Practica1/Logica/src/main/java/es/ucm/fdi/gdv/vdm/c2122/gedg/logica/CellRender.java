@@ -55,7 +55,6 @@ public class CellRender extends ObjectRender {
         Color pc = getColorState(cell_.getPrevState()); //Previous Color
         Color renderColor = new Color(cc.r, cc.g, cc.b, (int)(255 * alpha_));
 
-
         if (type_ == CELL_TYPE.NORMAL) {
             if (animated_) { //Si esta animada se dibuja progresivamente el nuevo color sobre el anterior
                 g.setColor(new Color(pc.r, pc.g, pc.b, (int)(255 * alpha_)));
