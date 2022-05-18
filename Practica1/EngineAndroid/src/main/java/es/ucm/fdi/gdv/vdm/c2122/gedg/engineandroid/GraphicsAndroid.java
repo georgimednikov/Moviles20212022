@@ -23,9 +23,9 @@ public class GraphicsAndroid extends GraphicsCommon {
     private final Paint paint_; //Paint para cada elemento visual que lo utilice
     private int saveCalled = 0; //Contador para que no se pueda llamar mas veces a restore que a save
 
-    public GraphicsAndroid(Context context) {
+    public GraphicsAndroid(Context context, SurfaceView view) {
         context_ = context;
-        view_ = new SurfaceView(context);
+        view_ = view;
         holder_ = view_.getHolder();
         paint_ = new Paint();
     }
@@ -212,16 +212,15 @@ public class GraphicsAndroid extends GraphicsCommon {
      * Guarda la posicion del canvas
      */
     @Override
-    public void save() { canvas_.save(); saveCalled++; }
+    public void save() { canvas_.save(); }
 
     /**
-     * Vuelve a la posicion anterior del canvas
+     * Vuelve a la posicion anterior del canvas, si se llama mas veces a restore que a save, las llamadas extra de restore no hacen nada
      */
     @Override
     public void restore() {
-        if (saveCalled > 0) {
+        if (canvas_.getSaveCount() > 0) {
             canvas_.restore();
-            saveCalled--;
         }
     }
 }

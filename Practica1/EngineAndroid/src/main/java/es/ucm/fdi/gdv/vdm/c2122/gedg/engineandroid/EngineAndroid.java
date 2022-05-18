@@ -1,6 +1,7 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 
 import android.content.Context;
+import android.view.Surface;
 import android.view.SurfaceView;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
@@ -22,8 +23,8 @@ public class EngineAndroid implements Engine, Runnable {
     private GraphicsAndroid graphics_;
     private State app_;
 
-    public EngineAndroid(Context context) {
-        graphics_ = new GraphicsAndroid(context);
+    public EngineAndroid(Context context, SurfaceView view) {
+        graphics_ = new GraphicsAndroid(context, view);
         input_ = new InputAndroid(graphics_);
     }
 
@@ -89,9 +90,9 @@ public class EngineAndroid implements Engine, Runnable {
             }
 
             updateDeltaTime();
-            currApp.update();
             graphics_.lock(); //Se fija un canvas
             graphics_.setGamePosition();
+            currApp.update();
             currApp.render(); //Se añaden elementos al canvas
             graphics_.unlock(); //Se desfija y renderiza
         }

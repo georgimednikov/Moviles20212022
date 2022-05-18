@@ -8,7 +8,7 @@ import javax.imageio.ImageIO;
 
 public class ImagePC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image {
 
-    private java.awt.Image image_; //Imagen para Android
+    private java.awt.Image image_; //Imagen para Java
 
     ImagePC(String name) {
         try {
@@ -20,11 +20,6 @@ public class ImagePC implements es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image {
             System.out.println("Current working directory : " + workingDir);
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void setSize(int width, int height) {
-        image_ = image_.getScaledInstance(width,height, Image.SCALE_DEFAULT);
     }
 
     @Override

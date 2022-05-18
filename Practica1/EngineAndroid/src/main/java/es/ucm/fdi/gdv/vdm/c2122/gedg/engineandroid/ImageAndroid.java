@@ -23,8 +23,6 @@ public class ImageAndroid implements Image {
     public Paint getPaint() { return paint_; }
 
     @Override
-    public void setSize(int width, int height) { width_ = width; height_ = height; }
-    @Override
     public int getWidth() {
         return width_;
     }
