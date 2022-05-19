@@ -4,7 +4,7 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 
-public class TextRender extends ObjectRender {
+public class TextRender extends ObjectRenderer {
 
     private boolean reappear_;
     private boolean centered_;

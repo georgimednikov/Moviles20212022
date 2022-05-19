@@ -2,7 +2,6 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.State;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
@@ -15,11 +14,11 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 public class OhnOLevel implements State {
 
     //Frases de victoria
-    private final String[] YOU_WIN_TEXTS = new String[] {
-        "ROCAMBOLESCO",
-        "EXCELENTE",
-        "INCREÍBLE",
-        "PARABIÉN"
+    private final String[] YOU_WIN_TEXTS = new String[]{
+            "ROCAMBOLESCO",
+            "EXCELENTE",
+            "INCREÍBLE",
+            "PARABIÉN"
     };
 
     Engine eng_;
@@ -44,15 +43,7 @@ public class OhnOLevel implements State {
     //Constantes de animacion
     private final float SCENE_FADE_DURATION = 0.25f; //Segundos que duran los fades de la escena
     private final float TIME_AFTER_WIN = 1.5f;
-    private final float CELL_FADE_DURATION = 0.15f;
     private final float TEXT_FADE_DURATION = 0.2f;
-    private final float BUMP_DURATION = 0.15f;
-    private final float BUMP_EXPAND_PERCENT = 0.1f;
-    private final int NUM_BUMPS = 2;
-
-    //Constantes de probabilidad del nivel
-    private final float BLUE_PROB = 0.5f; //Probabilidad de que una celda sea azul en vez de roja en la solución
-    private final float FIXED_PROB = 0.5f; //Probabilidad de que una celda sea fija
 
     //Variables de asignacion dinamica
     private int cellSeparation = -1;
@@ -68,14 +59,11 @@ public class OhnOLevel implements State {
     int boardSize;
     int numCells;
     int coloredCells = 0;
-    int fixedCells = 0;
     int contMistakes = 0; //Número de celdas mal puestas
-    private CellLogic[][] solBoard;
-    private CellLogic[][] board; //Tablero logico
-    private CellRender[][] renderBoard; //Tablero de renderizado
-    private List<ObjectRender> objects = new ArrayList<>();
-    private List<CellLogic> previousMoves = new ArrayList<>(); //Lista de movimientos realizados
-    private List<CellLogic> fixedBlueCells = new ArrayList<>(); //Lista de celdas logicas azules fijas
+
+    private Board board;
+    private BoardRenderer boardRenderer;
+    private List<ObjectRenderer> objects = new ArrayList<>();
 
     //Variables relacionadas con pistas
     private boolean givingFeedback = false;
@@ -93,9 +81,9 @@ public class OhnOLevel implements State {
     private Font progressFont;
     private Font numberFont;
     private Image lockImage;
-    private ImageRender quitImage;
-    private ImageRender undoImage;
-    private ImageRender hintImage;
+    private ImageRenderer quitImage;
+    private ImageRenderer undoImage;
+    private ImageRenderer hintImage;
     private TextRender infoTextRender;
     private TextRender progressTextRender;
     private String infoRegContent; //Contenido del texto que ayuda al jugador (cambia mucho de valor)
@@ -113,11 +101,11 @@ public class OhnOLevel implements State {
         //Se calculan las variables de asignacion dinamica
         //Dependen de las constantes y del tamaño de ventana
         int paintArea = eng_.getGraphics().getWidth() - 2 * BOARD_OFFSET_X;
-        cellRadius = (int)((paintArea * 0.9) / 2) / boardSize;
-        cellSeparation = (int)(paintArea * 0.1) / (boardSize-1);
+        cellRadius = (int) ((paintArea * 0.9) / 2) / boardSize;
+        cellSeparation = (int) (paintArea * 0.1) / (boardSize - 1);
         int buttonArea = eng_.getGraphics().getWidth() - 2 * BUTTON_OFFSET_X;
         buttonSeparation = (buttonArea - (BUTTON_SIZE * NUM_BUTTONS)) / (NUM_BUTTONS - 1);
-        highlightRadius = (int)Math.round(cellRadius * 1.1);
+        highlightRadius = (int) Math.round(cellRadius * 1.1);
 
         black = new Color(0, 0, 0, 255);
         darkGrey = new Color(150, 150, 150, 255);
@@ -128,16 +116,24 @@ public class OhnOLevel implements State {
         numberFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", white, cellRadius, false);
 
         infoRegContent = boardSize + " x " + boardSize;
-        infoTextRender = new TextRender(infoFont, infoRegContent, true); objects.add(infoTextRender);
-        progressTextRender = new TextRender(progressFont, Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%", true); objects.add(progressTextRender);
+        infoTextRender = new TextRender(infoFont, infoRegContent, true);
+        objects.add(infoTextRender);
+        progressTextRender = new TextRender(progressFont, "Placeholder", true);
+        objects.add(progressTextRender);
 
         lockImage = g.newImage("assets/sprites/lock.png");
-        quitImage = new ImageRender(g.newImage("assets/sprites/close.png"), BUTTON_SIZE, BUTTON_SIZE, false); objects.add(quitImage);
-        undoImage = new ImageRender(g.newImage("assets/sprites/history.png"), BUTTON_SIZE, BUTTON_SIZE, false); objects.add(undoImage);
-        hintImage = new ImageRender(g.newImage("assets/sprites/eye.png"), BUTTON_SIZE, BUTTON_SIZE, false); objects.add(hintImage);
+        quitImage = new ImageRenderer(g.newImage("assets/sprites/close.png"), BUTTON_SIZE, BUTTON_SIZE, false);
+        objects.add(quitImage);
+        undoImage = new ImageRenderer(g.newImage("assets/sprites/history.png"), BUTTON_SIZE, BUTTON_SIZE, false);
+        objects.add(undoImage);
+        hintImage = new ImageRenderer(g.newImage("assets/sprites/eye.png"), BUTTON_SIZE, BUTTON_SIZE, false);
+        objects.add(hintImage);
 
-        createLogicBoard();
-        createRenderBoard();
+        board = new Board(boardSize, cellRadius);
+        boardRenderer = new BoardRenderer(numberFont, lockImage, boardSize, cellRadius, cellSeparation, board);
+        objects.add(boardRenderer);
+
+        progressTextRender.setText(board.donePercentage() + "%");
         for (int i = 0; i < objects.size(); ++i) objects.get(i).fadeIn(SCENE_FADE_DURATION);
     }
 
@@ -158,10 +154,10 @@ public class OhnOLevel implements State {
                             BOARD_OFFSET_X + cellRadius * (i + 1) + (cellSeparation + cellRadius) * i,
                             BOARD_OFFSET_Y + cellRadius * (j + 1) + (cellSeparation + cellRadius) * j,
                             cellRadius, event.x, event.y)) {
-                        if (!board[j][i].isFixed()) //Si no es fija cambia de estado
+                        if (!board.isFixed(j, i)) //Si no es fija cambia de estado
                             changeCell(j, i);
                         else {
-                            renderBoard[j][i].bumpCell(BUMP_EXPAND_PERCENT, BUMP_DURATION, NUM_BUMPS);
+                            boardRenderer.bumpCell(j, i);
                             lockChanged = true;
                         }
                         continue next;
@@ -180,7 +176,8 @@ public class OhnOLevel implements State {
                         case 0:
                             fadeOut = true;
                             elapsedTime = 0;
-                            for (int j = 0; j < objects.size(); ++j) objects.get(j).fadeOut(SCENE_FADE_DURATION);
+                            for (int j = 0; j < objects.size(); ++j)
+                                objects.get(j).fadeOut(SCENE_FADE_DURATION);
                             break;
                         case 1:
                             undoMove();
@@ -190,8 +187,7 @@ public class OhnOLevel implements State {
                                 givingFeedback = givingHint = false;
                                 infoTextRender.fadeNewText(infoRegContent, INFO_REG_SIZE, false, TEXT_FADE_DURATION);
                                 infoReset = true;
-                            }
-                            else if(contMistakes != 0) { //Si no se esta dando una pista, se empieza a dar
+                            } else if (contMistakes != 0) { //Si no se esta dando una pista, se empieza a dar
                                 givingFeedback = givingHint = true;
                                 Hint hint = giveHint_user();
                                 //Se fijan los valores de la sombra negra
@@ -224,16 +220,12 @@ public class OhnOLevel implements State {
             g.setColor(black);
             g.fillCircle(highlightPosX, highlightPosY, highlightRadius);
         }
-        //Se pintan las celdas
-        for (int i = 0; i < boardSize; ++i) {
-            g.save();
-            g.translate(BOARD_OFFSET_X + cellRadius, BOARD_OFFSET_Y + cellRadius * (i + 1) + (cellRadius + cellSeparation) * i);
-            for (int j = 0; j < boardSize; ++j) {
-                renderBoard[i][j].render(g);
-                g.translate(cellRadius * 2 + cellSeparation, 0);
-            }
-            g.restore();
-        }
+
+        g.save();
+        g.translate(BOARD_OFFSET_X, BOARD_OFFSET_Y);
+        boardRenderer.render(g);
+        g.restore();
+
         g.save();
         g.translate(BUTTON_OFFSET_X, BUTTON_OFFSET_Y);
         quitImage.render(g);
@@ -246,6 +238,7 @@ public class OhnOLevel implements State {
 
     /**
      * Actualiza todo lo relacionado con las animaciones de la escena
+     *
      * @return True si no se deben procesar inputs porque se esta realizando una animacion, false en caso contrario
      */
     private boolean updateScene(double deltaTime) {
@@ -256,37 +249,38 @@ public class OhnOLevel implements State {
                 fadeOut = true; //Flag de transicion
                 elapsedTime = 0;
                 for (int i = 0; i < objects.size(); ++i)
-                    if (objects.get(i) != infoTextRender) objects.get(i).fadeOut(SCENE_FADE_DURATION);
-            }
-            else elapsedTime += deltaTime;
+                    if (objects.get(i) != infoTextRender)
+                        objects.get(i).fadeOut(SCENE_FADE_DURATION);
+            } else elapsedTime += deltaTime;
         }
         if (fadeOut) {
             if (elapsedTime >= SCENE_FADE_DURATION) {
                 OhnOMenu app = new OhnOMenu();
                 eng_.changeState(app);
-            }
-            else elapsedTime += deltaTime;
+            } else elapsedTime += deltaTime;
         }
         return false;
     }
+
     /**
      * Actualiza los renderers
      */
     private void updateRenders(double deltaTime) {
         for (int i = 0; i < objects.size(); ++i)
-            objects.get(i).updateRender(deltaTime);
+            objects.get(i).updateRenderer(deltaTime);
         //Si se ha cambiado si deberian mostrarse los candados se le dice a las celdas apropiadas
         if (!lockChanged) return;
         for (int i = 0; i < boardSize; ++i) {
             for (int j = 0; j < boardSize; ++j) {
-                if (lockChanged && renderBoard[i][j].type_ == CellRender.CELL_TYPE.LOCK)
-                    renderBoard[i][j].changeLock();
+                if (lockChanged && boardRenderer.getType(i, j) == CellRenderer.CELL_TYPE.LOCK)
+                    boardRenderer.changeLock(i, j);
             }
         }
         lockChanged = false;
     }
 
     //region Board Methods
+
     /**
      * Cambia el estado de una celda y lo que esto conlleva
      */
@@ -296,31 +290,13 @@ public class OhnOLevel implements State {
             givingFeedback = givingHint = false;
             infoReset = true;
         }
-        CellLogic cell = board[x][y];
-        cell.changeState();
-        renderBoard[x][y].transitionCell(CELL_FADE_DURATION);
-        previousMoves.add(cell);
 
-        CellLogic.STATE prevState = cell.getPrevState();
-        CellLogic.STATE currState = cell.getCurrState();
-        CellLogic.STATE solState = solBoard[x][y].getCurrState();
-
-        //Si se ha cambiado una celda que estaba bien hay un error mas
-        //Si ahora la celda esta bien entonces hay un error menos
-        if (prevState == solState) contMistakes++;
-        else if (currState == solState) contMistakes--;
-        if(contMistakes == 0) {
+        if (board.changeCell(x, y)) {
             gameOver = true;
-            infoTextRender.fadeNewText(YOU_WIN_TEXTS[rand.nextInt(YOU_WIN_TEXTS.length)], INFO_WIN_SIZE, true, TEXT_FADE_DURATION);
+            infoTextRender.fadeNewText(YOU_WIN_TEXTS[OhnORandom.r.nextInt(YOU_WIN_TEXTS.length)], INFO_WIN_SIZE, true, TEXT_FADE_DURATION);
+            return;
         }
-        if (prevState == CellLogic.STATE.GREY) {
-            coloredCells++;
-            progressTextRender.setText(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%");
-        }
-        else if (currState == CellLogic.STATE.GREY) {
-            coloredCells--;
-            progressTextRender.setText(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%");
-        }
+        progressTextRender.setText(board.donePercentage() + "%");
     }
 
     /**
@@ -328,14 +304,14 @@ public class OhnOLevel implements State {
      */
     private void undoMove() {
         String text = "";
-        if (previousMoves.isEmpty()) {
+        Tuple<Integer, Integer> cellPos = board.undoMove();
+        if (cellPos == null) {
             text = "No queda nada por hacer";
             givingFeedback = givingHint = false;
         }
         else {
             givingFeedback = true; //Va a aparecer el circulo negro
-            CellLogic cell = previousMoves.remove(previousMoves.size() - 1);
-            switch (cell.revertState()) {
+            switch (board.getCurrState(cellPos.x, cellPos.y)) {
                 case BLUE:
                     text = "Esta celda ha vuelto a azul";
                     break;
@@ -346,126 +322,13 @@ public class OhnOLevel implements State {
                     text = "Esta celda ha vuelto a rojo";
                     break;
             }
-            CellLogic.STATE currState = cell.getCurrState();
-            CellLogic.STATE prevState = cell.getPrevState();
-            CellLogic.STATE solState = solBoard[cell.getX()][cell.getY()].getCurrState();
-
-            //Si la celda ahora es gris entonces hay una celda coloreada menos y hay que actualizar el progreso
-            //Si la celda era gris entonces hay una celda coloreada mas y hay que actualizar el progreso
-            if (currState == CellLogic.STATE.GREY) {
-                coloredCells--;
-                progressTextRender.setText(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%");
-            }
-            else if (prevState == CellLogic.STATE.GREY) {
-                coloredCells++;
-                progressTextRender.setText(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%");
-            }
-            //Si se ha cambiado una celda que estaba bien hay un error mas
-            //Si ahora la celda esta bien entonces hay un error menos
-            if (prevState == solState) contMistakes++;
-            else if (currState == solState) contMistakes--;
-
-            renderBoard[cell.getX()][cell.getY()].transitionCell(CELL_FADE_DURATION);
-            //Asigna una posicion al circulo negro
-            highlightPosX = BOARD_OFFSET_X + cellRadius * (cell.getY() + 1) + (cellSeparation + cellRadius) * cell.getY();
-            highlightPosY = BOARD_OFFSET_Y + cellRadius * (cell.getX() + 1) + (cellSeparation + cellRadius) * cell.getX();
+            boardRenderer.transitionCell(cellPos.x, cellPos.y);
+            progressTextRender.setText(board.donePercentage() + "%");
         }
         infoTextRender.fadeNewText(text, INFO_HINT_SIZE, false, TEXT_FADE_DURATION);
         infoReset = false;
     }
-
-    //Crea la matriz que representa el nivel de un tamaño dado
-    private void createLogicBoard() {
-        // Crea los objetos
-        // Primero coloca un numero de casillas en posiciones aleatorias
-        board = new CellLogic[boardSize][boardSize];
-        for (int i = 0; i < boardSize; ++i) {
-            for (int j = 0; j < boardSize; ++j) {
-                board[i][j] = new CellLogic(i, j);
-            }
-        }
-        numCells = boardSize * boardSize;
-        Hint hint = null;
-        while (hint == null) {
-            fixedCells = 0;
-            fixedBlueCells.clear();
-            //Se fijan ciertas celdas con valores aleatorios
-            for (int i = 0; i < boardSize; ++i) {
-                for (int j = 0; j < boardSize; ++j) {
-                    board[i][j].resetCell(); //Por si ha habido un intento anterior
-                    if (getRandomBoolean(FIXED_PROB)) {
-                        if (getRandomBoolean(BLUE_PROB)) {
-                            board[i][j].fixCell(CellLogic.STATE.BLUE);
-                            fixedBlueCells.add(board[i][j]);
-                        }
-                        else {
-                            board[i][j].fixCell(CellLogic.STATE.RED);
-                        }
-                        fixedCells++;
-                    }
-                }
-            }
-            for (CellLogic c : fixedBlueCells) {
-                c.setNumber(Math.min(Math.max(calculateNumber(board, c.getX(), c.getY()), rand.nextInt(boardSize) + 1), boardSize));
-            }
-            // Se crea la solucion en solBoard
-            contMistakes = boardSize * boardSize - fixedCells;
-            solBoard = copyBoard(board);
-            int placedCells = 0;
-            boolean tryAgain = true;
-            int attempts = 0;
-            // Intenta rellenar la matriz auxiliar con las pistas, si no es capaz, no es resoluble
-            tries:
-            while (tryAgain && attempts++ < 99) {
-                hint = giveHint(solBoard);
-                tryAgain = hint != null;
-                if (tryAgain) {
-                    solBoard[hint.i][hint.j].applyHint(hint);
-                    placedCells++;
-                }
-                if (fixedCells + placedCells == numCells) {
-                    // Comprueba que los numeros tienen sentido, si no, reinicia
-                    for (int i = 0; i < fixedBlueCells.size(); ++i) {
-                        CellLogic c = fixedBlueCells.get(i);
-                        if (calculateNumber(solBoard, c.getX(), c.getY()) != c.getNumber()) {
-                            hint = null;
-                            break tries;
-                        }
-                    }
-                    progressTextRender.setText(Math.round((float)coloredCells / (float)(numCells - fixedCells) * 100) + "%");
-                    return;
-                }
-            }
-        }
-    }
-
-    private void createRenderBoard() {
-        renderBoard = new CellRender[boardSize][boardSize];
-        for (int i = 0; i < boardSize; ++i) {
-            for (int j = 0; j < boardSize; ++j) {
-                CellLogic logic = board[i][j];
-                CellRender render = renderBoard[i][j] = new CellRender(logic, cellRadius);
-                objects.add(render);
-                if (logic.isFixed()) { //Si es fija...
-                    //... y roja se añade a la lista de celdas de renderiza con candado
-                    if (logic.getCurrState() == CellLogic.STATE.RED) {
-                        render.setTypeLock(lockImage, BUMP_DURATION * NUM_BUMPS);
-                    }
-                    //... y azul entonces enseña su numero
-                    else
-                        render.setTypeNumber(numberFont, ""+logic.getNumber(), BUMP_DURATION * NUM_BUMPS);
-                }
-            }
-        }
-    }
     //endregion
-
-    //region Auxiliary Methods
-    static private Random rand = new Random(System.currentTimeMillis());
-
-    static private boolean getRandomBoolean(float p) {
-        return rand.nextFloat() < p;
-    }
 
     //Método DEBUG
     /*private int readFromConsole(char[][] mat) {
@@ -493,37 +356,18 @@ public class OhnOLevel implements State {
         return fixedCells;
     }*/
 
-    /**
-     * Deep copy del tablero
-     */
-    private CellLogic[][] copyBoard(CellLogic[][] orig) {
-        CellLogic[][] copy = new CellLogic[orig.length][orig[0].length];
-        for (int i = 0; i < orig.length; ++i) {
-            for (int j = 0; j < orig[0].length; ++j) {
-                copy[i][j] = new CellLogic(orig[i][j].getX(), orig[i][j].getY());
-                if (orig[i][j].isFixed()) {
-                    copy[i][j].fixCell(orig[i][j].getCurrState());
-                    copy[i][j].setNumber(orig[i][j].getNumber());
-                }
-            }
-        }
-        return copy;
+    //Calcula la distancia entre dos casillas
+    private int distanceBetweenPos(int x1, int y1, int x2, int y2) {
+        return Math.abs(x1 - x2) + Math.abs(y1 - y2);
     }
 
-    //Busca la primera casilla con color distinto al dado
-    //Si no hay, devuelve la última casilla que hay.
-    public int[] nextDiffColor(CellLogic[][] mat, int x, int y, int dx, int dy, CellLogic.STATE color) {
-        int i = 1;
-        while (inArray(mat, x + dx * i, y + dy * i) && mat[x + dx * i][y + dy * i].getCurrState() == color) {
-            i++;
-        }
-        if (!inArray(mat, x + dx * i, y + dy * i)) {
-            --i;
-        }
-        int[] res = {x + dx * i, y + dy * i};
-        return res;
+    private boolean checkCollisionCircle(int centerX, int centerY, int radius, int eventX, int eventY) {
+        int vecX = eventX - centerX;
+        int vecY = eventY - centerY;
+        return (Math.pow(vecX, 2) + Math.pow(vecY, 2) <= Math.pow(radius, 2));
     }
 
+    //region Hints
     //Busca la primera casilla del color dado
     //Si no hay, devuelve la última casilla que hay.
     public int[] nextColorCell(CellLogic[][] mat, int x, int y, int dx, int dy, CellLogic.STATE color) {
@@ -538,47 +382,6 @@ public class OhnOLevel implements State {
         return res;
     }
 
-    //Cuenta las celdas azules adyacentes a una dada
-    private int calculateNumber(CellLogic[][] mat, int x, int y) {
-        int count = 0;
-        int[] newPos;
-        newPos = nextDiffColor(mat, x, y, 1, 0, CellLogic.STATE.BLUE);
-        if (mat[newPos[0]][newPos[1]].getCurrState() != CellLogic.STATE.BLUE) {
-            count += newPos[0] - x - 1;
-        } else count += newPos[0] - x;
-        newPos = nextDiffColor(mat, x, y, 0, 1, CellLogic.STATE.BLUE);
-        if (mat[newPos[0]][newPos[1]].getCurrState() != CellLogic.STATE.BLUE) {
-            count += newPos[1] - y - 1;
-        } else count += newPos[1] - y;
-        newPos = nextDiffColor(mat, x, y, -1, 0, CellLogic.STATE.BLUE);
-        if (mat[newPos[0]][newPos[1]].getCurrState() != CellLogic.STATE.BLUE) {
-            count += x - newPos[0] - 1;
-        } else count += x - newPos[0];
-        newPos = nextDiffColor(mat, x, y, 0, -1, CellLogic.STATE.BLUE);
-        if (mat[newPos[0]][newPos[1]].getCurrState() != CellLogic.STATE.BLUE) {
-            count += y - newPos[1] - 1;
-        } else count += y - newPos[1];
-        return count;
-    }
-
-    //Comprueba que una posición no se sale del array
-    private boolean inArray(CellLogic[][] mat, int x, int y) {
-        return ((x >= 0 && x < mat.length) && (y >= 0 && y < mat[0].length));
-    }
-
-    //Calcula la distancia entre dos casillas
-    private int distanceBetweenPos(int x1, int y1, int x2, int y2) {
-        return Math.abs(x1 - x2) + Math.abs(y1 - y2);
-    }
-
-    private boolean checkCollisionCircle(int centerX, int centerY, int radius, int eventX, int eventY) {
-        int vecX = eventX - centerX;
-        int vecY = eventY - centerY;
-        return (Math.pow(vecX, 2) + Math.pow(vecY, 2) <= Math.pow(radius, 2));
-    }
-    //endregion
-
-    //region Hints
     public Hint giveHint(CellLogic[][] mat) {
         Hint hint = new Hint();
         //Pistas basadas en celdas fijas
@@ -666,7 +469,8 @@ public class OhnOLevel implements State {
 
     //region Fixed Hints
     private boolean hint_VISIBLE_CELLS_COVERED(Hint hint, CellLogic[][] mat, CellLogic cellLogic, int i, int j, int cont) {
-        if (cont != cellLogic.getNumber()) return false; //Si no ha llegado al numero correcto pasamos
+        if (cont != cellLogic.getNumber())
+            return false; //Si no ha llegado al numero correcto pasamos
         int[] newPos = nextDiffColor(mat, cellLogic.getX(), cellLogic.getY(), i, j, CellLogic.STATE.BLUE);
         //Busca en la direccion i j la siguiente casilla no azul; si es gris, esta abierta y hay que cerrarla
         if (mat[newPos[0]][newPos[1]].getCurrState() == CellLogic.STATE.GREY) {
@@ -679,7 +483,8 @@ public class OhnOLevel implements State {
     }
 
     private boolean hint_CANNOT_SURPASS_LIMIT(Hint hint, CellLogic[][] mat, CellLogic cellLogic, int i, int j, int cont) {
-        if (cont >= cellLogic.getNumber()) return false; //Si se ha llegado al numero correcto pasamos
+        if (cont >= cellLogic.getNumber())
+            return false; //Si se ha llegado al numero correcto pasamos
         int[] newPos = nextDiffColor(mat, cellLogic.getX(), cellLogic.getY(), i, j, CellLogic.STATE.BLUE);
         //Si la siguiente casilla en la direccion i j es gris puede haber camino, así que miramos si hacerlo supera el numero
         if (mat[newPos[0]][newPos[1]].getCurrState() == CellLogic.STATE.GREY) {
@@ -744,7 +549,8 @@ public class OhnOLevel implements State {
 
     //region Regular Hints
     private boolean hint_TOO_MANY_ADJACENT(Hint hint, CellLogic[][] mat, CellLogic cellLogic) {
-        if (calculateNumber(mat, cellLogic.getX(), cellLogic.getY()) <= cellLogic.getNumber()) return false;
+        if (calculateNumber(mat, cellLogic.getX(), cellLogic.getY()) <= cellLogic.getNumber())
+            return false;
         hint.i = cellLogic.getX();
         hint.j = cellLogic.getY();
         hint.type = Hint.HintType.TOO_MANY_ADJACENT;
@@ -760,7 +566,8 @@ public class OhnOLevel implements State {
                 if ((i + j == 2) || (i + j == 0) || (i + j == -2)) continue;
                 int[] firstRed = nextDiffColor(mat, x, y, i, j, CellLogic.STATE.BLUE);
                 // Si es gris, no se ha cerrado
-                if (mat[firstRed[0]][firstRed[1]].getCurrState() == CellLogic.STATE.GREY) return false;
+                if (mat[firstRed[0]][firstRed[1]].getCurrState() == CellLogic.STATE.GREY)
+                    return false;
                 //Si es roja hay que retroceder para no contarla
                 if (mat[firstRed[0]][firstRed[1]].getCurrState() != CellLogic.STATE.BLUE)
                     blueVisible += distanceBetweenPos(cellLogic.getX(), cellLogic.getY(), firstRed[0] - i, firstRed[1] - j);

@@ -3,12 +3,14 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 import android.view.MotionEvent;
 import android.view.View;
 
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.InputCommon;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.EventPool;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
-public class InputAndroid extends InputCommon implements View.OnTouchListener {
+public class InputAndroid implements View.OnTouchListener, Input {
 
     private GraphicsAndroid g_;
+    private EventPool pool_;
 
     private int startingEvents = 5;
     private float[] x = new float[10];
@@ -17,6 +19,7 @@ public class InputAndroid extends InputCommon implements View.OnTouchListener {
 
     public InputAndroid(GraphicsAndroid g) {
         g_ = g;
+        pool_ = new EventPool();
         g_.getSurfaceView().setOnTouchListener(this); //Se añade como listener de la aplicacion
     }
 
@@ -42,10 +45,18 @@ public class InputAndroid extends InputCommon implements View.OnTouchListener {
                     type = TouchEvent.TouchType.DRAG;
                     break;
             }
-            enqueueEvent(g_.toVirtualX((int)e.getX(pointerId)), g_.toVirtualY((int)e.getY(pointerId)), pointerId, type);
+            pool_.enqueueEvent(g_.toVirtualX((int)e.getX(pointerId)), g_.toVirtualY((int)e.getY(pointerId)), pointerId, type);
         }catch (Exception f){
             f.printStackTrace();
         }
         return true;
+    }
+
+    public TouchEvent dequeueEvent(){
+       return pool_.dequeueEvent();
+    }
+
+    public void releaseEvents(){
+        pool_.releaseEvents();
     }
 }

@@ -28,12 +28,12 @@ public class OhnOIntro implements State {
     private float elapsedTime = 0f; //Segundos que lleva haciendose un fade
 
     //Render
-    private ImageRender q42Image;
+    private ImageRenderer q42Image;
     private TextRender logoText;
     private TextRender playText;
     private TextRender creditText1;
     private TextRender creditText2;
-    private List<ObjectRender> objects = new ArrayList<>();
+    private List<ObjectRenderer> objects = new ArrayList<>();
 
     public OhnOIntro() {}
 
@@ -48,7 +48,7 @@ public class OhnOIntro implements State {
         playText = new TextRender(g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(0, 0, 0, 255), 60, false), "Jugar", true);
         creditText1 = new TextRender(g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(150, 150, 150, 255), 25, false), "Un juego copiado a Q42", true);
         creditText2 = new TextRender(g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(150, 150, 150, 255), 25, false), "Creado por Martin Kool", true);
-        q42Image = new ImageRender(g.newImage("assets/sprites/q42.png"), IMAGE_WIDTH, IMAGE_HEIGHT, true);
+        q42Image = new ImageRenderer(g.newImage("assets/sprites/q42.png"), IMAGE_WIDTH, IMAGE_HEIGHT, true);
         objects.add(logoText);
         objects.add(playText);
         objects.add(creditText1);
@@ -126,7 +126,7 @@ public class OhnOIntro implements State {
      */
     private void updateRenders(double deltaTime) {
         for (int i = 0; i < objects.size(); ++i)
-            objects.get(i).updateRender(deltaTime);
+            objects.get(i).updateRenderer(deltaTime);
     }
 
     /**

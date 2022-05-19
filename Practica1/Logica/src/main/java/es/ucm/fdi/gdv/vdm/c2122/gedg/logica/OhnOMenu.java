@@ -49,9 +49,9 @@ public class OhnOMenu implements State {
     private TextRender logoText;
     private TextRender textText;
     private TextRender numberText;
-    private ImageRender quitImage;
-    private CellRender[][] menu = new CellRender[ROWS][ROW_SIZE];
-    private List<ObjectRender> objects = new ArrayList<>();
+    private ImageRenderer quitImage;
+    private CellRenderer[][] menu = new CellRenderer[ROWS][ROW_SIZE];
+    private List<ObjectRenderer> objects = new ArrayList<>();
 
     public OhnOMenu() {}
 
@@ -71,20 +71,24 @@ public class OhnOMenu implements State {
         numberFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(255, 255, 255, 255), 75, false);
         logoText = new TextRender(g.newFont("assets/fonts/Molle-Regular.ttf", new Color(0, 0, 0, 255), 85, false), "Oh nO", true);
         textText = new TextRender(g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(0, 0, 0, 255), 30, false), "Elija el tamaño a jugar", true);
-        quitImage = new ImageRender(g.newImage("assets/sprites/close.png"), BUTTON_SIZE, BUTTON_SIZE, true);
+        quitImage = new ImageRenderer(g.newImage("assets/sprites/close.png"), BUTTON_SIZE, BUTTON_SIZE, true);
         objects.add(logoText);
         objects.add(textText);
         objects.add(quitImage);
 
-        CellLogic blueCell = new CellLogic(-1, -1); blueCell.setCurrState(CellLogic.STATE.BLUE);
-        CellLogic redCell = new CellLogic(-1, -1); redCell.setCurrState(CellLogic.STATE.RED);
         int cont = STARTING_VALUE;
         for (int i = 0; i < ROWS; ++i) {
             for (int j = 0; j < ROW_SIZE; ++j) {
-                if ((i + j) % 2 == 0) menu[i][j] = new CellRender(blueCell, cellRadius);
-                else menu[i][j] = new CellRender(redCell, cellRadius);
+                if ((i + j) % 2 == 0){
+                    menu[i][j] = new CellRenderer(cellRadius, true);
+                    menu[i][j].setState(Cell.STATE.BLUE);
+                }
+                else{
+                    menu[i][j] = new CellRenderer(cellRadius, true);
+                    menu[i][j].setState(Cell.STATE.RED);
+                }
                 objects.add(menu[i][j]);
-                menu[i][j].setTypeNumber(numberFont, ""+cont, 0);
+                menu[i][j].setTypeNumber(numberFont, ""+cont);
                 cont++;
             }
         }
@@ -186,7 +190,7 @@ public class OhnOMenu implements State {
      */
     private void updateRenders(double deltaTime) {
         for (int i = 0; i < objects.size(); ++i)
-            objects.get(i).updateRender(deltaTime);
+            objects.get(i).updateRenderer(deltaTime);
     }
 
     /**

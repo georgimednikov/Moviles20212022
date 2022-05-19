@@ -2,7 +2,7 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 
-public class ObjectRender {
+public class ObjectRenderer {
 
     protected float maxAlpha_;
     protected float minAlpha_;
@@ -12,7 +12,7 @@ public class ObjectRender {
     protected boolean fading_; //Si esta haciendo un fade
     protected boolean fadeIn_; //Si esta haciendo fade-in
 
-    public ObjectRender(boolean visible) {
+    public ObjectRenderer(boolean visible) {
         alpha_ = visible ? 1 : 0;
         elapsedFade_ = 0;
         maxAlpha_ = 1f;
@@ -21,7 +21,7 @@ public class ObjectRender {
 
     public void render(Graphics g) {}
 
-    public void updateRender(double deltaTime) {
+    public void updateRenderer(double deltaTime) {
         if (!fading_) return;
         if (elapsedFade_ >= fadeDur_) {
             elapsedFade_ = 0;

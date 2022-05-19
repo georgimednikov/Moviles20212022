@@ -1,12 +1,12 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.engineandroid;
 
 import android.content.Context;
-import android.view.Surface;
 import android.view.SurfaceView;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.EventPool;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.State;
 
 public class EngineAndroid implements Engine, Runnable {
@@ -93,6 +93,7 @@ public class EngineAndroid implements Engine, Runnable {
             graphics_.lock(); //Se fija un canvas
             graphics_.setGamePosition();
             currApp.update();
+            ((InputAndroid)input_).releaseEvents();
             currApp.render(); //Se añaden elementos al canvas
             graphics_.unlock(); //Se desfija y renderiza
         }

@@ -4,6 +4,7 @@ import java.awt.image.BufferStrategy;
 
 import javax.swing.JFrame;
 
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.EventPool;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.State;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
@@ -91,7 +92,7 @@ public class EnginePC implements Engine {
             }
 
             currApp.update();
-
+            ((InputPC)i_).releaseEvents();
             do {
                 do {
                     //Se consigue la estrategia de renderizado y la aplicacion le dice que dibujar

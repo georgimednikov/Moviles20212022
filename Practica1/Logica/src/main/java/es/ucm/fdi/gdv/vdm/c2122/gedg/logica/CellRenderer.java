@@ -8,22 +8,28 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 /**
  * Clase que renderiza una CellLogic
  */
-public class CellRender extends ObjectRender {
+public class CellRenderer extends ObjectRenderer {
 
     public enum CELL_TYPE {
         NORMAL,
         LOCK,
         NUMBER
     }
+
+    private final float CELL_FADE_DURATION = 0.15f;
+    private final float BUMP_DURATION = 0.15f;
+    private final float BUMP_EXPAND_PERCENT = 0.1f;
+    private final int NUM_BUMPS = 2;
+
     CELL_TYPE type_;
-    private CellLogic cell_; //Celda logica que representa
+    private Cell.STATE state_;
     private Color blue_;
     private Color red_;
     private Color grey_;
     private int cellRadius_; //Radio del renderizado de la celda
 
     //Variables de posibles renderizados sobre la celda
-    private ObjectRender object_;
+    private ObjectRenderer object_;
 
     //Variables relacionadas con las animaciones de los tipos de celdas
     //Cada tipo las usa como le conviene
@@ -35,24 +41,27 @@ public class CellRender extends ObjectRender {
     //Candado
     private float cellExpansion_;
 
-    public CellRender(CellLogic cell, int radius) {
-        this(cell, radius, true);
+    public CellRenderer(int radius) {
+        this(radius, true);
     }
-    public CellRender(CellLogic cell, int radius, boolean visible) {
+    public CellRenderer(int radius, boolean visible) {
         super(visible);
         type_ = CELL_TYPE.NORMAL;
-        cell_ = cell;
         cellRadius_ = radius;
         blue_ = new Color(72, 193, 228, 255);
         red_ = new Color(245, 53, 73, 255);
         grey_ = new Color(238, 237, 239, 255);
     }
 
+    public void setState(Cell.STATE state){
+        state_ = state;
+    }
+
     @Override
     public void render(Graphics g) {
         if (alpha_ <= 0) return;
-        Color cc = getColorState(cell_.getCurrState()); //Current Color
-        Color pc = getColorState(cell_.getPrevState()); //Previous Color
+        Color cc = getColorState(state_); //Current Color
+        Color pc = getColorState(state_); //Previous Color
         Color renderColor = new Color(cc.r, cc.g, cc.b, (int)(255 * alpha_));
 
         if (type_ == CELL_TYPE.NORMAL) {
@@ -81,9 +90,9 @@ public class CellRender extends ObjectRender {
     }
 
     @Override
-    public void updateRender(double deltaTime) {
-        if (type_ != CELL_TYPE.NORMAL) object_.updateRender(deltaTime);
-        super.updateRender(deltaTime);
+    public void updateRenderer(double deltaTime) {
+        if (type_ != CELL_TYPE.NORMAL) object_.updateRenderer(deltaTime);
+        super.updateRenderer(deltaTime);
 
         //Se lleva las animaciones especiales aparte porque no sustituye los fades
         //Si se esta haciendo la animacion y no ha acabado se sigue contando el tiempo, si no se para
@@ -106,39 +115,39 @@ public class CellRender extends ObjectRender {
     /**
      * Activa la animacion del bump de la Cell
      */
-    public void transitionCell(float transDuration) {
+    public void transitionCell() {
         animated_ = true;
-        animDur_ = transDuration;
+        animDur_ = CELL_FADE_DURATION;
         numRepeats = 1;
         animElapsed_ = 0;
     }
     /**
      * Activa la animacion del bump de la Cell
      */
-    public void bumpCell(float bumpExpansion, float bumpDuration, int numBumps) {
+    public void bumpCell() {
         animated_ = true;
-        animDur_ = bumpDuration;
-        cellExpansion_ = bumpExpansion;
-        numRepeats = numBumps;
+        animDur_ = BUMP_DURATION;
+        cellExpansion_ = BUMP_EXPAND_PERCENT;
+        numRepeats = NUM_BUMPS;
         animElapsed_ = 0;
     }
 
     /**
      * Fija la celda como tipo numero y crea su texto
      */
-    public void setTypeNumber(Font font, String text, float animDur) {
+    public void setTypeNumber(Font font, String text) {
         type_ = CELL_TYPE.NUMBER;
         object_ = new TextRender(font, text, true);
-        object_.fadeDur_ = animDur;
+        object_.fadeDur_ = BUMP_DURATION * NUM_BUMPS;
     }
 
     /**
      * Fija la celda como tipo candado y crea su imagen
      */
-    public void setTypeLock(Image lock, float animDur) {
+    public void setTypeLock(Image lock) {
         type_ = CELL_TYPE.LOCK;
-        object_ = new ImageRender(lock, cellRadius_, cellRadius_, true, false);
-        object_.fadeDur_ = animDur;
+        object_ = new ImageRenderer(lock, cellRadius_, cellRadius_, true, false);
+        object_.fadeDur_ = BUMP_DURATION * NUM_BUMPS;
         object_.maxAlpha_ = 0.3f;
     }
 
@@ -149,7 +158,7 @@ public class CellRender extends ObjectRender {
         object_.changeState();
     }
 
-    private Color getColorState(CellLogic.STATE state) {
+    private Color getColorState(Cell.STATE state) {
         switch (state) {
             case BLUE:
                 return blue_;

@@ -111,10 +111,10 @@ public class GraphicsAndroid extends GraphicsCommon {
     public void drawImage(Image image, int x, int y, int width, int height, boolean centered, float opacity) {
         ImageAndroid img = (ImageAndroid) image;
         //Se ajustan los valores a las dimensiones reales del canvas
-        x = toRealX(x);
-        y = toRealY(y);
-        width = toRealX(width);
-        height = toRealY(height);
+        x = toPhysicalX(x);
+        y = toPhysicalY(y);
+        width = toPhysicalX(width);
+        height = toPhysicalY(height);
         Rect src = new Rect(0, 0, img.getWidth(), img.getHeight());
         Rect dst;
         //Se centra si se ha pedido
@@ -141,9 +141,9 @@ public class GraphicsAndroid extends GraphicsCommon {
     @Override
     public void fillCircle(int cx, int cy, int r) {
         //Se ajustan los valores a las dimensiones reales del canvas
-        cx = toRealX(cx);
-        cy = toRealY(cy);
-        r = toRealY(r);
+        cx = toPhysicalX(cx);
+        cy = toPhysicalY(cy);
+        r = toPhysicalY(r);
         canvas_.drawCircle(cx, cy, r, paint_);
     }
 
@@ -158,10 +158,10 @@ public class GraphicsAndroid extends GraphicsCommon {
     @Override
     public void drawText(Font font, String text, int x, int y, boolean centered) {
         //Se ajustan los valores a las dimensiones reales del canvas
-        x = toRealX(x);
-        y = toRealY(y);
+        x = toPhysicalX(x);
+        y = toPhysicalY(y);
         FontAndroid f = (FontAndroid) font;
-        f.setRenderSize(toRealY(f.originalSize_));
+        f.setRenderSize(toPhysicalY(f.originalSize_));
         Rect bounds = new Rect(); f.getPaint().getTextBounds(text, 0, text.length(), bounds);
         if (centered)
             canvas_.drawText(text, x - bounds.exactCenterX(), y - bounds.exactCenterY(), f.getPaint());
@@ -200,8 +200,8 @@ public class GraphicsAndroid extends GraphicsCommon {
      */
     @Override
     public void translate(int dx, int dy) {
-        dx = toRealX(dx);
-        dy = toRealY(dy);
+        dx = toPhysicalX(dx);
+        dy = toPhysicalY(dy);
         canvas_.translate(dx, dy);
     }
 

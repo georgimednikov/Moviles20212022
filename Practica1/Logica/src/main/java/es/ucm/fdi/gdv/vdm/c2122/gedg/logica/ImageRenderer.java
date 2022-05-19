@@ -3,7 +3,7 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 
-public class ImageRender extends ObjectRender {
+public class ImageRenderer extends ObjectRenderer {
 
     private final float FADE_DURATION = 0.2f; //Segundos que duran los fades
 
@@ -12,10 +12,10 @@ public class ImageRender extends ObjectRender {
     private int height_;
     private boolean centered_;
 
-    public ImageRender(Image lock, int width, int height, boolean centered) {
+    public ImageRenderer(Image lock, int width, int height, boolean centered) {
         this(lock, width, height, centered, true);
     }
-    public ImageRender(Image lock, int width, int height, boolean centered, boolean visible) {
+    public ImageRenderer(Image lock, int width, int height, boolean centered, boolean visible) {
         super(visible);
         lock_ = lock;
         width_ = width;
