@@ -1,6 +1,11 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 
+/**
+ * Representación lógica de las celdas. Contienen su estado y si son fijas o no.
+ * Contiene los métodos que utiliza el tablero para modificar su estado.
+ */
 public class Cell {
+
     //Posibles estados de una celda
     public enum STATE {
         RED,
@@ -11,15 +16,9 @@ public class Cell {
     private int number_; //Número de azules de la celda
     private boolean fixed_; //Si se puede modificar el estado
     private Cell.STATE currState_; //Color actual de la celda
-    private CellRenderer render;
 
-    public Cell(int cellRadius){
+    public Cell(){
         resetCell();
-        render = new CellRenderer(cellRadius);
-    }
-
-    public CellRenderer getCellRender(){
-        return render;
     }
 
     /**
@@ -73,7 +72,6 @@ public class Cell {
                 currState_ = Cell.STATE.GREY;
                 break;
         }
-        render.transitionCell();
     }
 
     /**
@@ -100,7 +98,6 @@ public class Cell {
     public void setNumber(int number){
         number_ = number;
     }
-    public void setCurrState(Cell.STATE state) { currState_ = state; }
 
     public int getNumber() { return number_; }
     public boolean isFixed() { return fixed_; }

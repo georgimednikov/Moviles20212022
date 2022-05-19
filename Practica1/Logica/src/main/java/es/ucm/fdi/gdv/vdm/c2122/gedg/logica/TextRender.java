@@ -4,15 +4,18 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 
+/**
+ * Clase que implementa ObjectRenderer para dibujar textos.
+ */
 public class TextRender extends ObjectRenderer {
 
-    private boolean reappear_;
+    private boolean reappear_; //Dicta si el texto tiene que reaparecer tras desvanecerse.
     private boolean centered_;
-    private boolean newBold_; //Nuevo valor bold
-    private int newSize_; //Nuevo valor size
-    private String newText_; //Nuevo valor texto
-    private String text_;
-    private Font font_;
+    private boolean newBold_; //Nuevo valor bold si hace reappear.
+    private int newSize_; //Nuevo valor size si hace reappear.
+    private String newText_; //Nuevo valor texto si hace reappear.
+    private String text_; //Valor de texto actual.
+    private Font font_; //Fuente del texto.
 
     TextRender(Font font, String text, boolean centered) {
         this(font, text, centered, true);

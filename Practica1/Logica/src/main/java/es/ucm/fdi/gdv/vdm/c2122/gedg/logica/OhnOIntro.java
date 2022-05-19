@@ -55,6 +55,7 @@ public class OhnOIntro implements State {
         objects.add(creditText2);
         objects.add(q42Image);
 
+        //Se le dice a todos los objetos renderizables que aparezcan progresivamente al iniciar la escena.
         for (int i = 0; i < objects.size(); ++i) objects.get(i).fadeIn(SCENE_FADE_DURATION);
     }
 
@@ -83,12 +84,12 @@ public class OhnOIntro implements State {
         }
     }
     /**
-     * Renderiza la escena
+     * Renderiza la escena.
      */
     @Override
     public void render() {
         Graphics g = eng_.getGraphics();
-        //g.scale(2,1);
+
         g.save();
         g.translate(g.getWidth() / 2, LOGO_POS_Y);
         logoText.render(g);

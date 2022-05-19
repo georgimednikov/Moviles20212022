@@ -57,21 +57,13 @@ public class OhnOLevel implements State {
 
     //Variables de creacion de tablero
     int boardSize;
-    int numCells;
-    int coloredCells = 0;
-    int contMistakes = 0; //Número de celdas mal puestas
 
     private Board board;
     private BoardRenderer boardRenderer;
     private List<ObjectRenderer> objects = new ArrayList<>();
 
     //Variables relacionadas con pistas
-    private boolean givingFeedback = false;
-    private boolean givingHint = false;
     private boolean lockChanged = false; //Si hay que cambiar el estado de los candados
-    private int highlightPosX = 0; //Posicion del circulo negro
-    private int highlightPosY = 0;
-    private int highlightRadius = -1; //Asignacion dinamica
 
     //Objetos de la escena y variables relacionadas
     private Color black;
@@ -100,12 +92,13 @@ public class OhnOLevel implements State {
 
         //Se calculan las variables de asignacion dinamica
         //Dependen de las constantes y del tamaño de ventana
+
+        //Área en la que se van a dibujar los elementos de la interfaz.
         int paintArea = eng_.getGraphics().getWidth() - 2 * BOARD_OFFSET_X;
         cellRadius = (int) ((paintArea * 0.9) / 2) / boardSize;
         cellSeparation = (int) (paintArea * 0.1) / (boardSize - 1);
         int buttonArea = eng_.getGraphics().getWidth() - 2 * BUTTON_OFFSET_X;
         buttonSeparation = (buttonArea - (BUTTON_SIZE * NUM_BUTTONS)) / (NUM_BUTTONS - 1);
-        highlightRadius = (int) Math.round(cellRadius * 1.1);
 
         black = new Color(0, 0, 0, 255);
         darkGrey = new Color(150, 150, 150, 255);
@@ -133,7 +126,9 @@ public class OhnOLevel implements State {
         boardRenderer = new BoardRenderer(numberFont, lockImage, boardSize, cellRadius, cellSeparation, board);
         objects.add(boardRenderer);
 
-        progressTextRender.setText(board.donePercentage() + "%");
+        progressTextRender.setText(board.donePercentage() + "%"); //Actualiza el porcentaje de progreso.
+
+        //Se hace aparecer progresivamente todos los renderers de la escena.
         for (int i = 0; i < objects.size(); ++i) objects.get(i).fadeIn(SCENE_FADE_DURATION);
     }
 
@@ -156,7 +151,7 @@ public class OhnOLevel implements State {
                             cellRadius, event.x, event.y)) {
                         if (!board.isFixed(j, i)) //Si no es fija cambia de estado
                             changeCell(j, i);
-                        else {
+                        else { //Si es fija se hace la animación de "golpes" y se actualizan los candados.
                             boardRenderer.bumpCell(j, i);
                             lockChanged = true;
                         }
@@ -164,7 +159,6 @@ public class OhnOLevel implements State {
                     }
                 }
             }
-
 
             //Se comrpueban los botones
             for (int i = 0; i < NUM_BUTTONS; ++i) {
@@ -183,17 +177,14 @@ public class OhnOLevel implements State {
                             undoMove();
                             break;
                         case 2:
-                            if (givingHint) { //Si se esta dando una pista, se deja de dar
-                                givingFeedback = givingHint = false;
+                            if (boardRenderer.isCellHighlighted()) { //Si se esta dando una pista, se deja de dar
+                                boardRenderer.endHighlighting();
                                 infoTextRender.fadeNewText(infoRegContent, INFO_REG_SIZE, false, TEXT_FADE_DURATION);
                                 infoReset = true;
-                            } else if (contMistakes != 0) { //Si no se esta dando una pista, se empieza a dar
-                                givingFeedback = givingHint = true;
+                            } else if (!gameOver) { //Si no se esta dando una pista, se empieza a dar
                                 Hint hint = giveHint_user();
-                                //Se fijan los valores de la sombra negra
-                                highlightPosX = BOARD_OFFSET_X + cellRadius * (hint.j + 1) + (cellSeparation + cellRadius) * hint.j;
-                                highlightPosY = BOARD_OFFSET_Y + cellRadius * (hint.i + 1) + (cellSeparation + cellRadius) * hint.i;
-                                infoTextRender.fadeNewText(hint.hintText[hint.type.ordinal()], INFO_HINT_SIZE, false, TEXT_FADE_DURATION);
+                                boardRenderer.highlightCell(hint.j, hint.i); //Se destaca la celda para dar la pista.
+                                infoTextRender.fadeNewText(hint.hintText[hint.type.ordinal()], INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Se muestra la pista.
                                 infoReset = false;
                             }
                             break;
@@ -215,12 +206,6 @@ public class OhnOLevel implements State {
         progressTextRender.render(g);
         g.restore();
 
-        //Si se esta dando feedback se situa el circulo negro donde toca
-        if (givingFeedback) {
-            g.setColor(black);
-            g.fillCircle(highlightPosX, highlightPosY, highlightRadius);
-        }
-
         g.save();
         g.translate(BOARD_OFFSET_X, BOARD_OFFSET_Y);
         boardRenderer.render(g);
@@ -238,8 +223,7 @@ public class OhnOLevel implements State {
 
     /**
      * Actualiza todo lo relacionado con las animaciones de la escena
-     *
-     * @return True si no se deben procesar inputs porque se esta realizando una animacion, false en caso contrario
+     * Devuelve true si no se deben procesar inputs porque se esta realizando una animacion, false en caso contrario
      */
     private boolean updateScene(double deltaTime) {
         updateRenders(deltaTime);
@@ -248,12 +232,14 @@ public class OhnOLevel implements State {
                 gameOver = false;
                 fadeOut = true; //Flag de transicion
                 elapsedTime = 0;
+
+                //Se le dice a todos los renderers que desaparezcan progresivamente.
                 for (int i = 0; i < objects.size(); ++i)
                     if (objects.get(i) != infoTextRender)
                         objects.get(i).fadeOut(SCENE_FADE_DURATION);
             } else elapsedTime += deltaTime;
         }
-        if (fadeOut) {
+        if (fadeOut) { //Hace fade out hasta desaparecer por completo y luego cambia de escena.
             if (elapsedTime >= SCENE_FADE_DURATION) {
                 OhnOMenu app = new OhnOMenu();
                 eng_.changeState(app);
@@ -263,12 +249,12 @@ public class OhnOLevel implements State {
     }
 
     /**
-     * Actualiza los renderers
+     * Actualiza los renderers, actualizando sus animaciones con deltaTime.
      */
     private void updateRenders(double deltaTime) {
         for (int i = 0; i < objects.size(); ++i)
             objects.get(i).updateRenderer(deltaTime);
-        //Si se ha cambiado si deberian mostrarse los candados se le dice a las celdas apropiadas
+        //Si deberian aparecer/desaparecer los candados se le dice a las celdas apropiadas que ciclen su visibilidad.
         if (!lockChanged) return;
         for (int i = 0; i < boardSize; ++i) {
             for (int j = 0; j < boardSize; ++j) {
@@ -280,14 +266,13 @@ public class OhnOLevel implements State {
     }
 
     //region Board Methods
-
     /**
-     * Cambia el estado de una celda y lo que esto conlleva
+     * Cambia el estado de una celda y lo que esto conlleva.
      */
     public void changeCell(int x, int y) {
         if (!infoReset) {
             infoTextRender.fadeNewText(infoRegContent, INFO_REG_SIZE, false, TEXT_FADE_DURATION);
-            givingFeedback = givingHint = false;
+            boardRenderer.endHighlighting();
             infoReset = true;
         }
 
@@ -296,21 +281,21 @@ public class OhnOLevel implements State {
             infoTextRender.fadeNewText(YOU_WIN_TEXTS[OhnORandom.r.nextInt(YOU_WIN_TEXTS.length)], INFO_WIN_SIZE, true, TEXT_FADE_DURATION);
             return;
         }
-        progressTextRender.setText(board.donePercentage() + "%");
+        progressTextRender.setText(board.donePercentage() + "%"); //Actualiza el porcentaje de progreso.
     }
 
     /**
-     * Deshace el ultimo movimiento hecho
+     * Deshace el ultimo movimiento hecho de ser posible.
+     * Actualiza la interfaz en base a lo que se ha hecho.
      */
     private void undoMove() {
         String text = "";
         Tuple<Integer, Integer> cellPos = board.undoMove();
         if (cellPos == null) {
             text = "No queda nada por hacer";
-            givingFeedback = givingHint = false;
+            boardRenderer.endHighlighting();
         }
         else {
-            givingFeedback = true; //Va a aparecer el circulo negro
             switch (board.getCurrState(cellPos.x, cellPos.y)) {
                 case BLUE:
                     text = "Esta celda ha vuelto a azul";
@@ -323,9 +308,10 @@ public class OhnOLevel implements State {
                     break;
             }
             boardRenderer.transitionCell(cellPos.x, cellPos.y);
-            progressTextRender.setText(board.donePercentage() + "%");
+            boardRenderer.highlightCell(cellPos.x, cellPos.y);
+            progressTextRender.setText(board.donePercentage() + "%"); //Actualiza el porcentaje de progreso.
         }
-        infoTextRender.fadeNewText(text, INFO_HINT_SIZE, false, TEXT_FADE_DURATION);
+        infoTextRender.fadeNewText(text, INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Hace aparecer un texto con el string establecido.
         infoReset = false;
     }
     //endregion
@@ -356,11 +342,16 @@ public class OhnOLevel implements State {
         return fixedCells;
     }*/
 
-    //Calcula la distancia entre dos casillas
+    /**
+     * Calcula la distancia entre dos casillas.
+     */
     private int distanceBetweenPos(int x1, int y1, int x2, int y2) {
         return Math.abs(x1 - x2) + Math.abs(y1 - y2);
     }
 
+    /**
+     * Dado el centro de una circunferencia, su radio y otra posición, se comprueba si ha habido una intersección.
+     */
     private boolean checkCollisionCircle(int centerX, int centerY, int radius, int eventX, int eventY) {
         int vecX = eventX - centerX;
         int vecY = eventY - centerY;

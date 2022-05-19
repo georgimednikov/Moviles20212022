@@ -25,7 +25,7 @@ public class OhnOMenu implements State {
     private final float SCENE_FADE_DURATION = 0.25f; //Segundos que duran los fades
     private final int ROWS = 2;
     private final int ROW_SIZE = 3;
-    private final int STARTING_VALUE = 4;
+    private final int STARTING_VALUE = 4; //Tamaño mínimo de los tableros.
     private final int LOGO_POS_Y = 130;
     private final int TEXT_POS_Y = 215;
     private final int QUIT_POS_Y = 530;
@@ -48,20 +48,24 @@ public class OhnOMenu implements State {
     private Font numberFont;
     private TextRender logoText;
     private TextRender textText;
-    private TextRender numberText;
     private ImageRenderer quitImage;
+
+    //Tablero de renderizado de palo. Se quiere tener CellRenderers pero no se quiere un BoardRenderer como tal,
+    //ya que el menú se crea de forma irregular, con un patrón de colores fijo...
     private CellRenderer[][] menu = new CellRenderer[ROWS][ROW_SIZE];
     private List<ObjectRenderer> objects = new ArrayList<>();
 
     public OhnOMenu() {}
 
     /**
-     * Inicializa la escena para su actualizacion/renderizado
+     * Inicializa la escena para su actualizacion/renderizado.
      */
     @Override
     public void init(Engine eng) {
         eng_ = eng;
         Graphics g = eng_.getGraphics();
+
+        //Área en la que se van a dibujar los elementos de la interfaz.
         int paintArea = g.getWidth() - 2 * MENU_OFFSET_X;
         cellRadius = (int)((paintArea * 0.9) / 2) / ROW_SIZE;
         cellSeparation = (int)(paintArea * 0.1) / (ROW_SIZE -1);
@@ -76,7 +80,8 @@ public class OhnOMenu implements State {
         objects.add(textText);
         objects.add(quitImage);
 
-        int cont = STARTING_VALUE;
+        int cont = STARTING_VALUE; //Número que representa el tamaño de los tableros. Empieza con el valor mínimo.
+        // En cada fila se pone tantos elementos como el tamaño de fila, alternando colores.
         for (int i = 0; i < ROWS; ++i) {
             for (int j = 0; j < ROW_SIZE; ++j) {
                 if ((i + j) % 2 == 0){
