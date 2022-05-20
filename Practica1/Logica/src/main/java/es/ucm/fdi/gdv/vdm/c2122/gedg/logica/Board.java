@@ -1,6 +1,7 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -138,55 +139,129 @@ public class Board {
      * Crea un nivel en el tablero.
      */
     public void setNewBoard() {
-        Hint hint = null;
-        while (hint == null) {
-            //Se fijan ciertas celdas con valores aleatorios
-            for (int i = 0; i < boardSize_; ++i) {
-                for (int j = 0; j < boardSize_; ++j) {
-                    board_[i][j].resetCell(); //Por si ha habido un intento anterior
-                    if (OhnORandom.getRandomBoolean(FIXED_PROB)) {
-                        if (OhnORandom.getRandomBoolean(BLUE_PROB)) {
-                            board_[i][j].fixCell(Cell.STATE.BLUE);
-                            fixedBlueCells_.add(board_[i][j]);
-                        }
-                        else
-                            board_[i][j].fixCell(Cell.STATE.RED);
-                    }
-                }
+
+    }
+
+    /**
+     * Pone todas las celdas que no son pared del tablero a relleno
+     * Si overwriteNumbers, las pone todas a azul
+     */
+    public void setAllBlue(boolean overwriteNumbers){
+        for (int i = 0; i < boardSize_; i++) {
+            for (int j = 0; j < boardSize_; j++) {
+                if (board_[i][j].getCurrState() == Cell.STATE.GREY ||
+                        overwriteNumbers && board_[i][j].getCurrState() == Cell.STATE.NUMBERED_BLUE)
+                    board_[i][j].setCurrState(Cell.STATE.BLUE);
             }
-            for (Cell c : fixedBlueCells_) {
-                c.setNumber(Math.min(Math.max(calculateNumber(board_, c.getX(), c.getY()), OhnORandom.r.nextInt(boardSize_) + 1), boardSize_));
+        }
+    }
+
+    /**
+     * Coloca paredes en el tablero de forma aleatoria hasta que todas las celdas vean como maximo el maxallowed
+     */
+    public void maxify(int maxAllowed){
+        boolean tryAgain = true;
+        int attempts = 0;
+        while(tryAgain && attempts++ < 99){
+            tryAgain = false;
+            List<Cell> maxTiles = new ArrayList<>();
+            for (int i = 0; i < boardSize_; i++)
+                for (int j = 0; j < boardSize_; j++)
+                    if(board_[i][j].getNumber() > maxAllowed) maxTiles.add(board_[i][j]);
+            Cell chosenOne = maxTiles.get(OhnORandom.r.nextInt(maxTiles.size()));
+            Cell[] cuts = chosenOne.getTilesInRange(1, maxAllowed);
+            Cell cut = cuts[OhnORandom.r.nextInt(cuts.length)];
+            if(cut != null) {
+                cut.setCurrState(Cell.STATE.RED);
+                setAllBlue(true);
+                solve();
+                tryAgain = true;
+            }
+            else{
+                System.out.println("no cut found for", chosenOne.x, chosenOne.y, chosenOne.getNumber(), cuts, 1, maxAllowed);
+            }
+        }
+    }
+
+    /**
+     * Intenta resolver el tablero, devuelve la pista que ha usado
+     * @param hintMode Si es verdadero, el tablero no lo modifica, si no, aplica la pista directamente
+     */
+    public Hint solve(boolean hintMode){
+        boolean tryAgain = true;
+        int attempts = 0;
+
+        while (tryAgain && attempts++ < 99){
+            tryAgain = false;
+
+            if(isDone())
+                return new Hint(Hint.HintType.NONE, -1, -1);
+
+            for (int i = 0; i < boardSize_; i++) {
+                for (int j = 0; j < boardSize_; j++) {
+                    board_[i][j].setInfo(board_[i][j].collect());
+                }
             }
 
-            // Se crea la solucion en solBoard
-            contMistakes = boardSize_ * boardSize_ - fixedCells_;
-            solBoard = copyBoard(board_);
-            int placedCells = 0;
-            boolean tryAgain = true;
-            int attempts = 0;
-            // Intenta rellenar la matriz auxiliar con las pistas, si no es capaz, no es resoluble
-            tries:
-            while (tryAgain && attempts++ < 99) {
-                hint = giveHint(solBoard);
-                tryAgain = hint != null;
-                if (tryAgain) {
-                    solBoard[hint.i][hint.j].applyHint(hint);
-                    placedCells++;
+            List<Integer> random = new ArrayList<>();
+            for (int i = 0; i < boardSize_ * boardSize_; i++) {
+                random.add(i);
+            }
+            Collections.shuffle(random);
+
+            // Se recorren las casillas en orden aleatorio
+            for (int k = 0; k < random.size(); k++) {
+                int i = random.get(k) / boardSize_;
+                int j = random.get(k) % boardSize_;
+                Cell tile = board_[i][j];
+
+                tile.setInfo(tile.collect(tile.getInfo()));
+
+                if(!hintMode && tile.getCurrState() == Cell.STATE.BLUE && tile.getInfo().greysAround == 0){
+                    tile.setNumber(tile.getInfo().numberCount);
+                    tile.fixCell(Cell.STATE.NUMBERED_BLUE);
+                    return new Hint(Hint.HintType.NumberCanBeEntered, -1, -1);
                 }
-                if (fixedCells_ + placedCells == numCells_) {
-                    // Comprueba que los numeros tienen sentido, si no, reinicia
-                    for (int i = 0; i < fixedBlueCells_.size(); ++i) {
-                        Cell c = fixedBlueCells_.get(i);
-                        if (calculateNumber(solBoard, c.getX(), c.getY()) != c.getNumber()) {
-                            hint = null;
-                            break tries;
+
+                if(tile.getCurrState() == Cell.STATE.NUMBERED_BLUE && info.greysAround > 0){
+                    if(info.numberReached){
+                        if(!hintMode)
+                            tile.close();
+                        return new Hint(Hint.HintType.ValueReached, tile.x, tile.y);
+                    }
+
+                    if(info.singlePossibleDirection){
+                        if(!hintMode)
+                            tile.closeDirection(info.singlePossibleDirection, true, 1);
+                        return new Hint(Hint.HintType.OneDirectionLeft, tile.x, tile.y);
+                    }
+
+                    for(var dir in directions){
+                        if(curDir.wouldBeTooMuch){
+                            if(!hintMode)
+                                tile.closeDirection(dir);
+                            return new Hint(Hint.HintType.WouldExceed, tile.x, tile.y);
+                        }
+
+                        if(curDir.unknownCount && curDir.numberWhenDottingFirstUnknown + curDir.maxPossibleCountInOtherDirections <= tile.getNumber()){
+                            if(!hintMode)
+                                tile.closeDirection(dir, true, 1);
+                            return new Hint(Hint.HintType.OneDirectionRequired, tile.x, tile.y);
                         }
                     }
-                    return;
+                }
+
+                if(tile.getCurrState() == Cell.STATE.GREY && info.greysAround == 0 && info.completedNumbersAround == 0){
+                    if(info.numberCount == 0){
+                        if(!hintMode)
+                            tile.setCurrState(Cell.STATE.RED);
+                        return new Hint(Hint.HintType.MustBeWall, tile.x, tile.y);
+                    }
                 }
             }
         }
     }
+
 
     /**
      * Cuenta las celdas azules adyacentes a una dada. Recibe el tablero
