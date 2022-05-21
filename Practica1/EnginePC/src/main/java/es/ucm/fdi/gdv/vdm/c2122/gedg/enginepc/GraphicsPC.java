@@ -17,12 +17,18 @@ import java.util.Stack;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.*;
 
+/**
+ * Motor gráfico del proyecto para la plataforma de PC.
+ */
 public class GraphicsPC extends GraphicsCommon implements ComponentListener {
 
-    private JFrame jf_;
-    private Graphics g_;
-    private Stack<Graphics> saves_; //Estado actual de Graphics
+    private JFrame jf_; //El sistema de renderizado.
+    private Graphics g_; //El canvas de JFrame.
+    private Stack<Graphics> saves_; //Estados guardados del canvas.
+
+    // Escala del canvas.
     private float scaleX_ = 1, scaleY_ = 1;
+
     GraphicsPC(JFrame jf){
         jf_ = jf;
         BufferStrategy strategy = jf.getBufferStrategy();
@@ -32,6 +38,9 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
         saves_ = new Stack<>();
     }
 
+    /**
+     * Devuelve un puntero a la instancia del sistema de renderizado del motor gráfico.
+     */
     public JFrame getJFrame() {
         return jf_;
     }
@@ -84,23 +93,28 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
         width = (int) (toPhysicalX(width) * scaleX_);
         height = (int) (toPhysicalY(height) * scaleY_);
         ImagePC img = (ImagePC) image;
+
+        //Se añaden offsets a la imagen para centrarla si se ha pedido.
         int verticalOffset, horizontalOffset; verticalOffset = horizontalOffset = 0;
         if (centered) {
             verticalOffset = height / 2;
             horizontalOffset = width / 2;
         }
-        ((Graphics2D) g_).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+        ((Graphics2D) g_).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity)); //Cambia la opacidad a la pedida.
         g_.drawImage(img.getImage(), x - horizontalOffset, y - verticalOffset, width, height, null);
-        ((Graphics2D) g_).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1));
+        ((Graphics2D) g_).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1)); //Se restaura el valor por defecto de la opacidad.
     }
 
+    /**
+     * Fija el color con el que se va a pintar los siguientes elementos.
+     */
     @Override
     public void setColor(Color color) {
         g_.setColor(new java.awt.Color(color.r, color.g, color.b, color.a ));
     }
 
     /**
-     * Dibuja un circulo del color previamente establecido
+     * Dibuja un circulo del color previamente establecido.
      * @param cx Posicion X del centro
      * @param cy Posicion Y del centro
      * @param r Radio
@@ -116,7 +130,7 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
     }
 
     /**
-     * Dibuja un texto dado con una fuente dada
+     * Dibuja un texto dado con una fuente dada.
      * @param font Fuente
      * @param text Texto
      * @param x Posicion X
@@ -138,10 +152,11 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
         g2d.drawString(text, 0, fm.getAscent());
         g2d.dispose();
 
+        //Se podifica la posición de dibuja en base a la escala del canvas.
         x = (int) (x * scaleX_);
         y = (int) (y * scaleY_);
 
-        //Se setean el tamaño (ajustado), la fuente y el color para el texto
+        //Se modifica la posición de dibujado para que aparezca centrado si se ha pedido.
         if(centered){
             x = (int) (x - (buf.getWidth() / 2 * scaleX_));
             y = (int) (y - (buf.getHeight() / 2 * scaleY_));
@@ -151,7 +166,6 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
 
     /**
      * Actualiza el motor de renderizado, pone en blanco el render buffer y actualiza la posicion de la ventana
-     * @param g
      */
     public void setGraphics(Graphics g){
         g_ = g;
@@ -160,11 +174,17 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
         g_.setClip(0, 0, curSizeX, curSizeY); // Ya se ha trasladado, su 0, 0 esta movido ya
     }
 
+    /**
+     * Devuelve el ancho de la ventana.
+     */
     @Override
     public int getWidth() {
         return refSizeX;
     }
 
+    /**
+     * Devuelve el alto de la ventana.
+     */
     @Override
     public int getHeight() {
         return refSizeY;
@@ -207,9 +227,12 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
     public void scale(float sx, float sy) {
         scaleX_ = sx;
         scaleY_ = sy;
-        super.scale((int)(sx * refSizeX), (int)(sy * refSizeY));
+        //super.scale((int)(sx * refSizeX), (int)(sy * refSizeY)); TODO: ª
     }
 
+    /**
+     * Fija el tamaño de la ventana.
+     */
     public void setWindowSize(int w, int h){
         jf_.setSize(w, h);
     }

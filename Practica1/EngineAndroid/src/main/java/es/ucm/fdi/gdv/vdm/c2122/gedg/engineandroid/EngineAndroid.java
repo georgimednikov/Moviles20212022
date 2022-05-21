@@ -6,34 +6,32 @@ import android.view.SurfaceView;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.EventPool;
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.State;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Scene;
 
+/**
+ * Clase que representa un Motor en la plataforma de Android. Procesa Inputs, crea y dibuja en pantalla y actualiza sus elementos.
+ */
 public class EngineAndroid implements Engine, Runnable {
 
     //Variables del thread
     private Thread gameThread_;
-    private volatile boolean running_;
+    private volatile boolean running_; //Si está en ejecución.
 
     //Variables del deltaTime
     private double lastFrameTime_;
     private double deltaTime_;
 
-    private InputAndroid input_;
-    private GraphicsAndroid graphics_;
-    private State app_;
+    private InputAndroid input_; //Sistema de procesado de inputs.
+    private GraphicsAndroid graphics_; //Motor gráfico.
+    private Scene app_;
 
     public EngineAndroid(Context context, SurfaceView view) {
         graphics_ = new GraphicsAndroid(context, view);
         input_ = new InputAndroid(graphics_);
     }
 
-    public SurfaceView getSurfaceView() {
-        return graphics_.getSurfaceView();
-    }
-
     /**
-     * Si no esta ya en ejecucion, se crea un nuevo hilo que corre en juego
+     * Si no esta ya en ejecucion, se crea un nuevo hilo que ejecuta en juego.
      */
     public void onResume() {
         if (!running_) {
@@ -44,7 +42,7 @@ public class EngineAndroid implements Engine, Runnable {
     }
 
     /**
-     * Si esta en ejecucion la pausa, y espera a que el hilo muera
+     * Si esta en ejecucion la pausa, y espera a que el hilo muera.
      */
     public void onPause() {
         if (running_) {
@@ -54,23 +52,31 @@ public class EngineAndroid implements Engine, Runnable {
                     gameThread_.join();
                     gameThread_ = null;
                     break;
-                } catch (InterruptedException ie) {
-                    //No deberia pasar
+                } catch (InterruptedException ie) { //No debería pasar.
+                    ie.printStackTrace();
                 }
             }
         }
     }
 
+    /**
+     * Calcula el deltaTime o el tiempo que ha pasado entre el frame actual y el anterior.
+     */
     private void updateDeltaTime() {
         double currentTime = System.nanoTime();
         double nanoElapsedTime = currentTime - lastFrameTime_;
         lastFrameTime_ = currentTime;
         deltaTime_ = nanoElapsedTime / 1.0E9;
     }
+
+    /**
+     * Devuelve el tiempo que ha pasado entre el frame actual y el anterior. 0 en frame 1.
+     */
+    @Override
     public double getDeltaTime() { return deltaTime_; }
 
     /**
-     * Inicializa y ejecuta el bucle principal de la aplicacion
+     * Inicializa y ejecuta el bucle principal de la aplicación, ejecutando la escena declarada.
      */
     @Override
     public void run() {
@@ -80,7 +86,7 @@ public class EngineAndroid implements Engine, Runnable {
         }
         while(running_ && !graphics_.init()); //Se espera a que se inicialicen los graficos
         lastFrameTime_ = System.nanoTime();
-        State currApp = null;
+        Scene currApp = null;
         while(running_) { //Bucle principal
 
             //Se actualiza la aplicacion con la que se trabaja
@@ -100,17 +106,25 @@ public class EngineAndroid implements Engine, Runnable {
     }
 
     /**
-     * Asigna una nueva aplicacion
+     * Asigna una nueva escena
      * El siguiente frame se empieza a actualizar y renderizar
      */
     @Override
-    public void changeState(State a) {
+    public void changeScene(Scene a) {
         app_ = a;
     }
+
+    /**
+     * Devuelve un puntero a la instancia del motor gráfico.
+     */
     @Override
     public Graphics getGraphics() {
         return graphics_;
     }
+
+    /**
+     * Devuelve un puntero a la instancia del sistema de procesado de Input.
+     */
     @Override
     public Input getInput() {
         return input_;

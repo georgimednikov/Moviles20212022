@@ -14,6 +14,9 @@ import java.io.InputStream;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.*;
 
+/**
+ * Motor gráfico del proyecto para la plataforma de Android.
+ */
 public class GraphicsAndroid extends GraphicsCommon {
 
     private final SurfaceView view_;
@@ -21,7 +24,6 @@ public class GraphicsAndroid extends GraphicsCommon {
     private final Context context_;
     private Canvas canvas_;
     private final Paint paint_; //Paint para cada elemento visual que lo utilice
-    private int saveCalled = 0; //Contador para que no se pueda llamar mas veces a restore que a save
 
     public GraphicsAndroid(Context context, SurfaceView view) {
         context_ = context;
@@ -30,6 +32,9 @@ public class GraphicsAndroid extends GraphicsCommon {
         paint_ = new Paint();
     }
 
+    /**
+     * Se inicializa el canvas ajustándose a la ventana. Devuelve false si no se logra inicializar.
+     */
     public boolean init() {
         curSizeX = view_.getWidth();
         curSizeY = view_.getHeight();
@@ -37,12 +42,18 @@ public class GraphicsAndroid extends GraphicsCommon {
         return curSizeX != 0;
     }
 
+    /**
+     * Hace lock del canvas para que solo un hilo pueda interactuar con él.
+     */
     public void lock() {
         //Se espera a poder conseguir el canvas de la aplicacion y se fija
         while (!holder_.getSurface().isValid());
         canvas_ = holder_.lockCanvas();
     }
 
+    /**
+     * Se deja de hacer lock del canvas.
+     */
     public void unlock() {
         //Se libera el canvas
         holder_.unlockCanvasAndPost(canvas_);
@@ -90,7 +101,7 @@ public class GraphicsAndroid extends GraphicsCommon {
     }
 
     /**
-     * Pone en render buffer al color indicado
+     * Se limpia el render buffer pintando por encima del color dado cubriendo toda la pantalla
      */
     @Override
     public void clear(Color color) {
@@ -105,7 +116,6 @@ public class GraphicsAndroid extends GraphicsCommon {
      * @param width Ancho
      * @param height Alto
      * @param centered Se dibuja en base a su centro a su esquina superior izquierda
-     * @param opacity Alpha
      */
     @Override
     public void drawImage(Image image, int x, int y, int width, int height, boolean centered, float opacity) {
@@ -122,18 +132,22 @@ public class GraphicsAndroid extends GraphicsCommon {
             dst = new Rect(x - width / 2, y - height / 2, x + width / 2, y + height / 2);
         else
             dst = new Rect(x, y, x + width, y + height);
-        img.getPaint().setAlpha((int)(opacity * 255));
+
+        img.getPaint().setAlpha((int)(opacity * 255)); //Se modifica la opacidad.
         canvas_.drawBitmap(img.getBitmap(), src, dst, img.getPaint());
-        img.getPaint().setAlpha(255);
+        img.getPaint().setAlpha(255); //Se restaura la opacidad por defecto.
     }
 
+    /**
+     * Fija el color con el que se va a pintar los siguientes elementos.
+     */
     @Override
     public void setColor(Color color) {
         paint_.setARGB(color.a, color.r, color.g, color.b);
     }
 
     /**
-     * Dibuja un circulo del color previamente establecido
+     * Dibuja un circulo del color previamente establecido.
      * @param cx Posicion X del centro
      * @param cy Posicion Y del centro
      * @param r Radio
@@ -161,17 +175,25 @@ public class GraphicsAndroid extends GraphicsCommon {
         x = toPhysicalX(x);
         y = toPhysicalY(y);
         FontAndroid f = (FontAndroid) font;
-        f.setRenderSize(toPhysicalY(f.originalSize_));
+        f.setRenderSize(toPhysicalY(f.originalSize_)); //Se pasa a tamaño real.
         Rect bounds = new Rect(); f.getPaint().getTextBounds(text, 0, text.length(), bounds);
+
+        //Se centra si se ha pedido.
         if (centered)
             canvas_.drawText(text, x - bounds.exactCenterX(), y - bounds.exactCenterY(), f.getPaint());
         else
             canvas_.drawText(text, x, y - bounds.exactCenterY(), f.getPaint());
     }
 
+    /**
+     * Devuelve el ancho de la ventana.
+     */
     @Override
     public int getWidth() { return refSizeX; }
 
+    /**
+     * Devuelve el alto de la ventana.
+     */
     @Override
     public int getHeight() {
         return refSizeY;
@@ -196,7 +218,8 @@ public class GraphicsAndroid extends GraphicsCommon {
     }
 
     /**
-     * Mueve el canvas a la posicion dada real de la ventana
+     * Desplaza el canvas las unidades virtuales indicadas en los ejes X e Y haciendo
+     * la transformacion necesaria para ajustarse al tamaño actual de la ventana
      */
     @Override
     public void translate(int dx, int dy) {
@@ -205,6 +228,9 @@ public class GraphicsAndroid extends GraphicsCommon {
         canvas_.translate(dx, dy);
     }
 
+    /**
+     * Cambia la escala del canvas
+     */
     @Override
     public void scale(float sx, float sy) { canvas_.scale(sx, sy); }
 
@@ -215,7 +241,7 @@ public class GraphicsAndroid extends GraphicsCommon {
     public void save() { canvas_.save(); }
 
     /**
-     * Vuelve a la posicion anterior del canvas, si se llama mas veces a restore que a save, las llamadas extra de restore no hacen nada
+     * Vuelve a la posicion anterior del canvas
      */
     @Override
     public void restore() {

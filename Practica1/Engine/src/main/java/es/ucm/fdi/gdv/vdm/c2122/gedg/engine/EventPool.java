@@ -11,16 +11,16 @@ import java.util.List;
  * de la cola de eventos a procesar.
  */
 public class EventPool {
-    private final List<TouchEvent> enqueuedEvents_;
-    private final List<TouchEvent> dequeuedEvents_;
-    private final List<TouchEvent> freeEvents_;
+    private final List<TouchEvent> enqueuedEvents_; //Eventos que hay que procesar.
+    private final List<TouchEvent> dequeuedEvents_; //Elementos procesados que pueden seguir en uso y no se pueden liberar.
+    private final List<TouchEvent> freeEvents_; //Eventos libres que se pueden utilizar.
     private int poolSize_ = 10;
 
     public EventPool(){
         enqueuedEvents_ = new ArrayList<>();
         dequeuedEvents_ = new ArrayList<>();
         freeEvents_ = new ArrayList<>();
-        for (int i = 0; i < poolSize_; ++i) freeEvents_.add(new TouchEvent());
+        for (int i = 0; i < poolSize_; ++i) freeEvents_.add(new TouchEvent()); //Se crea una cantidad inicial de eventos libres.
     }
 
 
@@ -31,7 +31,7 @@ public class EventPool {
         if(freeEvents_.isEmpty()){
             for (int i = 0; i < poolSize_; ++i) freeEvents_.add(new TouchEvent());
             // Duplica el numero de eventos para que la proxima vez que haya que crear eventos ocurra cada vez
-            // menos, disminuyendo el coste asintotico a O(1)
+            // menos, disminuyendo el coste asintotico a O(1).
             poolSize_ = poolSize_ * 2;
         }
         TouchEvent aux = freeEvents_.remove(0);

@@ -3,14 +3,14 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 import java.util.ArrayList;
 import java.util.List;
 
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.State;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Scene;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
-public class OhnOMenu implements State {
+public class OhnOMenu implements Scene {
 
     Engine eng_;
 
@@ -178,11 +178,11 @@ public class OhnOMenu implements State {
                 switch (nextScene) {
                     case INTRO:
                         OhnOIntro intro = new OhnOIntro();
-                        eng_.changeState(intro);
+                        eng_.changeScene(intro);
                         break;
                     case MENU:
                         OhnOLevel level = new OhnOLevel(selectedSize);
-                        eng_.changeState(level);
+                        eng_.changeScene(level);
                         break;
                 }
             }
