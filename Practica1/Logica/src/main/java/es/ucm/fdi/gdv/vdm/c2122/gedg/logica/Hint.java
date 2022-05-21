@@ -1,7 +1,5 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 
-import javax.lang.model.type.NullType;
-
 public class Hint {
     //IDs de las pistas
     public enum HintType {
@@ -32,7 +30,13 @@ public class Hint {
             "Celda gris rodeada de rojas"
     };
 
-    public HintType type;
-    public int i = -1, j = -1;
+    public Hint(HintType t, int x, int y){
+        type_ = t;
+        x_ = x;
+        y_ = y;
+    }
+
+    public HintType type_;
+    public int x_ = -1, y_ = -1;
 }
 

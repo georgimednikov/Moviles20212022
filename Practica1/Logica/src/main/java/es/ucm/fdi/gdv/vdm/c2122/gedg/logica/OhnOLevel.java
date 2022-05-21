@@ -183,8 +183,8 @@ public class OhnOLevel implements State {
                                 infoReset = true;
                             } else if (!gameOver) { //Si no se esta dando una pista, se empieza a dar
                                 Hint hint = giveHint_user();
-                                boardRenderer.highlightCell(hint.j, hint.i); //Se destaca la celda para dar la pista.
-                                infoTextRender.fadeNewText(hint.hintText[hint.type.ordinal()], INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Se muestra la pista.
+                                boardRenderer.highlightCell(hint.y_, hint.x_); //Se destaca la celda para dar la pista.
+                                infoTextRender.fadeNewText(hint.hintText[hint.type_.ordinal()], INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Se muestra la pista.
                                 infoReset = false;
                             }
                             break;
@@ -359,20 +359,6 @@ public class OhnOLevel implements State {
     }
 
     //region Hints
-    //Busca la primera casilla del color dado
-    //Si no hay, devuelve la última casilla que hay.
-    public int[] nextColorCell(CellLogic[][] mat, int x, int y, int dx, int dy, CellLogic.STATE color) {
-        int i = 1;
-        while (inArray(mat, x + dx * i, y + dy * i) && mat[x + dx * i][y + dy * i].getCurrState() != color) {
-            i++;
-        }
-        if (!inArray(mat, x + dx * i, y + dy * i)) {
-            --i;
-        }
-        int[] res = {x + dx * i, y + dy * i};
-        return res;
-    }
-
     public Hint giveHint(CellLogic[][] mat) {
         Hint hint = new Hint();
         //Pistas basadas en celdas fijas
@@ -409,7 +395,7 @@ public class OhnOLevel implements State {
         switch (state) {
             case GREY:
                 if (hint_BLUE_BUT_ISOLATED(hint, mat, cellLogic)) {
-                    hint.type = Hint.HintType.ISOLATED_AND_EMPTY;
+                    hint.type_ = Hint.HintType.ISOLATED_AND_EMPTY;
                     return true;
                 }
             case BLUE:
@@ -465,9 +451,9 @@ public class OhnOLevel implements State {
         int[] newPos = nextDiffColor(mat, cellLogic.getX(), cellLogic.getY(), i, j, CellLogic.STATE.BLUE);
         //Busca en la direccion i j la siguiente casilla no azul; si es gris, esta abierta y hay que cerrarla
         if (mat[newPos[0]][newPos[1]].getCurrState() == CellLogic.STATE.GREY) {
-            hint.type = Hint.HintType.VISIBLE_CELLS_COVERED;
-            hint.i = newPos[0];
-            hint.j = newPos[1];
+            hint.type_ = Hint.HintType.VISIBLE_CELLS_COVERED;
+            hint.x_ = newPos[0];
+            hint.y_ = newPos[1];
             return true;
         }
         return false;
@@ -488,9 +474,9 @@ public class OhnOLevel implements State {
             } else newCont = distanceBetweenPos(newPos[0], newPos[1], newNewPos[0], newNewPos[1]);
             //Si poner la casilla gris en azul supera el numero correcto
             if (cont + newCont > cellLogic.getNumber()) {
-                hint.type = Hint.HintType.CANNOT_SURPASS_LIMIT;
-                hint.i = newPos[0];
-                hint.j = newPos[1];
+                hint.type_ = Hint.HintType.CANNOT_SURPASS_LIMIT;
+                hint.x_ = newPos[0];
+                hint.y_ = newPos[1];
                 return true;
             }
         }
@@ -529,9 +515,9 @@ public class OhnOLevel implements State {
             if (mat[thisFirstGrey[0]][thisFirstGrey[1]].getCurrState() != CellLogic.STATE.GREY) {
                 return false;
             }
-            hint.i = thisFirstGrey[0];
-            hint.j = thisFirstGrey[1];
-            hint.type = Hint.HintType.MUST_PLACE_BLUE;
+            hint.x_ = thisFirstGrey[0];
+            hint.y_ = thisFirstGrey[1];
+            hint.type_ = Hint.HintType.MUST_PLACE_BLUE;
             return true;
         }
         return false;
@@ -542,9 +528,9 @@ public class OhnOLevel implements State {
     private boolean hint_TOO_MANY_ADJACENT(Hint hint, CellLogic[][] mat, CellLogic cellLogic) {
         if (calculateNumber(mat, cellLogic.getX(), cellLogic.getY()) <= cellLogic.getNumber())
             return false;
-        hint.i = cellLogic.getX();
-        hint.j = cellLogic.getY();
-        hint.type = Hint.HintType.TOO_MANY_ADJACENT;
+        hint.x_ = cellLogic.getX();
+        hint.y_ = cellLogic.getY();
+        hint.type_ = Hint.HintType.TOO_MANY_ADJACENT;
         return true;
     }
 
@@ -568,9 +554,9 @@ public class OhnOLevel implements State {
         }
         //Si ve las que tiene que ver esta pista no aplica
         if (blueVisible >= cellLogic.getNumber()) return false;
-        hint.i = cellLogic.getX();
-        hint.j = cellLogic.getY();
-        hint.type = Hint.HintType.NOT_ENOUGH_BUT_CLOSED;
+        hint.x_ = cellLogic.getX();
+        hint.y_ = cellLogic.getY();
+        hint.type_ = Hint.HintType.NOT_ENOUGH_BUT_CLOSED;
         return true;
     }
 
@@ -590,9 +576,9 @@ public class OhnOLevel implements State {
                 }
             }
         }
-        hint.i = cellLogic.getX();
-        hint.j = cellLogic.getY();
-        hint.type = Hint.HintType.BLUE_BUT_ISOLATED;
+        hint.x_ = cellLogic.getX();
+        hint.y_ = cellLogic.getY();
+        hint.type_ = Hint.HintType.BLUE_BUT_ISOLATED;
         return true;
     }
     //endregion

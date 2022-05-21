@@ -10,6 +10,26 @@ import java.util.List;
  */
 public class Board {
 
+    public enum Direction{
+        LEFT(-1, 0, 0),
+        UP(0, 1, 1),
+        RIGHT(1, 0, 2),
+        DOWN(0, -1, 3),
+        NONE(0, 0, -1);
+
+        public final int dx;
+        public final int dy;
+        public final int id;
+
+        Direction(int x, int y, int i){
+            dx = x;
+            dy = y;
+            id = i;
+        }
+    }
+
+    public Hint hint;
+
     //Constantes de probabilidad del nivel
     private final float BLUE_PROB = 0.5f; //Probabilidad de que una celda sea azul en vez de roja en la solución
     private final float FIXED_PROB = 0.5f; //Probabilidad de que una celda sea fija
@@ -150,8 +170,10 @@ public class Board {
         for (int i = 0; i < boardSize_; i++) {
             for (int j = 0; j < boardSize_; j++) {
                 if (board_[i][j].getCurrState() == Cell.STATE.GREY ||
-                        overwriteNumbers && board_[i][j].getCurrState() == Cell.STATE.NUMBERED_BLUE)
+                        (overwriteNumbers && board_[i][j].getCurrState() == Cell.STATE.BLUE && board_[i][j].isFixed())){
+                    board_[i][j].resetCell();
                     board_[i][j].setCurrState(Cell.STATE.BLUE);
+                }
             }
         }
     }
@@ -184,24 +206,104 @@ public class Board {
     }
 
     /**
+     * Consigue la información de las casillas alrededor de cada celda en las cuatro direcciones y la guarda.
+     */
+    public void collectInfo() {
+        for (int i = 0; i < boardSize_; i++) {
+            for (int j = 0; j < boardSize_; j++) {
+                Cell cell = board_[i][j];
+                cell.resetInfo();
+                int nPossibleDirections = 0;
+                Direction singlePossibleDirection = null;
+                for (Direction dir :
+                        Direction.values()) {
+                    int k = 1;
+                    Cell dirCell;
+                    boolean greyFound = false;
+                    DirectionInfo dirInfo = cell.getDirectionInfo(dir); // TODO: mirar que se modifica el de la cell
+                    while (inArray(i + dir.dx * k, j + dir.dy * k) &&
+                            (dirCell = board_[i + dir.dx * k][j + dir.dy * k]).getCurrState() != Cell.STATE.RED){
+                        if(dirCell.getCurrState() == Cell.STATE.GREY){
+                            if(dirInfo.greysCount == 0)
+                                dirInfo.numberWhenFillingFirstGrey++;
+                            cell.setGreysAround(cell.getGreysAround() + 1);
+                            dirInfo.greysCount++;
+                            greyFound = true;
+                        }
+                        else if(dirCell.getCurrState() == Cell.STATE.BLUE){
+                            if(dirInfo.greysCount == 0)
+                                dirInfo.numberWhenFillingFirstGrey++;
+                            cell.setCurNumber(cell.getCurNumber() + 1);
+                            if(dirCell.isFixed()){
+                                cell.setCompletedNumbersAround(true);
+                            }
+                            if(greyFound){
+                                dirInfo.numberCountAfterGreys++;
+                            }
+                            if(dirInfo.greysCount == 1){
+                                dirInfo.numberCountAfterGreys++;
+                                if (dirInfo.numberCountAfterGreys + 1 > cell.getNumber()) {
+                                    dirInfo.wouldBeTooMuch = true;
+                                }
+                            }
+                        }
+                        dirInfo.maxPossibleCount++;
+                        ++k;
+                    }
+                    if(k > 1){
+                        nPossibleDirections++;
+                        singlePossibleDirection = dir;
+                    }
+                }
+                for (Direction dir :
+                        Direction.values()) {
+                    DirectionInfo dirInfo = cell.getDirectionInfo(dir); // TODO: mirar que se modifica el de la cell
+                    for (Direction other :
+                            Direction.values()) {
+                        DirectionInfo otherDirInfo = cell.getDirectionInfo(other); // TODO: mirar que se modifica el de la cell
+                        if (dir == other)
+                            continue;
+                        dirInfo.maxPossibleCountInOtherDirections += otherDirInfo.maxPossibleCount;
+                    }
+                }
+                if(nPossibleDirections == 1){
+                    cell.setSinglePossibleDirection(singlePossibleDirection);
+                }
+                else{
+                    cell.setSinglePossibleDirection(null);
+                }
+            }
+        }
+    }
+
+    /**
+     * Devuelve true si el tablero no tiene celdas grises.
+     */
+    private boolean isDone(boolean allowBlues) {
+        for (int i = 0; i < boardSize_; i++)
+            for (int j = 0; j < boardSize_; j++) {
+                if (board_[i][j].getCurrState() == Cell.STATE.GREY ||
+                        (!allowBlues && board_[i][j].getCurrState() == Cell.STATE.BLUE))
+                    return false;
+            }
+        return true;
+    }
+
+    /**
      * Intenta resolver el tablero, devuelve la pista que ha usado
      * @param hintMode Si es verdadero, el tablero no lo modifica, si no, aplica la pista directamente
      */
-    public Hint solve(boolean hintMode){
+    public boolean solve(boolean hintMode){
         boolean tryAgain = true;
         int attempts = 0;
 
         while (tryAgain && attempts++ < 99){
             tryAgain = false;
 
-            if(isDone())
-                return new Hint(Hint.HintType.NONE, -1, -1);
+            if(isDone(false))
+                return true;
 
-            for (int i = 0; i < boardSize_; i++) {
-                for (int j = 0; j < boardSize_; j++) {
-                    board_[i][j].setInfo(board_[i][j].collect());
-                }
-            }
+            collectInfo();
 
             List<Integer> random = new ArrayList<>();
             for (int i = 0; i < boardSize_ * boardSize_; i++) {
@@ -209,101 +311,133 @@ public class Board {
             }
             Collections.shuffle(random);
 
+            collectInfo();
+
             // Se recorren las casillas en orden aleatorio
             for (int k = 0; k < random.size(); k++) {
                 int i = random.get(k) / boardSize_;
                 int j = random.get(k) % boardSize_;
-                Cell tile = board_[i][j];
+                Cell cell = board_[i][j];
 
-                tile.setInfo(tile.collect(tile.getInfo()));
-
-                if(!hintMode && tile.getCurrState() == Cell.STATE.BLUE && tile.getInfo().greysAround == 0){
-                    tile.setNumber(tile.getInfo().numberCount);
-                    tile.fixCell(Cell.STATE.NUMBERED_BLUE);
-                    return new Hint(Hint.HintType.NumberCanBeEntered, -1, -1);
+                if(!hintMode && cell.getCurrState() == Cell.STATE.BLUE && cell.getGreysAround() == 0){
+                    cell.setNumber(cell.getCurNumber());
+                    cell.fixCell(Cell.STATE.BLUE);
+                    break;
                 }
 
-                if(tile.getCurrState() == Cell.STATE.NUMBERED_BLUE && info.greysAround > 0){
-                    if(info.numberReached){
+                if(cell.getCurrState() == Cell.STATE.BLUE && cell.isFixed() && cell.getGreysAround() > 0){
+                    if(cell.isCompleted()){
                         if(!hintMode)
-                            tile.close();
-                        return new Hint(Hint.HintType.ValueReached, tile.x, tile.y);
+                            cell.close();
+                        hint = new Hint(Hint.HintType.VISIBLE_CELLS_COVERED, i, j);
+                        break;
                     }
 
-                    if(info.singlePossibleDirection){
+                    if(cell.getSinglePossibleDirection() != null){
                         if(!hintMode)
-                            tile.closeDirection(info.singlePossibleDirection, true, 1);
-                        return new Hint(Hint.HintType.OneDirectionLeft, tile.x, tile.y);
+                            cell.closeDirection(info.singlePossibleDirection, true, 1);
+                        hint = new Hint(Hint.HintType.MUST_PLACE_BLUE, i, j);
+                        break;
                     }
 
-                    for(var dir in directions){
-                        if(curDir.wouldBeTooMuch){
+                    for(Direction dir : Direction.values()){
+                        DirectionInfo dirInfo = cell.getDirectionInfo(dir);
+                        if(dirInfo.wouldBeTooMuch){
                             if(!hintMode)
-                                tile.closeDirection(dir);
-                            return new Hint(Hint.HintType.WouldExceed, tile.x, tile.y);
+                                cell.closeDirection(dir);
+                            hint = new Hint(Hint.HintType.CANNOT_SURPASS_LIMIT, i, j);
+                            break;
                         }
 
-                        if(curDir.unknownCount && curDir.numberWhenDottingFirstUnknown + curDir.maxPossibleCountInOtherDirections <= tile.getNumber()){
+                        if(dirInfo.greysCount > 0 && dirInfo.numberWhenFillingFirstGrey + dirInfo.maxPossibleCountInOtherDirections <= cell.getNumber()){
                             if(!hintMode)
-                                tile.closeDirection(dir, true, 1);
-                            return new Hint(Hint.HintType.OneDirectionRequired, tile.x, tile.y);
+                                cell.closeDirection(dir, true, 1);
+                            hint = new Hint(Hint.HintType.MUST_PLACE_BLUE, i, j);
+                            break;
                         }
                     }
                 }
 
-                if(tile.getCurrState() == Cell.STATE.GREY && info.greysAround == 0 && info.completedNumbersAround == 0){
-                    if(info.numberCount == 0){
+                if(cell.getCurrState() == Cell.STATE.GREY && cell.getGreysAround() == 0 && cell.hasFixedBlueAround()){
+                    if(cell.getCurNumber() == 0){
                         if(!hintMode)
-                            tile.setCurrState(Cell.STATE.RED);
-                        return new Hint(Hint.HintType.MustBeWall, tile.x, tile.y);
+                            cell.setCurrState(Cell.STATE.RED);
+                        hint = new Hint(Hint.HintType.ISOLATED_AND_EMPTY, i, j);
+                        break;
                     }
                 }
             }
         }
+        return false;
     }
 
 
     /**
-     * Cuenta las celdas azules adyacentes a una dada. Recibe el tablero
+     * Cuenta las celdas azules adyacentes a una dada
      */
     private int calculateNumber(int x, int y) {
         int count = 0;
         int[] newPos;
-        newPos = nextDiffColor(x, y, 1, 0, Cell.STATE.BLUE);
+        newPos = nextDiffColorCell(x, y, 1, 0, Cell.STATE.BLUE);
         if (board_[newPos[0]][newPos[1]].getCurrState() != Cell.STATE.BLUE) {
             count += newPos[0] - x - 1;
         } else count += newPos[0] - x;
-        newPos = nextDiffColor(x, y, 0, 1, Cell.STATE.BLUE);
+        newPos = nextDiffColorCell(x, y, 0, 1, Cell.STATE.BLUE);
         if (board_[newPos[0]][newPos[1]].getCurrState() != Cell.STATE.BLUE) {
             count += newPos[1] - y - 1;
         } else count += newPos[1] - y;
-        newPos = nextDiffColor(x, y, -1, 0, Cell.STATE.BLUE);
+        newPos = nextDiffColorCell(x, y, -1, 0, Cell.STATE.BLUE);
         if (board_[newPos[0]][newPos[1]].getCurrState() != Cell.STATE.BLUE) {
             count += x - newPos[0] - 1;
         } else count += x - newPos[0];
-        newPos = nextDiffColor(x, y, 0, -1, Cell.STATE.BLUE);
+        newPos = nextDiffColorCell(x, y, 0, -1, Cell.STATE.BLUE);
         if (board_[newPos[0]][newPos[1]].getCurrState() != Cell.STATE.BLUE) {
             count += y - newPos[1] - 1;
         } else count += y - newPos[1];
         return count;
     }
 
-    //
+    /**
+     * Busca la primera casilla del color dado
+     * Si no hay, devuelve la última casilla que hay.
+     */
+    private Tuple<Integer, Integer> nextColorCell(int x, int y, Direction direction, Cell.STATE color) {
+        int i = 1;
+        while (inArray(x + direction.dx * i, y + direction.dy * i) &&
+                board_[x + direction.dx * i][y + direction.dy * i].getCurrState() != color)
+            i++;
+        if (!inArray(x + direction.dx * i, y + direction.dy * i))
+            --i;
+        return new Tuple<>(x + direction.dx * i, y + direction.dy * i);
+    }
+
+    /**
+     * Busca la primera casilla azul fijada
+     * Si no hay, devuelve la última casilla que hay.
+     */
+    private Tuple<Integer, Integer> nextFixedBlueCell(int x, int y, Direction direction) {
+        int i = 1;
+        while (inArray(x + direction.dx * i, y + direction.dy * i) &&
+                board_[x + direction.dx * i][y + direction.dy * i].getCurrState() != Cell.STATE.BLUE &&
+                !board_[x + direction.dx * i][y + direction.dy * i].isFixed())
+            i++;
+        if (!inArray(x + direction.dx * i, y + direction.dy * i))
+            --i;
+        return new Tuple<>(x + direction.dx * i, y + direction.dy * i);
+    }
 
     /**
      * Busca la primera casilla con color distinto al dado.
      * Si no hay, devuelve la última casilla que hay.
      */
-    private int[] nextDiffColor(int x, int y, int dx, int dy, Cell.STATE color) {
+    private Tuple<Integer, Integer> nextDiffColorCell(int x, int y, Direction direction, Cell.STATE color) {
         int i = 1;
-        while (inArray(x + dx * i, y + dy * i) && board_[x + dx * i][y + dy * i].getCurrState() == color) {
+        while (inArray(x + direction.dx * i, y + direction.dy * i) &&
+                board_[x + direction.dx * i][y + direction.dy * i].getCurrState() == color)
             i++;
-        }
-        if (!inArray(x + dx * i, y + dy * i)) {
+        if (!inArray(x + direction.dx * i, y + direction.dy * i))
             --i;
-        }
-        int[] res = {x + dx * i, y + dy * i};
-        return res;
+        return new Tuple<>(x + direction.dx * i, y + direction.dy * i);
     }
 
     /**
