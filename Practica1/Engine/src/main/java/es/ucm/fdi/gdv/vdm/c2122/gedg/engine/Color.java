@@ -1,5 +1,8 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.engine;
 
+/**
+ * Clase interna que se usa para representar los colores independientemente de la plataforma.
+ */
 public class Color {
     public int r;
     public int g;

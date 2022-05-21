@@ -1,35 +1,37 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.enginepc;
 
 import java.awt.image.BufferStrategy;
-
 import javax.swing.JFrame;
-
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.EventPool;
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.State;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Scene;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Input;
 
+/**
+ * Clase que representa un Motor en la plataforma de PC. Procesa Inputs, crea y dibuja en pantalla y actualiza sus elementos.
+ */
 public class EnginePC implements Engine {
 
+    //Instancia del sistema de renderizado.
     JFrame jf_;
-    State a_;
-    GraphicsPC g_;
-    Input i_;
     java.awt.Graphics Jgraphics_;
     BufferStrategy strategy_;
-    boolean running;
+
+    Scene a_; //Escena actual que reproduce el motor.
+    GraphicsPC g_; //Motor gráfico.
+    Input i_; //Sistema de procesado de inputs.
+    boolean running; //Si el motor está listo para ejecutar el bucle principal.
     private double deltaTime_;
     private double lastFrameTime_;
 
     public boolean init(String windowName) {
         jf_ = new JFrame(windowName);
-        jf_.setSize(600,400);
+        jf_.setSize(600,400); //Tamaño por defecto se puede cambiar con setWindowSize del motor gráfico.
         jf_.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jf_.setIgnoreRepaint(true);
         jf_.setVisible(true);
 
-        //Se intenta crear una strategy, si no se puede algo va bastante mal
+        //Se intenta crear una strategy, si no se puede algo va bastante mal.
         int intentos = 100;
         while(intentos-- > 0) {
             try {
@@ -50,6 +52,9 @@ public class EnginePC implements Engine {
         return true;
     }
 
+    /**
+     * Calcula el deltaTime o el tiempo que ha pasado entre el frame actual y el anterior.
+     */
     private void updateDeltaTime() {
         double currentTime = System.nanoTime();
         double nanoElapsedTime = currentTime - lastFrameTime_;
@@ -57,31 +62,42 @@ public class EnginePC implements Engine {
         deltaTime_ = nanoElapsedTime / 1.0E9;
     }
 
+    /**
+     * Devuelve el tiempo que ha pasado entre el frame actual y el anterior. 0 en frame 1.
+     */
     @Override
     public double getDeltaTime() { return deltaTime_; }
+
+    /**
+     * Devuelve un puntero a la instancia del motor gráfico.
+     */
     @Override
     public Graphics getGraphics() {
         return g_;
     }
+
+    /**
+     * Devuelve un puntero a la instancia del sistema de procesado de Input.
+     */
     @Override
     public Input getInput() {
         return i_;
     }
 
     /**
-     * Asigna una nueva aplicacion
+     * Asigna una nueva escena
      * El siguiente frame se empieza a actualizar y renderizar
      */
     @Override
-    public void changeState(State a) {
+    public void changeScene(Scene a) {
         this.a_ = a;
     }
 
     /**
-     * Ejecuta el bucle principal de la aplicacion
+     * Ejecuta el bucle principal de la aplicacion, ejecutando la escena declarada.
      */
     public void run() {
-        State currApp = null;
+        Scene currApp = null;
         while(running){
             lastFrameTime_ = System.nanoTime();
 

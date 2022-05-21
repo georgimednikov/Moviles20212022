@@ -5,6 +5,9 @@ import android.graphics.Paint;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Image;
 
+/**
+ * Clase que representa una imagen en la plataforma de Android.
+ */
 public class ImageAndroid implements Image {
 
     private Bitmap sprite_; //Imagen para Android
@@ -18,14 +21,28 @@ public class ImageAndroid implements Image {
         width_ = sprite_.getWidth(); height_ = sprite_.getHeight();
     }
 
+    /**
+     * Devuelve el bitmap de JFrame que describe la imagen.
+     */
     public Bitmap getBitmap() { return sprite_; }
 
+    /**
+     * Devuelve la configuración de dibujado de JFrame de la imagen.
+     */
     public Paint getPaint() { return paint_; }
 
+
+    /**
+     * Devuelve la anchura de la imagen.
+     */
     @Override
     public int getWidth() {
         return width_;
     }
+
+    /**
+     * Devuelve la altura de la imagen.
+     */
     @Override
     public int getHeight() {
         return height_;

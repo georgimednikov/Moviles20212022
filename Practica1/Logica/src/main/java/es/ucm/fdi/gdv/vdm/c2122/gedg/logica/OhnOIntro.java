@@ -3,13 +3,13 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 import java.util.ArrayList;
 import java.util.List;
 
-import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.State;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Scene;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Color;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Engine;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Graphics;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.TouchEvent;
 
-public class OhnOIntro implements State {
+public class OhnOIntro implements Scene {
 
     Engine eng_;
 
@@ -116,7 +116,7 @@ public class OhnOIntro implements State {
         if (fadeOut) {
             if (elapsedTime >= SCENE_FADE_DURATION) {
                 OhnOMenu app = new OhnOMenu();
-                eng_.changeState(app);
+                eng_.changeScene(app);
             }
             else elapsedTime += deltaTime;
         }
