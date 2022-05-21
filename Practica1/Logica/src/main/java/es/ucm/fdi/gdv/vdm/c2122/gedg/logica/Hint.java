@@ -17,6 +17,7 @@ public class Hint {
         //Pistas para casillas no fijas
         BLUE_BUT_ISOLATED, // La celda es azul pero esta cerrada
         ISOLATED_AND_EMPTY, // La celda es gris pero esta cerrada
+        NONE
     }
 
     //Textos para cada pista posible
