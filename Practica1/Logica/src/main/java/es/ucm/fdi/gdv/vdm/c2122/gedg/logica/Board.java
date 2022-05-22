@@ -3,6 +3,7 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Clase que representa la lógica del tablero y lo que esto implica.
@@ -14,8 +15,7 @@ public class Board {
         LEFT(-1, 0, 0),
         UP(0, 1, 1),
         RIGHT(1, 0, 2),
-        DOWN(0, -1, 3),
-        NONE(0, 0, -1);
+        DOWN(0, -1, 3);
 
         public final int dx;
         public final int dy;
@@ -36,6 +36,7 @@ public class Board {
 
     private int boardSize_;
     private Cell[][] board_; //Tablero
+    private Cell[][] solBoard_; //Tablero
     private List<Tuple<Integer, Integer>> previousMoves_ = new ArrayList<>(); //Lista con las posiciones de las celdas modificadas
 
     private int numCells_;
@@ -43,7 +44,7 @@ public class Board {
     private int coloredCells_ = 0; //Número de celdas no grises
     private List<Cell> fixedBlueCells_ = new ArrayList<>(); //Lista de celdas logicas azules fijas
 
-    public Board(int size, int cellRadius) {
+    public Board(int size) {
         numCells_ = size * size;
         boardSize_ = size;
 
@@ -51,10 +52,10 @@ public class Board {
         board_ = new Cell[size][size];
         for (int i = 0; i < size; i++)
             for (int j = 0; j < size; j++)
-                board_[i][j] = new Cell(cellRadius);
+                board_[i][j] = new Cell();
 
         //Se establecen las celdas para una partida
-        setNewBoard();
+        setNewBoard(size);
     }
 
     /**
@@ -79,40 +80,22 @@ public class Board {
     }
 
     /**
-     * Fija una celda. Si es gris no hace nada.
-     */
-    public void fixCell(int x, int y, Cell.STATE state) {
-        if (state == Cell.STATE.GREY) return;
-        board_[x][y].fixCell(state);
-        if (state == Cell.STATE.BLUE) fixedBlueCells_.add(board_[x][y]);
-        fixedCells_++;
-    }
-
-    /**
      * Cicla el estado de la celda. Devuelve true si se completa el nivel.
      */
     public boolean changeCell(int x, int y) {
+        Cell.STATE prevState = board_[x][y].getCurrState();
         board_[x][y].changeState();
+        Cell.STATE currState = board_[x][y].getCurrState();
         previousMoves_.add(new Tuple<>(x, y)); //Se añade a la lista de movimientos realizados.
 
-        CellLogic.STATE prevState = cell.getPrevState();
-        CellLogic.STATE currState = cell.getCurrState();
-        CellLogic.STATE solState = solBoard[x][y].getCurrState();
-
-        //Si se ha cambiado una celda que estaba bien hay un error mas
-        //Si ahora la celda esta bien entonces hay un error menos
-        if (prevState == solState) contMistakes++;
-        else if (currState == solState) contMistakes--;
-        if(contMistakes == 0) {
-            return true;
-        }
-        if (prevState == CellLogic.STATE.GREY) {
+        if (prevState == Cell.STATE.GREY) {
             coloredCells_++;
         }
-        else if (currState == CellLogic.STATE.GREY) {
+        else if (currState == Cell.STATE.GREY) {
             coloredCells_--;
         }
-        return contMistakes == 0;
+
+        return solve(true);
     }
 
     /**
@@ -130,27 +113,18 @@ public class Board {
         if (previousMoves_.isEmpty()) return null;
 
         Tuple<Integer, Integer> cellPos = previousMoves_.remove(previousMoves_.size() - 1);
+        Cell.STATE prevState = board_[cellPos.x][cellPos.y].getCurrState();
         board_[cellPos.x][cellPos.y].revertState();
-
-        CellLogic.STATE currState = cellPos.getCurrState();
-        CellLogic.STATE prevState = cellPos.getPrevState();
-        CellLogic.STATE solState = solBoard[cellPos.getX()][cellPos.getY()].getCurrState();
+        Cell.STATE currState = board_[cellPos.x][cellPos.y].getCurrState();
 
         //Si la celda ahora es gris entonces hay una celda coloreada menos y hay que actualizar el progreso
         //Si la celda era gris entonces hay una celda coloreada mas y hay que actualizar el progreso
-        if (currState == CellLogic.STATE.GREY) {
-            coloredCells_--;
-        } else if (prevState == CellLogic.STATE.GREY) {
+        if (prevState == Cell.STATE.GREY) {
             coloredCells_++;
         }
-        //Si se ha cambiado una celda que estaba bien hay un error mas
-        //Si ahora la celda esta bien entonces hay un error menos
-        if (prevState == solState) contMistakes++;
-        else if (currState == solState) contMistakes--;
-
-        //Asigna una posicion al circulo negro
-        highlightPosX = BOARD_OFFSET_X + cellRadius * (cellPos.getY() + 1) + (cellSeparation + cellRadius) * cellPos.getY();
-        highlightPosY = BOARD_OFFSET_Y + cellRadius * (cellPos.getX() + 1) + (cellSeparation + cellRadius) * cellPos.getX();
+        else if (currState == Cell.STATE.GREY) {
+            coloredCells_--;
+        }
 
         return cellPos;
     }
@@ -158,8 +132,15 @@ public class Board {
     /**
      * Crea un nivel en el tablero.
      */
-    public void setNewBoard() {
-
+    public void setNewBoard(int boardSize) {
+        // Pone las celdas a azul
+        setAllBlue(false);
+        // Mira las direcciones y cuenta el maximo de azules que ve en cada direccion
+        solve(false);
+        // Hace que las celdas azules vean hasta boardSize otras azules
+        maxify(boardSize);
+        // Pone celdas en grises mientras la solucion sea unica
+        breakDown();
     }
 
     /**
@@ -179,30 +160,57 @@ public class Board {
     }
 
     /**
+     * Recoge las cells que estan en el rango [min, max] de x,y
+     */
+    public Cell[] getCellsInRange(int x, int y, int min, int max){
+        List<Cell> res = new ArrayList<>();
+        for (Direction dir :
+                Direction.values()) {
+            int k = 1;
+            while(inArray(x + dir.dx * k, y + dir.dy * k)){
+                Cell otherCell = board_[x + dir.dx * k][y + dir.dy * k];
+                if(otherCell.getCurrState() == Cell.STATE.RED) break;
+                if(k >= min && k <= max){
+                    res.add(otherCell);
+                }
+                k++;
+            }
+        }
+        Cell[] cells = new Cell[res.size()];
+        for (int i = 0; i < res.size(); i++) {
+            cells[i] = res.get(i);
+        }
+        return cells;
+    }
+
+    /**
      * Coloca paredes en el tablero de forma aleatoria hasta que todas las celdas vean como maximo el maxallowed
+     * Asigna el tablero solucion
      */
     public void maxify(int maxAllowed){
         boolean tryAgain = true;
         int attempts = 0;
         while(tryAgain && attempts++ < 99){
             tryAgain = false;
-            List<Cell> maxTiles = new ArrayList<>();
+            List<Tuple<Integer, Integer>> maxCells = new ArrayList<>();
             for (int i = 0; i < boardSize_; i++)
                 for (int j = 0; j < boardSize_; j++)
-                    if(board_[i][j].getNumber() > maxAllowed) maxTiles.add(board_[i][j]);
-            Cell chosenOne = maxTiles.get(OhnORandom.r.nextInt(maxTiles.size()));
-            Cell[] cuts = chosenOne.getTilesInRange(1, maxAllowed);
-            Cell cut = cuts[OhnORandom.r.nextInt(cuts.length)];
-            if(cut != null) {
+                    if(board_[i][j].getNumber() > maxAllowed) maxCells.add(new Tuple<>(i, j));
+            if(maxCells.size() == 0)
+                break;
+            int random = OhnORandom.r.nextInt(maxCells.size());
+            Cell[] cuts = getCellsInRange(maxCells.get(random).x, maxCells.get(random).y, 1, maxAllowed);
+
+            if (cuts.length > 0){
+                Cell cut = cuts[OhnORandom.r.nextInt(cuts.length)];
                 cut.setCurrState(Cell.STATE.RED);
+                cut.setNumber(-1);
                 setAllBlue(true);
-                solve();
+                solve(false);
                 tryAgain = true;
             }
-            else{
-                System.out.println("no cut found for", chosenOne.x, chosenOne.y, chosenOne.getNumber(), cuts, 1, maxAllowed);
-            }
         }
+        solBoard_ = copyBoard();
     }
 
     /**
@@ -290,7 +298,32 @@ public class Board {
     }
 
     /**
-     * Intenta resolver el tablero, devuelve la pista que ha usado
+     * Pone paredes en los extremos (al final de los azules) de la celda dada
+     */
+    public void closeCell(int x, int y){
+        for (Direction dir :
+                Direction.values()) {
+            fillDirectionCell(x, y, dir, Cell.STATE.RED);
+        }
+    }
+
+    /**
+     * Pone el color color al encontrarse un gris a partir de x,y siguiendo la direccion dir
+     */
+    public void fillDirectionCell(int x, int y, Direction dir, Cell.STATE color){
+        int k = 1;
+        while(inArray(x + dir.dx * k, y + dir.dy * k)){
+            Cell otherCell = board_[x + dir.dx * k][y + dir.dy * k];
+            if(otherCell.getCurrState() == Cell.STATE.GREY){
+                otherCell.setCurrState(color);
+                break;
+            } else
+                k++;
+        }
+    }
+
+    /**
+     * Intenta resolver el tablero, devuelve true si el tablero esta resuelto y false en caso contrario
      * @param hintMode Si es verdadero, el tablero no lo modifica, si no, aplica la pista directamente
      */
     public boolean solve(boolean hintMode){
@@ -309,7 +342,7 @@ public class Board {
             for (int i = 0; i < boardSize_ * boardSize_; i++) {
                 random.add(i);
             }
-            Collections.shuffle(random);
+            //Collections.shuffle(random);
 
             collectInfo();
 
@@ -322,21 +355,24 @@ public class Board {
                 if(!hintMode && cell.getCurrState() == Cell.STATE.BLUE && cell.getGreysAround() == 0){
                     cell.setNumber(cell.getCurNumber());
                     cell.fixCell(Cell.STATE.BLUE);
+                    tryAgain = true;
                     break;
                 }
 
                 if(cell.getCurrState() == Cell.STATE.BLUE && cell.isFixed() && cell.getGreysAround() > 0){
                     if(cell.isCompleted()){
                         if(!hintMode)
-                            cell.close();
+                            closeCell(i, j);
                         hint = new Hint(Hint.HintType.VISIBLE_CELLS_COVERED, i, j);
+                        tryAgain = true;
                         break;
                     }
 
                     if(cell.getSinglePossibleDirection() != null){
                         if(!hintMode)
-                            cell.closeDirection(info.singlePossibleDirection, true, 1);
+                            fillDirectionCell(i, j, cell.getSinglePossibleDirection(), Cell.STATE.BLUE);
                         hint = new Hint(Hint.HintType.MUST_PLACE_BLUE, i, j);
+                        tryAgain = true;
                         break;
                     }
 
@@ -344,15 +380,17 @@ public class Board {
                         DirectionInfo dirInfo = cell.getDirectionInfo(dir);
                         if(dirInfo.wouldBeTooMuch){
                             if(!hintMode)
-                                cell.closeDirection(dir);
+                                fillDirectionCell(i, j, dir, Cell.STATE.RED);
                             hint = new Hint(Hint.HintType.CANNOT_SURPASS_LIMIT, i, j);
+                            tryAgain = true;
                             break;
                         }
 
                         if(dirInfo.greysCount > 0 && dirInfo.numberWhenFillingFirstGrey + dirInfo.maxPossibleCountInOtherDirections <= cell.getNumber()){
                             if(!hintMode)
-                                cell.closeDirection(dir, true, 1);
+                                fillDirectionCell(i, j, dir, Cell.STATE.BLUE);
                             hint = new Hint(Hint.HintType.MUST_PLACE_BLUE, i, j);
+                            tryAgain = true;
                             break;
                         }
                     }
@@ -363,6 +401,7 @@ public class Board {
                         if(!hintMode)
                             cell.setCurrState(Cell.STATE.RED);
                         hint = new Hint(Hint.HintType.ISOLATED_AND_EMPTY, i, j);
+                        tryAgain = true;
                         break;
                     }
                 }
@@ -371,73 +410,50 @@ public class Board {
         return false;
     }
 
-
     /**
-     * Cuenta las celdas azules adyacentes a una dada
+     * Coloca celdas grises en el tablero mientras tenga una solucion unica
      */
-    private int calculateNumber(int x, int y) {
-        int count = 0;
-        int[] newPos;
-        newPos = nextDiffColorCell(x, y, 1, 0, Cell.STATE.BLUE);
-        if (board_[newPos[0]][newPos[1]].getCurrState() != Cell.STATE.BLUE) {
-            count += newPos[0] - x - 1;
-        } else count += newPos[0] - x;
-        newPos = nextDiffColorCell(x, y, 0, 1, Cell.STATE.BLUE);
-        if (board_[newPos[0]][newPos[1]].getCurrState() != Cell.STATE.BLUE) {
-            count += newPos[1] - y - 1;
-        } else count += newPos[1] - y;
-        newPos = nextDiffColorCell(x, y, -1, 0, Cell.STATE.BLUE);
-        if (board_[newPos[0]][newPos[1]].getCurrState() != Cell.STATE.BLUE) {
-            count += x - newPos[0] - 1;
-        } else count += x - newPos[0];
-        newPos = nextDiffColorCell(x, y, 0, -1, Cell.STATE.BLUE);
-        if (board_[newPos[0]][newPos[1]].getCurrState() != Cell.STATE.BLUE) {
-            count += y - newPos[1] - 1;
-        } else count += y - newPos[1];
-        return count;
-    }
+    public void breakDown(){
+        boolean tryAgain = true;
+        int attempts = 0;
+        int reds = 0;
+        int minReds = 1;
+        Cell cell;
+        List<Tuple<Integer, Integer>> cellPool = new ArrayList<>();
 
-    /**
-     * Busca la primera casilla del color dado
-     * Si no hay, devuelve la última casilla que hay.
-     */
-    private Tuple<Integer, Integer> nextColorCell(int x, int y, Direction direction, Cell.STATE color) {
-        int i = 1;
-        while (inArray(x + direction.dx * i, y + direction.dy * i) &&
-                board_[x + direction.dx * i][y + direction.dy * i].getCurrState() != color)
-            i++;
-        if (!inArray(x + direction.dx * i, y + direction.dy * i))
-            --i;
-        return new Tuple<>(x + direction.dx * i, y + direction.dy * i);
-    }
+        for (int i = 0; i < boardSize_; i++) {
+            for (int j = 0; j < boardSize_; j++) {
+                cell = board_[i][j];
+                //cell.unfix();
+                cellPool.add(new Tuple<>(i, j));
 
-    /**
-     * Busca la primera casilla azul fijada
-     * Si no hay, devuelve la última casilla que hay.
-     */
-    private Tuple<Integer, Integer> nextFixedBlueCell(int x, int y, Direction direction) {
-        int i = 1;
-        while (inArray(x + direction.dx * i, y + direction.dy * i) &&
-                board_[x + direction.dx * i][y + direction.dy * i].getCurrState() != Cell.STATE.BLUE &&
-                !board_[x + direction.dx * i][y + direction.dy * i].isFixed())
-            i++;
-        if (!inArray(x + direction.dx * i, y + direction.dy * i))
-            --i;
-        return new Tuple<>(x + direction.dx * i, y + direction.dy * i);
-    }
+                if (cell.getCurrState() == Cell.STATE.RED)
+                    reds++;
+            }
+        }
 
-    /**
-     * Busca la primera casilla con color distinto al dado.
-     * Si no hay, devuelve la última casilla que hay.
-     */
-    private Tuple<Integer, Integer> nextDiffColorCell(int x, int y, Direction direction, Cell.STATE color) {
-        int i = 1;
-        while (inArray(x + direction.dx * i, y + direction.dy * i) &&
-                board_[x + direction.dx * i][y + direction.dy * i].getCurrState() == color)
-            i++;
-        if (!inArray(x + direction.dx * i, y + direction.dy * i))
-            --i;
-        return new Tuple<>(x + direction.dx * i, y + direction.dy * i);
+        while (tryAgain && cellPool.size() > 0 && attempts++ < 99){
+            tryAgain = false;
+            Cell[][] save1 = copyBoard();
+
+            Tuple<Integer, Integer> poolCell = cellPool.remove(OhnORandom.r.nextInt(cellPool.size()));
+            cell = board_[poolCell.x][poolCell.y];
+            boolean isRed = cell.getCurrState() == Cell.STATE.RED;
+
+            if (isRed && reds <= minReds) continue;
+
+            cell.resetCell();
+            Cell[][] save2 = copyBoard();
+            if (solve(true)) {
+                if (isRed) reds--;
+                board_ = save2;
+                tryAgain = true;
+            }
+            else {
+                board_ = save1;
+                tryAgain = true;
+            }
+        }
     }
 
     /**
@@ -450,16 +466,15 @@ public class Board {
     /**
      * Deep copy del tablero
      */
-/*    public Board copy() {
-        Board copy = new Board(boardSize);
-        for (int i = 0; i < boardSize; ++i) {
-            for (int j = 0; j < boardSize; ++j) {
-                if (board[i][j].isFixed()) {
-                    copy.fixCell(i, j, board[i][j].getCurrState());
-                    copy.setNumber(i, j, board[i][j].getNumber());
-                }
+    public Cell[][] copyBoard() {
+        Cell[][] copy = new Cell[boardSize_][boardSize_];
+        for (int i = 0; i < boardSize_; ++i) {
+            for (int j = 0; j < boardSize_; ++j) {
+                copy[i][j] = new Cell();
+                copy[i][j].fixCell(board_[i][j].getCurrState());
+                copy[i][j].setNumber(board_[i][j].getNumber());
             }
         }
         return copy;
-    }*/
+    }
 }

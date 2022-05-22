@@ -20,15 +20,18 @@ public class Cell {
     private int curNumber_ = 0; // Numero de azules que tiene actualmente alrededor
     private int greysAround_ = 0; // Numero de grises alrededor
     private boolean fixedBlueAround = false; // Si tiene alrededor alguna azul completada
-    private Board.Direction singlePossibleDirection_ = Board.Direction.NONE; // Si solamente se puede expandir en una direccion
+    private Board.Direction singlePossibleDirection_ = null; // Si solamente se puede expandir en una direccion
     private DirectionInfo[] directionInfo_ = new DirectionInfo[4]; // Informacion del resto de direcciones
 
     public void resetInfo(){
         curNumber_ = 0;
         greysAround_ = 0;
         fixedBlueAround = false;
-        singlePossibleDirection_ = Board.Direction.NONE;
+        singlePossibleDirection_ = null;
         directionInfo_ = new DirectionInfo[4];
+        for (int i = 0; i < 4; i++) {
+            directionInfo_[i] = new DirectionInfo();
+        }
     }
 
     public Cell(){
@@ -113,6 +116,10 @@ public class Cell {
                 break;
         }
         return currState_;
+    }
+
+    public void unfix(){
+        fixed_ = false;
     }
 
     /**
