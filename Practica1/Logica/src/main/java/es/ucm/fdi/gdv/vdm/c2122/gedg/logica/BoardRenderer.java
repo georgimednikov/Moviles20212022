@@ -123,6 +123,11 @@ public class BoardRenderer extends ObjectRenderer {
     }
 
     /**
+     * Anima la celda en la posición dada de forma que transiciona a su estado anterior.
+     */
+    public void undoMove(int x, int y){ board_[x][y].undoMove(); }
+
+    /**
      * Deja de destacar la celda destacada de haber.
      */
     public void endHighlighting() {

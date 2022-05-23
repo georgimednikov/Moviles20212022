@@ -277,6 +277,7 @@ public class OhnOLevel implements Scene {
             infoReset = true;
         }
 
+        boardRenderer.transitionCell(x, y);
         if (board.changeCell(x, y)) {
             gameOver = true;
             infoTextRender.fadeNewText(YOU_WIN_TEXTS[OhnORandom.r.nextInt(YOU_WIN_TEXTS.length)], INFO_WIN_SIZE, true, TEXT_FADE_DURATION);
@@ -308,7 +309,7 @@ public class OhnOLevel implements Scene {
                     text = "Esta celda ha vuelto a rojo";
                     break;
             }
-            boardRenderer.transitionCell(cellPos.x, cellPos.y);
+            boardRenderer.undoMove(cellPos.x, cellPos.y);
             boardRenderer.highlightCell(cellPos.x, cellPos.y);
             progressTextRender.setText(board.donePercentage() + "%"); //Actualiza el porcentaje de progreso.
         }

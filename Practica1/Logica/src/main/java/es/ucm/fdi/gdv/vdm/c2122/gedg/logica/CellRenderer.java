@@ -41,6 +41,7 @@ public class CellRenderer extends ObjectRenderer {
     private float animDur_;
     private float animElapsed_;
     private boolean animated_;
+    private boolean forward_;
 
     //Candado
     private float cellExpansion_;
@@ -57,6 +58,7 @@ public class CellRenderer extends ObjectRenderer {
         red_ = new Color(245, 53, 73, 255);
         grey_ = new Color(238, 237, 239, 255);
         black_ = new Color(0, 0, 0, 255);
+        forward_ = true;
     }
 
     /**
@@ -80,8 +82,15 @@ public class CellRenderer extends ObjectRenderer {
             g.fillCircle(0, 0, highlightRadius_);
         }
 
-        Color cc = getColorState(state_); //Current Color
-        Color pc = getColorState(previousState(state_)); //Previous Color
+        Color cc, pc;
+        if (forward_) {
+            cc = getColorState(state_); //Current Color
+            pc = getColorState(previousState(state_)); //Previous Color
+        }
+        else {
+            cc = getColorState(state_); //Current Color
+            pc = getColorState(nextState(state_)); //Previous Color
+        }
         renderColor = new Color(cc.r, cc.g, cc.b, (int)(255 * alpha_));
         if (type_ == CELL_TYPE.NORMAL) {
             if (animated_) { //Si esta animada se dibuja progresivamente el nuevo color sobre el anterior
@@ -150,7 +159,14 @@ public class CellRenderer extends ObjectRenderer {
         animDur_ = CELL_FADE_DURATION;
         numRepeats = 1;
         animElapsed_ = 0;
+        forward_ = true;
     }
+
+    public void undoMove() {
+        transitionCell();
+        forward_ = false;
+    }
+
     /**
      * Activa la animacion del bump de esta celda.
      */
@@ -218,6 +234,20 @@ public class CellRenderer extends ObjectRenderer {
                 return Cell.STATE.BLUE;
             default:
                 return Cell.STATE.RED;
+        }
+    }
+
+    /**
+     * Devuelve el siguiente estado siguiendo el ciclo GRIS->AZUL->ROJO
+     */
+    public Cell.STATE nextState(Cell.STATE state) {
+        switch (state) {
+            case BLUE:
+                return Cell.STATE.RED;
+            case RED:
+                return Cell.STATE.GREY;
+            default:
+                return Cell.STATE.BLUE;
         }
     }
 }
