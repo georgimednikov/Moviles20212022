@@ -184,8 +184,8 @@ public class OhnOLevel implements Scene {
                             } else if (!gameOver) { //Si no se esta dando una pista, se empieza a dar
                                 board.solve(true);
                                 Hint hint = board.hint;
-                                boardRenderer.highlightCell(hint.y_, hint.x_); //Se destaca la celda para dar la pista.
-                                infoTextRender.fadeNewText(hint.hintText[hint.type_.ordinal()], INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Se muestra la pista.
+                                boardRenderer.highlightCell(hint.x, hint.y); //Se destaca la celda para dar la pista.
+                                infoTextRender.fadeNewText(hint.hintText[hint.type.ordinal()], INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Se muestra la pista.
                                 infoReset = false;
                             }
                             break;

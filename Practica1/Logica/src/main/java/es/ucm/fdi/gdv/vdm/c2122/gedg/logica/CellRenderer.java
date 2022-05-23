@@ -56,7 +56,7 @@ public class CellRenderer extends ObjectRenderer {
         blue_ = new Color(72, 193, 228, 255);
         red_ = new Color(245, 53, 73, 255);
         grey_ = new Color(238, 237, 239, 255);
-        black_ = new Color(255, 255, 255, 255);
+        black_ = new Color(0, 0, 0, 255);
     }
 
     /**
@@ -74,14 +74,15 @@ public class CellRenderer extends ObjectRenderer {
     public void render(Graphics g) {
         if (alpha_ <= 0) return;
 
+        Color renderColor = new Color(black_.r, black_.g, black_.b, (int)(255 * alpha_));
         if (highlighted_){
-            g.setColor(black_);
+            g.setColor(renderColor);
             g.fillCircle(0, 0, highlightRadius_);
         }
 
         Color cc = getColorState(state_); //Current Color
         Color pc = getColorState(previousState(state_)); //Previous Color
-        Color renderColor = new Color(cc.r, cc.g, cc.b, (int)(255 * alpha_));
+        renderColor = new Color(cc.r, cc.g, cc.b, (int)(255 * alpha_));
         if (type_ == CELL_TYPE.NORMAL) {
             if (animated_) { //Si esta animada se dibuja progresivamente el nuevo color sobre el anterior
                 g.setColor(new Color(pc.r, pc.g, pc.b, (int)(255 * alpha_)));

@@ -3,7 +3,6 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Stack;
 
 /**
  * Clase que representa la lógica del tablero y lo que esto implica.
@@ -30,23 +29,19 @@ public class Board {
 
     public Hint hint;
 
-    //Constantes de probabilidad del nivel
-    private final float BLUE_PROB = 0.5f; //Probabilidad de que una celda sea azul en vez de roja en la solución
-    private final float FIXED_PROB = 0.5f; //Probabilidad de que una celda sea fija
-
     private int boardSize_;
     private Cell[][] board_; //Tablero
-    private Cell[][] solBoard_; //Tablero
     private List<Tuple<Integer, Integer>> previousMoves_ = new ArrayList<>(); //Lista con las posiciones de las celdas modificadas
 
     private int numCells_;
     private int fixedCells_ = 0; //Número total de celdas fijas (no modificables)
     private int coloredCells_ = 0; //Número de celdas no grises
-    private List<Cell> fixedBlueCells_ = new ArrayList<>(); //Lista de celdas logicas azules fijas
+    private int numberTries; //Número de intentos que se realizan en el algoritmo de generación.
 
     public Board(int size) {
         numCells_ = size * size;
         boardSize_ = size;
+        numberTries = (boardSize_ * boardSize_) * 5; //Numero de intentos que vaya acorde del tamaño
 
         //Se crea e inicializa el tablero
         board_ = new Cell[size][size];
@@ -190,7 +185,7 @@ public class Board {
     public void maxify(int maxAllowed){
         boolean tryAgain = true;
         int attempts = 0;
-        while(tryAgain && attempts++ < 99){
+        while(tryAgain && attempts++ < numberTries){
             tryAgain = false;
             List<Tuple<Integer, Integer>> maxCells = new ArrayList<>();
             for (int i = 0; i < boardSize_; i++)
@@ -210,75 +205,92 @@ public class Board {
                 tryAgain = true;
             }
         }
-        solBoard_ = copyBoard();
     }
 
     /**
-     * Consigue la información de las casillas alrededor de cada celda en las cuatro direcciones y la guarda.
+     * Consigue la informacion de las casillas alrededor de cada celda en las cuatro direcciones y la guarda
      */
-    public void collectInfo() {
+    public void collectInfoPass1() {
         for (int i = 0; i < boardSize_; i++) {
             for (int j = 0; j < boardSize_; j++) {
                 Cell cell = board_[i][j];
                 cell.resetInfo();
-                int nPossibleDirections = 0;
                 Direction singlePossibleDirection = null;
                 for (Direction dir :
                         Direction.values()) {
                     int k = 1;
                     Cell dirCell;
-                    boolean greyFound = false;
-                    DirectionInfo dirInfo = cell.getDirectionInfo(dir); // TODO: mirar que se modifica el de la cell
+                    DirectionInfo dirInfo = cell.getDirectionInfo(dir);
                     while (inArray(i + dir.dx * k, j + dir.dy * k) &&
                             (dirCell = board_[i + dir.dx * k][j + dir.dy * k]).getCurrState() != Cell.STATE.RED){
-                        if(dirCell.getCurrState() == Cell.STATE.GREY){
+                        if(dirCell.getCurrState() == Cell.STATE.BLUE){
                             if(dirInfo.greysCount == 0)
-                                dirInfo.numberWhenFillingFirstGrey++;
-                            cell.setGreysAround(cell.getGreysAround() + 1);
-                            dirInfo.greysCount++;
-                            greyFound = true;
-                        }
-                        else if(dirCell.getCurrState() == Cell.STATE.BLUE){
-                            if(dirInfo.greysCount == 0)
-                                dirInfo.numberWhenFillingFirstGrey++;
-                            cell.setCurNumber(cell.getCurNumber() + 1);
-                            if(dirCell.isFixed()){
-                                cell.setCompletedNumbersAround(true);
-                            }
-                            if(greyFound){
-                                dirInfo.numberCountAfterGreys++;
-                            }
+                                cell.setCurNumber(cell.getCurNumber() + 1);
+
                             if(dirInfo.greysCount == 1){
                                 dirInfo.numberCountAfterGreys++;
-                                if (dirInfo.numberCountAfterGreys + 1 > cell.getNumber()) {
+                                if (dirInfo.numberCountAfterGreys + 1 > cell.getNumber())
                                     dirInfo.wouldBeTooMuch = true;
-                                }
                             }
                         }
+                        else {
+                            cell.setGreysAround(cell.getGreysAround() + 1);
+
+                            dirInfo.greysCount++;
+                        }
+
                         dirInfo.maxPossibleCount++;
+
                         ++k;
                     }
-                    if(k > 1){
-                        nPossibleDirections++;
-                        singlePossibleDirection = dir;
-                    }
                 }
+
                 for (Direction dir :
                         Direction.values()) {
-                    DirectionInfo dirInfo = cell.getDirectionInfo(dir); // TODO: mirar que se modifica el de la cell
+                    DirectionInfo dirInfo = cell.getDirectionInfo(dir);
+                    int possibleDirections = 0;
+
                     for (Direction other :
                             Direction.values()) {
-                        DirectionInfo otherDirInfo = cell.getDirectionInfo(other); // TODO: mirar que se modifica el de la cell
+                        dirInfo.numberWhenFillingFirstGrey = cell.getCurNumber() + 1 + dirInfo.numberCountAfterGreys;
+                        DirectionInfo otherDirInfo = cell.getDirectionInfo(other);
                         if (dir == other)
                             continue;
+
+                        if(otherDirInfo.greysCount > 0)
+                            possibleDirections++;
+
                         dirInfo.maxPossibleCountInOtherDirections += otherDirInfo.maxPossibleCount;
                     }
+
+                    if(possibleDirections == 0 && dirInfo.greysCount > 0)
+                        singlePossibleDirection = dir;
                 }
-                if(nPossibleDirections == 1){
-                    cell.setSinglePossibleDirection(singlePossibleDirection);
-                }
-                else{
-                    cell.setSinglePossibleDirection(null);
+
+                cell.setSinglePossibleDirection(singlePossibleDirection);
+            }
+        }
+    }
+
+    /**
+     * Una vez tiene informacion intrinseca de cada celda, obtiene informacion extra del resto de celdas
+     */
+    public void collectInfoPass2(){
+        for (int i = 0; i < boardSize_; i++) {
+            for (int j = 0; j < boardSize_; j++) {
+                Cell cell = board_[i][j];
+                for (Direction dir :
+                        Direction.values()) {
+                    int k = 1;
+                    Cell dirCell;
+
+                    while (inArray(i + dir.dx * k, j + dir.dy * k) &&
+                            (dirCell = board_[i + dir.dx * k][j + dir.dy * k]).getCurrState() != Cell.STATE.RED) {
+                        if(dirCell.isCompleted()) // TODO: esto esta mal seguramente
+                            cell.setCompletedBlueAround(true);
+
+                        k++;
+                    }
                 }
             }
         }
@@ -291,7 +303,7 @@ public class Board {
         for (int i = 0; i < boardSize_; i++)
             for (int j = 0; j < boardSize_; j++) {
                 if (board_[i][j].getCurrState() == Cell.STATE.GREY ||
-                        (!allowBlues && board_[i][j].getCurrState() == Cell.STATE.BLUE))
+                        (!allowBlues && board_[i][j].getCurrState() == Cell.STATE.BLUE && board_[i][j].getNumber() <= 0))
                     return false;
             }
         return true;
@@ -330,21 +342,21 @@ public class Board {
         boolean tryAgain = true;
         int attempts = 0;
 
-        while (tryAgain && attempts++ < 99){
+        while (tryAgain && attempts++ < numberTries){
             tryAgain = false;
 
             if(isDone(false))
                 return true;
 
-            collectInfo();
+            collectInfoPass1();
 
             List<Integer> random = new ArrayList<>();
             for (int i = 0; i < boardSize_ * boardSize_; i++) {
                 random.add(i);
             }
-            //Collections.shuffle(random);
+            Collections.shuffle(random);
 
-            collectInfo();
+            collectInfoPass2();
 
             // Se recorren las casillas en orden aleatorio
             for (int k = 0; k < random.size(); k++) {
@@ -353,8 +365,12 @@ public class Board {
                 Cell cell = board_[i][j];
 
                 if(!hintMode && cell.getCurrState() == Cell.STATE.BLUE && cell.getGreysAround() == 0){
-                    cell.setNumber(cell.getCurNumber());
-                    cell.fixCell(Cell.STATE.BLUE);
+                    if(cell.getCurNumber() > 0) {
+                        cell.setNumber(cell.getCurNumber());
+                        cell.fixCell(Cell.STATE.BLUE);
+                    } else {
+                        cell.fixCell(Cell.STATE.RED);
+                    }
                     tryAgain = true;
                     break;
                 }
@@ -394,16 +410,16 @@ public class Board {
                             break;
                         }
                     }
+                    if(tryAgain)
+                        break;
                 }
 
-                if(cell.getCurrState() == Cell.STATE.GREY && cell.getGreysAround() == 0 && cell.hasFixedBlueAround()){
-                    if(cell.getCurNumber() == 0){
-                        if(!hintMode)
-                            cell.setCurrState(Cell.STATE.RED);
-                        hint = new Hint(Hint.HintType.ISOLATED_AND_EMPTY, i, j);
-                        tryAgain = true;
-                        break;
-                    }
+                if(cell.getCurrState() == Cell.STATE.GREY && cell.getGreysAround() == 0 && !cell.getCompletedBlueAround()){
+                    if(!hintMode)
+                        cell.setCurrState(Cell.STATE.RED);
+                    hint = new Hint(Hint.HintType.ISOLATED_AND_EMPTY, i, j);
+                    tryAgain = true;
+                    break;
                 }
             }
         }
@@ -424,7 +440,6 @@ public class Board {
         for (int i = 0; i < boardSize_; i++) {
             for (int j = 0; j < boardSize_; j++) {
                 cell = board_[i][j];
-                //cell.unfix();
                 cellPool.add(new Tuple<>(i, j));
 
                 if (cell.getCurrState() == Cell.STATE.RED)
@@ -432,7 +447,7 @@ public class Board {
             }
         }
 
-        while (tryAgain && cellPool.size() > 0 && attempts++ < 99){
+        while (tryAgain && cellPool.size() > 0 && attempts++ < numberTries){
             tryAgain = false;
             Cell[][] save1 = copyBoard();
 
@@ -444,15 +459,14 @@ public class Board {
 
             cell.resetCell();
             Cell[][] save2 = copyBoard();
-            if (solve(true)) {
+            if (solve(false)) {
                 if (isRed) reds--;
                 board_ = save2;
-                tryAgain = true;
             }
             else {
                 board_ = save1;
-                tryAgain = true;
             }
+            tryAgain = true;
         }
     }
 
@@ -471,7 +485,12 @@ public class Board {
         for (int i = 0; i < boardSize_; ++i) {
             for (int j = 0; j < boardSize_; ++j) {
                 copy[i][j] = new Cell();
-                copy[i][j].fixCell(board_[i][j].getCurrState());
+                if(board_[i][j].isFixed()) {
+                    copy[i][j].fixCell(board_[i][j].getCurrState());
+                }
+                else {
+                    copy[i][j].setCurrState(board_[i][j].getCurrState());
+                }
                 copy[i][j].setNumber(board_[i][j].getNumber());
             }
         }

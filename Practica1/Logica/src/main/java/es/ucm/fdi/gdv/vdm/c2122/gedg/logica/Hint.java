@@ -31,12 +31,12 @@ public class Hint {
     };
 
     public Hint(HintType t, int x, int y){
-        type_ = t;
-        x_ = x;
-        y_ = y;
+        this.type = t;
+        this.x = x;
+        this.y = y;
     }
 
-    public HintType type_;
-    public int x_ = -1, y_ = -1;
+    public HintType type;
+    public int x = -1, y = -1;
 }
 

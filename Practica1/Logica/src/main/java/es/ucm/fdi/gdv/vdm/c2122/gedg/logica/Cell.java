@@ -19,14 +19,14 @@ public class Cell {
 
     private int curNumber_ = 0; // Numero de azules que tiene actualmente alrededor
     private int greysAround_ = 0; // Numero de grises alrededor
-    private boolean fixedBlueAround = false; // Si tiene alrededor alguna azul completada
+    private boolean completedBlueAround = false; // Si tiene alrededor alguna azul completada
     private Board.Direction singlePossibleDirection_ = null; // Si solamente se puede expandir en una direccion
     private DirectionInfo[] directionInfo_ = new DirectionInfo[4]; // Informacion del resto de direcciones
 
     public void resetInfo(){
         curNumber_ = 0;
         greysAround_ = 0;
-        fixedBlueAround = false;
+        completedBlueAround = false;
         singlePossibleDirection_ = null;
         directionInfo_ = new DirectionInfo[4];
         for (int i = 0; i < 4; i++) {
@@ -61,7 +61,7 @@ public class Cell {
      * @param h Pista que se usa para actualizar
      */
     public void applyHint(Hint h){
-        switch (h.type_){
+        switch (h.type){
             case VISIBLE_CELLS_COVERED:
             case CANNOT_SURPASS_LIMIT:
             case ISOLATED_AND_EMPTY:
@@ -134,8 +134,8 @@ public class Cell {
     public void setGreysAround(int number){
         greysAround_ = number;
     }
-    public void setCompletedNumbersAround(boolean completedNumbersAround) {
-        fixedBlueAround = completedNumbersAround;
+    public void setCompletedBlueAround(boolean completedNumbersAround) {
+        completedBlueAround = completedNumbersAround;
     }
     public void setSinglePossibleDirection(Board.Direction d) {
         singlePossibleDirection_ = d;
@@ -146,8 +146,8 @@ public class Cell {
     public int getNumber() { return number_; }
     public int getCurNumber() { return curNumber_; }
     public int getGreysAround() { return greysAround_; }
-    public boolean hasFixedBlueAround() {
-        return fixedBlueAround;
+    public boolean getCompletedBlueAround() {
+        return completedBlueAround;
     }
     public boolean canBeCompletedWithGreys(){return greysAround_ + curNumber_ == number_;}
     public boolean isCompleted(){return curNumber_ == number_;}
