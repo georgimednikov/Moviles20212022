@@ -41,7 +41,7 @@ public class CellRenderer extends ObjectRenderer {
     private float animDur_;
     private float animElapsed_;
     private boolean animated_;
-    private boolean forward_;
+    private boolean forward_; //Si la celda está transicionando hacia "delante" (movimiento) o "atrás" (deshacer)
 
     //Candado
     private float cellExpansion_;
@@ -83,11 +83,11 @@ public class CellRenderer extends ObjectRenderer {
         }
 
         Color cc, pc;
-        if (forward_) {
+        if (forward_) { //Si es un movimiento normal va del anterior al actual
             cc = getColorState(state_); //Current Color
             pc = getColorState(previousState(state_)); //Previous Color
         }
-        else {
+        else { //Si se está deshaciendo un movimiento va del que sería el siguiente al actual
             cc = getColorState(state_); //Current Color
             pc = getColorState(nextState(state_)); //Previous Color
         }
@@ -153,6 +153,7 @@ public class CellRenderer extends ObjectRenderer {
 
     /**
      * Activa la animacion que transiciona el color de la celda entre el anterior y el actual.
+     * Llamar después de actualizar la lógica.
      */
     public void transitionCell() {
         animated_ = true;
@@ -162,7 +163,11 @@ public class CellRenderer extends ObjectRenderer {
         forward_ = true;
     }
 
-    public void undoMove() {
+    /**
+     * Activa la animacion que transiciona el color de la celda entre el actual y el "siguiente".
+     * Llamar después de actualizar la lógica.
+     */
+    public void transitionBack() {
         transitionCell();
         forward_ = false;
     }

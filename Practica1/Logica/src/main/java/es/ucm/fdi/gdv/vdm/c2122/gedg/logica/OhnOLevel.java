@@ -309,7 +309,7 @@ public class OhnOLevel implements Scene {
                     text = "Esta celda ha vuelto a rojo";
                     break;
             }
-            boardRenderer.undoMove(cellPos.x, cellPos.y);
+            boardRenderer.transitionBack(cellPos.x, cellPos.y);
             boardRenderer.highlightCell(cellPos.x, cellPos.y);
             progressTextRender.setText(board.donePercentage() + "%"); //Actualiza el porcentaje de progreso.
         }

@@ -136,6 +136,14 @@ public class Board {
         maxify(boardSize);
         // Pone celdas en grises mientras la solucion sea unica
         breakDown();
+
+        //Se cuentan las celdas fijas y se asignan las a 0 las coloreadas que ha puesto el usuario.
+        fixedCells_ = coloredCells_ = 0;
+        for (int i = 0; i < boardSize_; i++) {
+            for (int j = 0; j < boardSize_; j++) {
+                if (board_[i][j].isFixed()) fixedCells_++;
+            }
+        }
     }
 
     /**
