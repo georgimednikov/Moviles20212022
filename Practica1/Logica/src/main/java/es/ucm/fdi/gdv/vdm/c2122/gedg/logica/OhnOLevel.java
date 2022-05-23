@@ -54,6 +54,10 @@ public class OhnOLevel implements Scene {
     private boolean gameOver = false;
     private boolean fadeOut = false;
     private float elapsedTime = 0f; //Segundos que lleva haciendose un fade de la escena
+    private int elapsedFrames = 0;  //Cuenta hasta el segundo frame para no contar el segundo delta time de la ejecución de la escena.
+                                    //Si se elige un tamaño grande de nivel puede tardar un poco en cargar, agrandando el delta time
+                                    //el segundo frame y haciendo instantánea la transición de entrada en la escena. El primero también
+                                    //se evita para que no empiecen las animaciones un frame y estén congeladas el siguiente.
 
     //Variables de creacion de tablero
     int boardSize;
@@ -227,6 +231,8 @@ public class OhnOLevel implements Scene {
      * Devuelve true si no se deben procesar inputs porque se esta realizando una animacion, false en caso contrario
      */
     private boolean updateScene(double deltaTime) {
+        if (elapsedFrames <= 1) { elapsedFrames++; deltaTime = 0; } //Ver declaración de elapsedFrames.
+
         updateRenders(deltaTime);
         if (gameOver) { //Si se ha acabado el juego se espera antes de empezar a cambiar de escena
             if (elapsedTime >= TIME_AFTER_WIN) {
@@ -317,32 +323,6 @@ public class OhnOLevel implements Scene {
         infoReset = false;
     }
     //endregion
-
-    //Método DEBUG
-    /*private int readFromConsole(char[][] mat) {
-        int fixedCells = 0;
-        for (int i = 0; i < boardSize; ++i) {
-            for (int j = 0; j < boardSize; ++j) {
-                char c = mat[i][j];
-
-                switch (c) {
-                    case 'r':
-                        board[i][j].fixCell(CellLogic.STATE.RED);
-                        fixedCells++;
-                        break;
-                    case '0':
-                        break;
-                    default: // numeros
-                        int num = Character.getNumericValue(c);
-                        board[i][j].fixCell(CellLogic.STATE.BLUE, num);
-                        fixedCells++;
-                        fixedBlueCells.add(board[i][j]);
-                        break;
-                }
-            }
-        }
-        return fixedCells;
-    }*/
 
     /**
      * Dado el centro de una circunferencia, su radio y otra posición, se comprueba si ha habido una intersección.
