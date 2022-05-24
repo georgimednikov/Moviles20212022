@@ -22,12 +22,12 @@ public class Hint {
     public static String[] hintText = {
             //                                   |
             "Ve suficientes celdas azules",
-            "Superaría el número de una celda",
-            "Sin esta no vería suficientes azules",
+            "Una dirección superaría el límite",
+            "Hay una común en todos los casos",
             "Ve demasiadas celdas azules",
             "No ve suficientes azules",
-            "Es azul sin azules adyacentes",
-            "Celda gris rodeada de rojas"
+            "Un azul tiene que ver otro azul",
+            "Esta debería ser fácil..."
     };
 
     public Hint(HintType t, int x, int y){

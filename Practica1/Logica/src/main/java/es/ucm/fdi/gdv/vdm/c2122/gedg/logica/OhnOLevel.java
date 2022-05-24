@@ -23,8 +23,6 @@ public class OhnOLevel implements Scene {
 
     Engine eng_;
 
-    //Constantes de renderizado
-
     //Textos
     private final int INFO_POS_Y = 75;
     private final int PROGRESS_POS_Y = 500;
@@ -287,9 +285,16 @@ public class OhnOLevel implements Scene {
         if (board.changeCell(x, y)) {
             gameOver = true;
             infoTextRender.fadeNewText(YOU_WIN_TEXTS[OhnORandom.r.nextInt(YOU_WIN_TEXTS.length)], INFO_WIN_SIZE, true, TEXT_FADE_DURATION);
-            return;
         }
-        progressTextRender.setText(board.donePercentage() + "%"); //Actualiza el porcentaje de progreso.
+
+        int fillPercentage = board.donePercentage();
+        if (fillPercentage == 100 && !gameOver) {
+            Hint hint = board.hint;
+            boardRenderer.highlightCell(hint.x, hint.y); //Se destaca la celda para dar la pista.
+            infoTextRender.fadeNewText(hint.hintText[hint.type.ordinal()], INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Se muestra la pista.
+            infoReset = false;
+        }
+        progressTextRender.setText(fillPercentage + "%"); //Actualiza el porcentaje de progreso.
     }
 
     /**

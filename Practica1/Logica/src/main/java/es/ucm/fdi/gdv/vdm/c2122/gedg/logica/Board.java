@@ -294,7 +294,7 @@ public class Board {
 
                     while (inArray(i + dir.dx * k, j + dir.dy * k) &&
                             (dirCell = board_[i + dir.dx * k][j + dir.dy * k]).getCurrState() != Cell.STATE.RED) {
-                        if(dirCell.isCompleted()) // TODO: esto esta mal seguramente
+                        if(dirCell.isCompleted() && dirCell.getCurrState() == Cell.STATE.BLUE) // TODO: esto esta mal seguramente
                             cell.setCompletedBlueAround(true);
 
                         k++;
@@ -342,6 +342,31 @@ public class Board {
         }
     }
 
+    public void render(){
+        for (int i = 0; i < boardSize_; i++) {
+            for (int j = 0; j < boardSize_; j++) {
+                Cell c = board_[i][j];
+                String s;
+                switch (c.getCurrState()){
+                    case RED:
+                    default:
+                        s = "R ";
+                        break;
+                    case GREY:
+                        s = "_ ";
+                        break;
+                    case BLUE:
+                        s = c.getNumber() + " ";
+                        break;
+                }
+                System.out.print(s);
+            }
+            System.out.println();
+        }
+        System.out.println();
+        System.out.println();
+    }
+
     /**
      * Intenta resolver el tablero, devuelve true si el tablero esta resuelto y false en caso contrario
      * @param hintMode Si es verdadero, el tablero no lo modifica, si no, aplica la pista directamente
@@ -377,6 +402,7 @@ public class Board {
                         cell.setNumber(cell.getCurNumber());
                         cell.fixCell(Cell.STATE.BLUE);
                     } else {
+                        cell.setNumber(-1);
                         cell.fixCell(Cell.STATE.RED);
                     }
                     tryAgain = true;
@@ -422,7 +448,7 @@ public class Board {
                         break;
                 }
 
-                if(cell.getCurrState() == Cell.STATE.GREY && cell.getGreysAround() == 0 && !cell.getCompletedBlueAround()){
+                if(cell.getCurrState() == Cell.STATE.GREY && cell.getCurNumber() == 0 && cell.getGreysAround() == 0 && !cell.getCompletedBlueAround()){
                     if(!hintMode)
                         cell.setCurrState(Cell.STATE.RED);
                     hint = new Hint(Hint.HintType.ISOLATED_AND_EMPTY, i, j);
@@ -444,7 +470,7 @@ public class Board {
         int minReds = 1;
         Cell cell;
         List<Tuple<Integer, Integer>> cellPool = new ArrayList<>();
-
+        render(); // TODO
         for (int i = 0; i < boardSize_; i++) {
             for (int j = 0; j < boardSize_; j++) {
                 cell = board_[i][j];
@@ -465,8 +491,11 @@ public class Board {
 
             if (isRed && reds <= minReds) continue;
 
-            cell.resetCell();
+            int cellNum = cell.getNumber();
+            cell.resetCell(); // Comentar
+            cell.setNumber(cellNum);
             Cell[][] save2 = copyBoard();
+            render(); // TODO
             if (solve(false)) {
                 if (isRed) reds--;
                 board_ = save2;
