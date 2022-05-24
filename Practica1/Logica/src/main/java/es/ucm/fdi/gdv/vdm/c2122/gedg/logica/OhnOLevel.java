@@ -42,6 +42,7 @@ public class OhnOLevel implements Scene {
     private final float SCENE_FADE_DURATION = 0.25f; //Segundos que duran los fades de la escena
     private final float TIME_AFTER_WIN = 1.5f;
     private final float TEXT_FADE_DURATION = 0.2f;
+    private final float SECONDS_UNTIL_HINT = 2.0f; //Segundos que se espera para mostrar una pista cuando se resuelve incorrectamente el nivel.
 
     //Variables de asignacion dinamica
     private int cellSeparation = -1;
@@ -51,6 +52,7 @@ public class OhnOLevel implements Scene {
     //Variables de animacion
     private boolean gameOver = false;
     private boolean fadeOut = false;
+    private float timeForHint = 0f; //Tiempo que se lleva esperando para poner la pista cuando se completa el tablero de forma incorrecta.
     private float elapsedTime = 0f; //Segundos que lleva haciendose un fade de la escena
     private int elapsedFrames = 0;  //Cuenta hasta el segundo frame para no contar el segundo delta time de la ejecución de la escena.
                                     //Si se elige un tamaño grande de nivel puede tardar un poco en cargar, agrandando el delta time
@@ -184,11 +186,7 @@ public class OhnOLevel implements Scene {
                                 infoTextRender.fadeNewText(infoRegContent, INFO_REG_SIZE, false, TEXT_FADE_DURATION);
                                 infoReset = true;
                             } else if (!gameOver) { //Si no se esta dando una pista, se empieza a dar
-                                board.solve(true);
-                                Hint hint = board.hint;
-                                boardRenderer.highlightCell(hint.x, hint.y); //Se destaca la celda para dar la pista.
-                                infoTextRender.fadeNewText(hint.hintText[hint.type.ordinal()], INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Se muestra la pista.
-                                infoReset = false;
+                                giveHint();
                             }
                             break;
                     }
@@ -230,6 +228,15 @@ public class OhnOLevel implements Scene {
      */
     private boolean updateScene(double deltaTime) {
         if (elapsedFrames <= 1) { elapsedFrames++; deltaTime = 0; } //Ver declaración de elapsedFrames.
+
+        //Si se ha rellenado el tablero pero no se ha acabado la partida, se espera SECONDS_UNTIL_HINT para mostrar una pista
+        int donePercentage = board.donePercentage();
+        if (!gameOver && donePercentage == 100 && timeForHint < SECONDS_UNTIL_HINT) {
+            timeForHint += deltaTime;
+            if (timeForHint >= SECONDS_UNTIL_HINT) {
+                giveHint();
+            }
+        }
 
         updateRenders(deltaTime);
         if (gameOver) { //Si se ha acabado el juego se espera antes de empezar a cambiar de escena
@@ -287,14 +294,15 @@ public class OhnOLevel implements Scene {
             infoTextRender.fadeNewText(YOU_WIN_TEXTS[OhnORandom.r.nextInt(YOU_WIN_TEXTS.length)], INFO_WIN_SIZE, true, TEXT_FADE_DURATION);
         }
 
-        int fillPercentage = board.donePercentage();
-        if (fillPercentage == 100 && !gameOver) {
-            Hint hint = board.hint;
-            boardRenderer.highlightCell(hint.x, hint.y); //Se destaca la celda para dar la pista.
-            infoTextRender.fadeNewText(hint.hintText[hint.type.ordinal()], INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Se muestra la pista.
-            infoReset = false;
-        }
-        progressTextRender.setText(fillPercentage + "%"); //Actualiza el porcentaje de progreso.
+        progressTextRender.setText(board.donePercentage() + "%"); //Actualiza el porcentaje de progreso.
+        timeForHint = 0; //Cuando se hace un input se reinicia la cuenta del tiempo de la pista que sale al completar el tablero mal.
+    }
+
+    private void giveHint() {
+        Hint hint = board.hint;
+        boardRenderer.highlightCell(hint.x, hint.y); //Se destaca la celda para dar la pista.
+        infoTextRender.fadeNewText(hint.hintText[hint.type.ordinal()], INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Se muestra la pista.
+        infoReset = false;
     }
 
     /**
@@ -326,6 +334,7 @@ public class OhnOLevel implements Scene {
         }
         infoTextRender.fadeNewText(text, INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Hace aparecer un texto con el string establecido.
         infoReset = false;
+        timeForHint = 0; //Cuando se hace un input se reinicia la cuenta del tiempo de la pista que sale al completar el tablero mal.
     }
     //endregion
 
