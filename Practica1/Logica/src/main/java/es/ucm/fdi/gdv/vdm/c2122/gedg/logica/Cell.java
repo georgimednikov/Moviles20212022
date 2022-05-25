@@ -63,24 +63,6 @@ public class Cell {
     }
 
     /**
-     * Actualiza la celda dada una pista
-     * @param h Pista que se usa para actualizar
-     */
-    public void applyHint(Hint h){
-        switch (h.type){
-            case VISIBLE_CELLS_COVERED:
-            case CANNOT_SURPASS_LIMIT:
-            case ISOLATED_AND_EMPTY:
-            case BLUE_BUT_ISOLATED:
-                currState_ = Cell.STATE.RED;
-                break;
-            case MUST_PLACE_BLUE:
-                currState_ = Cell.STATE.BLUE;
-                break;
-        }
-    }
-
-    /**
      * Cambia el estado de la celda siguiendo el ciclo GRIS->AZUL->ROJO
      */
     public void changeState() {

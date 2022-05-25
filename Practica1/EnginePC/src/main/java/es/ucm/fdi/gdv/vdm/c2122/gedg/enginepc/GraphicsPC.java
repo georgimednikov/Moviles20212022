@@ -26,9 +26,6 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
     private Graphics g_; //El canvas de JFrame.
     private Stack<Graphics> saves_; //Estados guardados del canvas.
 
-    // Escala del canvas.
-    private float scaleX_ = 1, scaleY_ = 1;
-
     GraphicsPC(JFrame jf){
         jf_ = jf;
         BufferStrategy strategy = jf.getBufferStrategy();
@@ -88,10 +85,10 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
     @Override
     public void drawImage(Image image, int x, int y, int width, int height, boolean centered, float opacity) {
         //Se ajustan los valores a las dimensiones reales del canvas
-        x = (int) (toPhysicalX(x) * scaleX_);
-        y = (int) (toPhysicalY(y) * scaleY_);
-        width = (int) (toPhysicalX(width) * scaleX_);
-        height = (int) (toPhysicalY(height) * scaleY_);
+        x = (int) (toPhysicalX(x));
+        y = (int) (toPhysicalY(y));
+        width = (int) (toPhysicalX(width));
+        height = (int) (toPhysicalY(height));
         ImagePC img = (ImagePC) image;
 
         //Se añaden offsets a la imagen para centrarla si se ha pedido.
@@ -122,10 +119,10 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
     @Override
     public void fillCircle(int cx, int cy, int r) {
         //Se ajustan los valores a las dimensiones reales del canvas
-        cx = (int) (toPhysicalX(cx) * scaleX_);
-        cy = (int) (toPhysicalY(cy) * scaleY_);
-        int rx = (int) (toPhysicalX(r) * scaleX_);
-        int ry = (int) (toPhysicalY(r) * scaleY_);
+        cx = (int) (toPhysicalX(cx));
+        cy = (int) (toPhysicalY(cy));
+        int rx = (int) (toPhysicalX(r));
+        int ry = (int) (toPhysicalY(r));
         g_.fillOval(cx - rx , cy - ry, 2*rx, 2*ry);
     }
 
@@ -143,26 +140,34 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
         java.awt.Font jfont = f.getFont();
         FontMetrics fm = g_.getFontMetrics(jfont);
 
-        // Una imagen del texto se crea para poder hacer stretch en caso de que la escala del canvas sea irregular
-        BufferedImage buf = new BufferedImage(fm.stringWidth(text), fm.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = buf.createGraphics();
-        g2d.setFont(jfont);
-        Color c = f.getColor();
-        g2d.setColor(new java.awt.Color(c.r, c.g, c.b, c.a));
-        g2d.drawString(text, 0, fm.getAscent());
-        g2d.dispose();
+        //Se ajustan los valores a las dimensiones reales del canvas
+        x = toPhysicalX(x);
+        y = toPhysicalY(y);
 
-        //Se podifica la posición de dibuja en base a la escala del canvas.
-        x = (int) (x * scaleX_);
-        y = (int) (y * scaleY_);
+        // Se pone el tamaño ajustado del texto segun el canvas
+        f.setRenderSize(toPhysicalX(f.originalSize_));
+        // Se ponen color y fuente de jframe
+        g_.setFont(jfont);
+        Color c = f.getColor();
+        g_.setColor(new java.awt.Color(c.r, c.g, c.b, c.a));
 
         //Se modifica la posición de dibujado para que aparezca centrado si se ha pedido.
-        if(centered){
-            x = (int) (x - (buf.getWidth() / 2 * scaleX_));
-            y = (int) (y - (buf.getHeight() / 2 * scaleY_));
+        if (!centered) {
+            g_.drawString(text, x, y);
+            return;
         }
-        g_.drawImage(buf, toPhysicalX(x), toPhysicalY(y), toPhysicalX((int) (buf.getWidth() * scaleX_)), toPhysicalY((int) (buf.getHeight() * scaleY_)), null);
+        //Se calcula el alto y ancho del texto para poder centrarlo
+        FontRenderContext frc = new FontRenderContext(null, true, true);
+        Rectangle2D r2D = f.getFont().getStringBounds(text, frc);
+        int rWidth = (int)Math.round(r2D.getWidth());
+        int rHeight = (int)Math.round(r2D.getHeight());
+        int tX = (int)Math.round(r2D.getX());
+        int tY = (int)Math.round(r2D.getY());
+        int a = x - (rWidth / 2) - tX;
+        int b = y - (rHeight / 2) - tY;
+        g_.drawString(text, a, b);
     }
+
 
     /**
      * Actualiza el motor de renderizado, pone en blanco el render buffer y actualiza la posicion de la ventana
@@ -225,8 +230,7 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
      */
     @Override
     public void scale(float sx, float sy) {
-        scaleX_ = sx;
-        scaleY_ = sy;
+        ((Graphics2D)g_).scale(sx, sy);
         //super.scale((int)(sx * refSizeX), (int)(sy * refSizeY)); TODO: ª
     }
 

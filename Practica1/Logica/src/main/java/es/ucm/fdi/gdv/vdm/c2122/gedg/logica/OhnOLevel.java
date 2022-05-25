@@ -145,7 +145,7 @@ public class OhnOLevel implements Scene {
         TouchEvent event;
         next:
         while ((event = eng_.getInput().dequeueEvent()) != null) {
-            if (event.type != TouchEvent.TouchType.PRESS) continue;
+            if (gameOver || event.type != TouchEvent.TouchType.PRESS) continue;
             //Para cada celda se comprueba si se ha hecho click en ella
             for (int i = 0; i < boardSize; ++i) {
                 for (int j = 0; j < boardSize; ++j) {
@@ -299,9 +299,10 @@ public class OhnOLevel implements Scene {
     }
 
     private void giveHint() {
+        board.calculateHint();
         Hint hint = board.hint;
         boardRenderer.highlightCell(hint.x, hint.y); //Se destaca la celda para dar la pista.
-        infoTextRender.fadeNewText(hint.hintText[hint.type.ordinal()], INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Se muestra la pista.
+        infoTextRender.fadeNewText(hint.type.text, INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Se muestra la pista.
         infoReset = false;
     }
 

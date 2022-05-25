@@ -89,7 +89,7 @@ public class OhnOIntro implements Scene {
     @Override
     public void render() {
         Graphics g = eng_.getGraphics();
-
+        //g.scale(2, 1); // a
         g.save();
         g.translate(g.getWidth() / 2, LOGO_POS_Y);
         logoText.render(g);
