@@ -131,7 +131,9 @@ public class Board {
         // Pone las celdas a azul
         setAllBlue(false);
         // Mira las direcciones y cuenta el maximo de azules que ve en cada direccion
-        solve(false);
+        collectInfoPass1();
+        // Pone las celdas a azul con su numero correcto
+        setAllBlue(true);
         // Hace que las celdas azules vean hasta boardSize otras azules
         maxify(boardSize);
         // Pone celdas en grises mientras la solucion sea unica
@@ -155,8 +157,8 @@ public class Board {
             for (int j = 0; j < boardSize_; j++) {
                 if (board_[i][j].getCurrState() == Cell.STATE.GREY ||
                         (overwriteNumbers && board_[i][j].getCurrState() == Cell.STATE.BLUE && board_[i][j].isFixed())){
-                    board_[i][j].resetCell();
-                    board_[i][j].setCurrState(Cell.STATE.BLUE);
+                    board_[i][j].fixCell(Cell.STATE.BLUE);
+                    board_[i][j].setNumber(board_[i][j].getCurNumber());
                 }
             }
         }
@@ -206,10 +208,24 @@ public class Board {
 
             if (cuts.length > 0){
                 Cell cut = cuts[OhnORandom.r.nextInt(cuts.length)];
-                cut.setCurrState(Cell.STATE.RED);
+                cut.fixCell(Cell.STATE.RED);
                 cut.setNumber(-1);
                 setAllBlue(true);
-                solve(false);
+                collectInfoPass1();
+                for (int i = 0; i < boardSize_; i++) {
+                    for (int j = 0; j < boardSize_; j++) {
+                        Cell cell = board_[i][j];
+                        if(cell.getCurrState() == Cell.STATE.BLUE && cell.getGreysAround() == 0){
+                            if(cell.getCurNumber() > 0) {
+                                cell.setNumber(cell.getCurNumber());
+                                cell.fixCell(Cell.STATE.BLUE);
+                            } else {
+                                cell.setNumber(-1);
+                                cell.fixCell(Cell.STATE.RED);
+                            }
+                        }
+                    }
+                }
                 tryAgain = true;
             }
         }
@@ -232,17 +248,23 @@ public class Board {
                     while (inArray(i + dir.dx * k, j + dir.dy * k) &&
                             (dirCell = board_[i + dir.dx * k][j + dir.dy * k]).getCurrState() != Cell.STATE.RED){
                         if(dirCell.getCurrState() == Cell.STATE.BLUE){
-                            if(dirInfo.greysCount == 0)
+                            if(dirInfo.greysCount == 0) {
                                 cell.setCurNumber(cell.getCurNumber() + 1);
+                                dirInfo.numberWhenFillingFirstGrey++;
+                            }
 
                             if(dirInfo.greysCount == 1){
                                 dirInfo.numberCountAfterGreys++;
+                                dirInfo.numberWhenFillingFirstGrey++;
                                 if (dirInfo.numberCountAfterGreys + 1 > cell.getNumber())
                                     dirInfo.wouldBeTooMuch = true;
                             }
                         }
-                        else {
+                        else { // GREY
                             cell.setGreysAround(cell.getGreysAround() + 1);
+
+                            if(dirInfo.greysCount == 0)
+                                dirInfo.numberWhenFillingFirstGrey++;
 
                             dirInfo.greysCount++;
                         }
@@ -260,7 +282,6 @@ public class Board {
 
                     for (Direction other :
                             Direction.values()) {
-                        dirInfo.numberWhenFillingFirstGrey = cell.getCurNumber() + 1 + dirInfo.numberCountAfterGreys;
                         DirectionInfo otherDirInfo = cell.getDirectionInfo(other);
                         if (dir == other)
                             continue;
@@ -311,7 +332,7 @@ public class Board {
         for (int i = 0; i < boardSize_; i++)
             for (int j = 0; j < boardSize_; j++) {
                 if (board_[i][j].getCurrState() == Cell.STATE.GREY ||
-                        (!allowBlues && board_[i][j].getCurrState() == Cell.STATE.BLUE && board_[i][j].getNumber() <= 0))
+                        (!allowBlues && board_[i][j].getCurrState() == Cell.STATE.BLUE && !board_[i][j].isFixed()))
                     return false;
             }
         return true;
@@ -342,10 +363,10 @@ public class Board {
         }
     }
 
-    public void render(){
+    public void render(Cell[][] board){
         for (int i = 0; i < boardSize_; i++) {
             for (int j = 0; j < boardSize_; j++) {
-                Cell c = board_[i][j];
+                Cell c = board[i][j];
                 String s;
                 switch (c.getCurrState()){
                     case RED:
@@ -363,8 +384,6 @@ public class Board {
             }
             System.out.println();
         }
-        System.out.println();
-        System.out.println();
     }
 
     /**
@@ -372,6 +391,33 @@ public class Board {
      * @param hintMode Si es verdadero, el tablero no lo modifica, si no, aplica la pista directamente
      */
     public boolean solve(boolean hintMode){
+        board_ = new Cell[5][5];
+        board_[0][0] = new Cell(-1, Cell.STATE.RED, true);
+        board_[1][0] = new Cell(4, Cell.STATE.BLUE, true);
+        board_[2][0] = new Cell(2, Cell.STATE.BLUE, true);
+        board_[3][0] = new Cell(2, Cell.STATE.BLUE, true);
+        board_[4][0] = new Cell(-1, Cell.STATE.RED, true);
+        board_[0][1] = new Cell(2, Cell.STATE.BLUE, true);
+        board_[1][1] = new Cell(3, Cell.STATE.BLUE, true);
+        board_[2][1] = new Cell(-1, Cell.STATE.RED, true);
+        board_[3][1] = new Cell(-1, Cell.STATE.RED, true);
+        board_[4][1] = new Cell(3, Cell.STATE.BLUE, true);
+        board_[0][2] = new Cell(3, Cell.STATE.BLUE, true);
+        board_[1][2] = new Cell(2, Cell.STATE.BLUE, true);
+        board_[2][2] = new Cell(-1, Cell.STATE.RED, true);
+        board_[3][2] = new Cell(1, Cell.STATE.BLUE, true);
+        board_[4][2] = new Cell(4, Cell.STATE.BLUE, true);
+        board_[0][3] = new Cell(-1, Cell.STATE.RED, true);
+        board_[1][3] = new Cell(-1, Cell.STATE.RED, true);
+        board_[2][3] = new Cell(-1, Cell.STATE.RED, true);
+        board_[3][3] = new Cell(-1, Cell.STATE.RED, true);
+        board_[4][3] = new Cell(3, Cell.STATE.BLUE, true);
+        board_[0][4] = new Cell(1, Cell.STATE.GREY, false);
+        board_[1][4] = new Cell(1, Cell.STATE.GREY, false);
+        board_[2][4] = new Cell(-1, Cell.STATE.RED, true);
+        board_[3][4] = new Cell(1, Cell.STATE.BLUE, true);
+        board_[4][4] = new Cell(4, Cell.STATE.BLUE, true);
+
         boolean tryAgain = true;
         int attempts = 0;
 
@@ -397,23 +443,14 @@ public class Board {
                 int j = random.get(k) % boardSize_;
                 Cell cell = board_[i][j];
 
-                if(!hintMode && cell.getCurrState() == Cell.STATE.BLUE && cell.getGreysAround() == 0){
-                    if(cell.getCurNumber() > 0) {
-                        cell.setNumber(cell.getCurNumber());
-                        cell.fixCell(Cell.STATE.BLUE);
-                    } else {
-                        cell.setNumber(-1);
-                        cell.fixCell(Cell.STATE.RED);
-                    }
-                    tryAgain = true;
-                    break;
-                }
-
                 if(cell.getCurrState() == Cell.STATE.BLUE && cell.isFixed() && cell.getGreysAround() > 0){
                     if(cell.isCompleted()){
                         if(!hintMode)
                             closeCell(i, j);
                         hint = new Hint(Hint.HintType.VISIBLE_CELLS_COVERED, i, j);
+                        System.out.print(hint != null ? Hint.hintText[hint.type.ordinal()] + " " : "");
+                        System.out.print(hint != null ? hint.x + " " : "");
+                        System.out.println(hint != null ? hint.y + " " : "");//TODO
                         tryAgain = true;
                         break;
                     }
@@ -422,6 +459,9 @@ public class Board {
                         if(!hintMode)
                             fillDirectionCell(i, j, cell.getSinglePossibleDirection(), Cell.STATE.BLUE);
                         hint = new Hint(Hint.HintType.MUST_PLACE_BLUE, i, j);
+                        System.out.print(hint != null ? Hint.hintText[hint.type.ordinal()] + " " : "");
+                        System.out.print(hint != null ? hint.x + " " : "");
+                        System.out.println(hint != null ? hint.y + " " : "");//TODO
                         tryAgain = true;
                         break;
                     }
@@ -432,6 +472,9 @@ public class Board {
                             if(!hintMode)
                                 fillDirectionCell(i, j, dir, Cell.STATE.RED);
                             hint = new Hint(Hint.HintType.CANNOT_SURPASS_LIMIT, i, j);
+                            System.out.print(hint != null ? Hint.hintText[hint.type.ordinal()] + " " : "");
+                            System.out.print(hint != null ? hint.x + " " : "");
+                            System.out.println(hint != null ? hint.y + " " : "");//TODO
                             tryAgain = true;
                             break;
                         }
@@ -440,6 +483,9 @@ public class Board {
                             if(!hintMode)
                                 fillDirectionCell(i, j, dir, Cell.STATE.BLUE);
                             hint = new Hint(Hint.HintType.MUST_PLACE_BLUE, i, j);
+                            System.out.print(hint != null ? Hint.hintText[hint.type.ordinal()] + " " : "");
+                            System.out.print(hint != null ? hint.x + " " : "");
+                            System.out.println(hint != null ? hint.y + " " : "");//TODO
                             tryAgain = true;
                             break;
                         }
@@ -452,6 +498,9 @@ public class Board {
                     if(!hintMode)
                         cell.setCurrState(Cell.STATE.RED);
                     hint = new Hint(Hint.HintType.ISOLATED_AND_EMPTY, i, j);
+                    System.out.print(hint != null ? Hint.hintText[hint.type.ordinal()] + " " : "");
+                    System.out.print(hint != null ? hint.x + " " : "");
+                    System.out.println(hint != null ? hint.y + " " : "");//TODO
                     tryAgain = true;
                     break;
                 }
@@ -470,7 +519,9 @@ public class Board {
         int minReds = 1;
         Cell cell;
         List<Tuple<Integer, Integer>> cellPool = new ArrayList<>();
-        render(); // TODO
+        render(board_); // TODO
+        System.out.println();
+        System.out.println();
         for (int i = 0; i < boardSize_; i++) {
             for (int j = 0; j < boardSize_; j++) {
                 cell = board_[i][j];
@@ -495,7 +546,7 @@ public class Board {
             cell.resetCell(); // Comentar
             cell.setNumber(cellNum);
             Cell[][] save2 = copyBoard();
-            render(); // TODO
+            render(board_); // TODO
             if (solve(false)) {
                 if (isRed) reds--;
                 board_ = save2;
@@ -504,6 +555,8 @@ public class Board {
                 board_ = save1;
             }
             tryAgain = true;
+            System.out.println();
+            System.out.println();
         }
     }
 

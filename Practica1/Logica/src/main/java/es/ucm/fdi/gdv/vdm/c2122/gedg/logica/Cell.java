@@ -38,6 +38,12 @@ public class Cell {
         resetCell();
     }
 
+    public Cell(int n, STATE s, boolean f){
+        number_ = n;
+        currState_ = s;
+        fixed_ = f;
+    }
+
     /**
      * Fija la celda con un estado dado
      */

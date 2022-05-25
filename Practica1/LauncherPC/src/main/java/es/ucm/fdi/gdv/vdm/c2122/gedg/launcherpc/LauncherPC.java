@@ -2,11 +2,12 @@ package es.ucm.fdi.gdv.vdm.c2122.gedg.launcherpc;
 
 import es.ucm.fdi.gdv.vdm.c2122.gedg.enginepc.EnginePC;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.enginepc.GraphicsPC;
+import es.ucm.fdi.gdv.vdm.c2122.gedg.logica.Board;
 import es.ucm.fdi.gdv.vdm.c2122.gedg.logica.OhnOIntro;
 
 public class LauncherPC {
     public static void main(String[] args){
-
+Board b = new Board(5);
         //Inicia el motor.
         EnginePC pc = new EnginePC();
         pc.init("0hn0");
