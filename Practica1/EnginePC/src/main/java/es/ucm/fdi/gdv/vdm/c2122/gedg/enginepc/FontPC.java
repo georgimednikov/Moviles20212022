@@ -13,7 +13,7 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.engine.Font;
 public class FontPC implements Font {
 
     int originalSize_; //Tamaño original de la fuente, NO modificado por el redimensionado de la pantalla
-    private java.awt.Font font; //Fuente de Java
+    private java.awt.Font font_; //Fuente de Java
     private Color color_;
 
     public FontPC(String name, Color color, int size, boolean isBold) {
@@ -22,7 +22,7 @@ public class FontPC implements Font {
 
         //Se busca la fuente en la ruta dada. Si no existe, salta una excepción.
         try {
-            font = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, new File(name)).deriveFont((isBold) ? java.awt.Font.BOLD : java.awt.Font.PLAIN, size);
+            font_ = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, new File(name)).deriveFont((isBold) ? java.awt.Font.BOLD : java.awt.Font.PLAIN, size);
         }
         catch (IOException | FontFormatException e)
         {
@@ -36,7 +36,7 @@ public class FontPC implements Font {
      * Devuelve la fuente que usa JFrame para renderizar.
      */
     java.awt.Font getFont(){
-        return font;
+        return font_;
     }
 
     /**
@@ -45,8 +45,8 @@ public class FontPC implements Font {
     @Override
     //Modifica el tamaño de renderizado
     public void setRenderSize(int size) {
-        if(font.getSize() == size) return;
-        font = font.deriveFont((float) size);
+        if(font_.getSize() == size) return;
+        font_ = font_.deriveFont((float) size);
     }
 
     /**
@@ -63,7 +63,7 @@ public class FontPC implements Font {
     @Override
     public void setSize(int size) {
         originalSize_ = size;
-        font = font.deriveFont((float) size);
+        font_ = font_.deriveFont((float) size);
     }
 
     /**
@@ -71,7 +71,7 @@ public class FontPC implements Font {
      */
     @Override
     public void setBold(boolean isBold) {
-        font = font.deriveFont((isBold) ? java.awt.Font.BOLD : java.awt.Font.PLAIN);
+        font_ = font_.deriveFont((isBold) ? java.awt.Font.BOLD : java.awt.Font.PLAIN);
     }
 
     /**
@@ -79,7 +79,7 @@ public class FontPC implements Font {
      */
     @Override
     public int getSize() {
-        return font.getSize();
+        return font_.getSize();
     }
 
     /**

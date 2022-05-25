@@ -45,48 +45,48 @@ public class OhnOLevel implements Scene {
     private final float SECONDS_UNTIL_HINT = 2.0f; //Segundos que se espera para mostrar una pista cuando se resuelve incorrectamente el nivel.
 
     //Variables de asignacion dinamica
-    private int cellSeparation = -1;
-    private int cellRadius = -1;
-    private int buttonSeparation = -1;
+    private int cellSeparation_ = -1;
+    private int cellRadius_ = -1;
+    private int buttonSeparation_ = -1;
 
     //Variables de animacion
-    private boolean gameOver = false;
-    private boolean fadeOut = false;
-    private float timeForHint = 0f; //Tiempo que se lleva esperando para poner la pista cuando se completa el tablero de forma incorrecta.
-    private float elapsedTime = 0f; //Segundos que lleva haciendose un fade de la escena
-    private int elapsedFrames = 0;  //Cuenta hasta el segundo frame para no contar el segundo delta time de la ejecución de la escena.
-                                    //Si se elige un tamaño grande de nivel puede tardar un poco en cargar, agrandando el delta time
-                                    //el segundo frame y haciendo instantánea la transición de entrada en la escena. El primero también
-                                    //se evita para que no empiecen las animaciones un frame y estén congeladas el siguiente.
+    private boolean gameOver_ = false;
+    private boolean fadeOut_ = false;
+    private float timeForHint_ = 0f; //Tiempo que se lleva esperando para poner la pista cuando se completa el tablero de forma incorrecta.
+    private float elapsedTime_ = 0f; //Segundos que lleva haciendose un fade de la escena
+    private int elapsedFrames_ = 0;  //Cuenta hasta el segundo frame para no contar el segundo delta time de la ejecución de la escena.
+                                     //Si se elige un tamaño grande de nivel puede tardar un poco en cargar, agrandando el delta time
+                                     //el segundo frame y haciendo instantánea la transición de entrada en la escena. El primero también
+                                     //se evita para que no empiecen las animaciones un frame y estén congeladas el siguiente.
 
     //Variables de creacion de tablero
-    int boardSize;
+    private int boardSize_;
 
-    private Board board;
-    private BoardRenderer boardRenderer;
-    private List<ObjectRenderer> objects = new ArrayList<>();
+    private Board board_;
+    private BoardRenderer boardRenderer_;
+    private List<ObjectRenderer> objects_ = new ArrayList<>();
 
     //Variables relacionadas con pistas
-    private boolean lockChanged = false; //Si hay que cambiar el estado de los candados
+    private boolean lockChanged_ = false; //Si hay que cambiar el estado de los candados
 
     //Objetos de la escena y variables relacionadas
-    private Color black;
-    private Color white;
-    private Color darkGrey;
-    private Font infoFont;
-    private Font progressFont;
-    private Font numberFont;
-    private Image lockImage;
-    private ImageRenderer quitImage;
-    private ImageRenderer undoImage;
-    private ImageRenderer hintImage;
-    private TextRender infoTextRender;
-    private TextRender progressTextRender;
-    private String infoRegContent; //Contenido del texto que ayuda al jugador (cambia mucho de valor)
-    private boolean infoReset = true; //Si el texto informativo ha sido reseteado o no (ha vuelto a su texto por defecto)
+    private Color black_;
+    private Color white_;
+    private Color lightGrey_;
+    private Font infoFont_;
+    private Font progressFont_;
+    private Font numberFont_;
+    private Image lockImage_;
+    private ImageRenderer quitImage_;
+    private ImageRenderer undoImage_;
+    private ImageRenderer hintImage_;
+    private TextRender hintTextRender_;
+    private TextRender progressTextRender_;
+    private String infoRegContent_; //Contenido del texto que ayuda al jugador (cambia mucho de valor)
+    private boolean infoReset_ = true; //Si el texto informativo ha sido reseteado o no (ha vuelto a su texto por defecto)
 
     public OhnOLevel(int size) {
-        boardSize = size;
+        boardSize_ = size;
     }
 
     @Override
@@ -99,41 +99,41 @@ public class OhnOLevel implements Scene {
 
         //Área en la que se van a dibujar los elementos de la interfaz.
         int paintArea = eng_.getGraphics().getWidth() - 2 * BOARD_OFFSET_X;
-        cellRadius = (int) ((paintArea * 0.9) / 2) / boardSize;
-        cellSeparation = (int) (paintArea * 0.1) / (boardSize - 1);
+        cellRadius_ = (int) ((paintArea * 0.9) / 2) / boardSize_;
+        cellSeparation_ = (int) (paintArea * 0.1) / (boardSize_ - 1);
         int buttonArea = eng_.getGraphics().getWidth() - 2 * BUTTON_OFFSET_X;
-        buttonSeparation = (buttonArea - (BUTTON_SIZE * NUM_BUTTONS)) / (NUM_BUTTONS - 1);
+        buttonSeparation_ = (buttonArea - (BUTTON_SIZE * NUM_BUTTONS)) / (NUM_BUTTONS - 1);
 
-        black = new Color(0, 0, 0, 255);
-        darkGrey = new Color(150, 150, 150, 255);
-        white = new Color(255, 255, 255, 255);
+        black_ = new Color(0, 0, 0, 255);
+        lightGrey_ = new Color(150, 150, 150, 255);
+        white_ = new Color(255, 255, 255, 255);
 
-        infoFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", black, INFO_REG_SIZE, true);
-        progressFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", darkGrey, PROGRESS_SIZE, false);
-        numberFont = g.newFont("assets/fonts/JosefinSans-Bold.ttf", white, cellRadius, false);
+        infoFont_ = g.newFont("assets/fonts/JosefinSans-Bold.ttf", black_, INFO_REG_SIZE, true);
+        progressFont_ = g.newFont("assets/fonts/JosefinSans-Bold.ttf", lightGrey_, PROGRESS_SIZE, false);
+        numberFont_ = g.newFont("assets/fonts/JosefinSans-Bold.ttf", white_, cellRadius_, false);
 
-        infoRegContent = boardSize + " x " + boardSize;
-        infoTextRender = new TextRender(infoFont, infoRegContent, true);
-        objects.add(infoTextRender);
-        progressTextRender = new TextRender(progressFont, "Placeholder", true);
-        objects.add(progressTextRender);
+        infoRegContent_ = boardSize_ + " x " + boardSize_;
+        hintTextRender_ = new TextRender(infoFont_, infoRegContent_, true);
+        objects_.add(hintTextRender_);
+        progressTextRender_ = new TextRender(progressFont_, "Placeholder", true);
+        objects_.add(progressTextRender_);
 
-        lockImage = g.newImage("assets/sprites/lock.png");
-        quitImage = new ImageRenderer(g.newImage("assets/sprites/close.png"), BUTTON_SIZE, BUTTON_SIZE, false);
-        objects.add(quitImage);
-        undoImage = new ImageRenderer(g.newImage("assets/sprites/history.png"), BUTTON_SIZE, BUTTON_SIZE, false);
-        objects.add(undoImage);
-        hintImage = new ImageRenderer(g.newImage("assets/sprites/eye.png"), BUTTON_SIZE, BUTTON_SIZE, false);
-        objects.add(hintImage);
+        lockImage_ = g.newImage("assets/sprites/lock.png");
+        quitImage_ = new ImageRenderer(g.newImage("assets/sprites/close.png"), BUTTON_SIZE, BUTTON_SIZE, false);
+        objects_.add(quitImage_);
+        undoImage_ = new ImageRenderer(g.newImage("assets/sprites/history.png"), BUTTON_SIZE, BUTTON_SIZE, false);
+        objects_.add(undoImage_);
+        hintImage_ = new ImageRenderer(g.newImage("assets/sprites/eye.png"), BUTTON_SIZE, BUTTON_SIZE, false);
+        objects_.add(hintImage_);
 
-        board = new Board(boardSize);
-        boardRenderer = new BoardRenderer(numberFont, lockImage, boardSize, cellRadius, cellSeparation, board);
-        objects.add(boardRenderer);
+        board_ = new Board(boardSize_);
+        boardRenderer_ = new BoardRenderer(numberFont_, lockImage_, boardSize_, cellRadius_, cellSeparation_, board_);
+        objects_.add(boardRenderer_);
 
-        progressTextRender.setText(board.donePercentage() + "%"); //Actualiza el porcentaje de progreso.
+        progressTextRender_.setText(board_.donePercentage() + "%"); //Actualiza el porcentaje de progreso.
 
         //Se hace aparecer progresivamente todos los renderers de la escena.
-        for (int i = 0; i < objects.size(); ++i) objects.get(i).fadeIn(SCENE_FADE_DURATION);
+        for (int i = 0; i < objects_.size(); ++i) objects_.get(i).fadeIn(SCENE_FADE_DURATION);
     }
 
     @Override
@@ -145,19 +145,19 @@ public class OhnOLevel implements Scene {
         TouchEvent event;
         next:
         while ((event = eng_.getInput().dequeueEvent()) != null) {
-            if (gameOver || event.type != TouchEvent.TouchType.PRESS) continue;
+            if (gameOver_ || event.type != TouchEvent.TouchType.PRESS) continue;
             //Para cada celda se comprueba si se ha hecho click en ella
-            for (int i = 0; i < boardSize; ++i) {
-                for (int j = 0; j < boardSize; ++j) {
+            for (int i = 0; i < boardSize_; ++i) {
+                for (int j = 0; j < boardSize_; ++j) {
                     if (checkCollisionCircle(
-                            BOARD_OFFSET_X + cellRadius * (i + 1) + (cellSeparation + cellRadius) * i,
-                            BOARD_OFFSET_Y + cellRadius * (j + 1) + (cellSeparation + cellRadius) * j,
-                            cellRadius, event.x, event.y)) {
-                        if (!board.isFixed(j, i)) //Si no es fija cambia de estado
+                            BOARD_OFFSET_X + cellRadius_ * (i + 1) + (cellSeparation_ + cellRadius_) * i,
+                            BOARD_OFFSET_Y + cellRadius_ * (j + 1) + (cellSeparation_ + cellRadius_) * j,
+                            cellRadius_, event.x, event.y)) {
+                        if (!board_.isFixed(j, i)) //Si no es fija cambia de estado
                             changeCell(j, i);
                         else { //Si es fija se hace la animación de "golpes" y se actualizan los candados.
-                            boardRenderer.bumpCell(j, i);
-                            lockChanged = true;
+                            boardRenderer_.bumpCell(j, i);
+                            lockChanged_ = true;
                         }
                         continue next;
                     }
@@ -167,25 +167,25 @@ public class OhnOLevel implements Scene {
             //Se comrpueban los botones
             for (int i = 0; i < NUM_BUTTONS; ++i) {
                 if (checkCollisionCircle(
-                        BUTTON_OFFSET_X + (BUTTON_SIZE / 2) + (BUTTON_SIZE + buttonSeparation) * i,
+                        BUTTON_OFFSET_X + (BUTTON_SIZE / 2) + (BUTTON_SIZE + buttonSeparation_) * i,
                         BUTTON_OFFSET_Y + (BUTTON_SIZE / 2),
                         BUTTON_SIZE / 2, event.x, event.y)) {
                     switch (i) {
                         case 0: //Salir
-                            fadeOut = true;
-                            elapsedTime = 0;
-                            for (int j = 0; j < objects.size(); ++j)
-                                objects.get(j).fadeOut(SCENE_FADE_DURATION);
+                            fadeOut_ = true;
+                            elapsedTime_ = 0;
+                            for (int j = 0; j < objects_.size(); ++j)
+                                objects_.get(j).fadeOut(SCENE_FADE_DURATION);
                             break;
                         case 1: //Deshacer movimiento
                             undoMove();
                             break;
                         case 2: //Dar pista
-                            if (boardRenderer.isCellHighlighted()) { //Si se esta dando una pista, se deja de dar
-                                boardRenderer.endHighlighting();
-                                infoTextRender.fadeNewText(infoRegContent, INFO_REG_SIZE, false, TEXT_FADE_DURATION);
-                                infoReset = true;
-                            } else if (!gameOver) { //Si no se esta dando una pista, se empieza a dar
+                            if (boardRenderer_.isCellHighlighted()) { //Si se esta dando una pista, se deja de dar
+                                boardRenderer_.endHighlighting();
+                                hintTextRender_.fadeNewText(infoRegContent_, INFO_REG_SIZE, false, TEXT_FADE_DURATION);
+                                infoReset_ = true;
+                            } else if (!gameOver_) { //Si no se esta dando una pista, se empieza a dar
                                 giveHint();
                             }
                             break;
@@ -202,23 +202,23 @@ public class OhnOLevel implements Scene {
 
         g.save();
         g.translate(g.getWidth() / 2, INFO_POS_Y);
-        infoTextRender.render(g);
+        hintTextRender_.render(g);
         g.translate(0, PROGRESS_POS_Y - INFO_POS_Y);
-        progressTextRender.render(g);
+        progressTextRender_.render(g);
         g.restore();
 
         g.save();
         g.translate(BOARD_OFFSET_X, BOARD_OFFSET_Y);
-        boardRenderer.render(g);
+        boardRenderer_.render(g);
         g.restore();
 
         g.save();
         g.translate(BUTTON_OFFSET_X, BUTTON_OFFSET_Y);
-        quitImage.render(g);
-        g.translate(BUTTON_SIZE + buttonSeparation, 0);
-        undoImage.render(g);
-        g.translate(BUTTON_SIZE + buttonSeparation, 0);
-        hintImage.render(g);
+        quitImage_.render(g);
+        g.translate(BUTTON_SIZE + buttonSeparation_, 0);
+        undoImage_.render(g);
+        g.translate(BUTTON_SIZE + buttonSeparation_, 0);
+        hintImage_.render(g);
         g.restore();
     }
 
@@ -227,35 +227,35 @@ public class OhnOLevel implements Scene {
      * Devuelve true si no se deben procesar inputs porque se esta realizando una animacion, false en caso contrario
      */
     private boolean updateScene(double deltaTime) {
-        if (elapsedFrames <= 1) { elapsedFrames++; deltaTime = 0; } //Ver declaración de elapsedFrames.
+        if (elapsedFrames_ <= 1) { elapsedFrames_++; deltaTime = 0; } //Ver declaración de elapsedFrames.
 
         //Si se ha rellenado el tablero pero no se ha acabado la partida, se espera SECONDS_UNTIL_HINT para mostrar una pista
-        int donePercentage = board.donePercentage();
-        if (!gameOver && donePercentage == 100 && timeForHint < SECONDS_UNTIL_HINT) {
-            timeForHint += deltaTime;
-            if (timeForHint >= SECONDS_UNTIL_HINT) {
+        int donePercentage = board_.donePercentage();
+        if (!gameOver_ && donePercentage == 100 && timeForHint_ < SECONDS_UNTIL_HINT) {
+            timeForHint_ += deltaTime;
+            if (timeForHint_ >= SECONDS_UNTIL_HINT) {
                 giveHint();
             }
         }
 
         updateRenders(deltaTime);
-        if (gameOver) { //Si se ha acabado el juego se espera antes de empezar a cambiar de escena
-            if (elapsedTime >= TIME_AFTER_WIN) {
-                gameOver = false;
-                fadeOut = true; //Flag de transicion
-                elapsedTime = 0;
+        if (gameOver_) { //Si se ha acabado el juego se espera antes de empezar a cambiar de escena
+            if (elapsedTime_ >= TIME_AFTER_WIN) {
+                gameOver_ = false;
+                fadeOut_ = true; //Flag de transicion
+                elapsedTime_ = 0;
 
                 //Se le dice a todos los renderers que desaparezcan progresivamente.
-                for (int i = 0; i < objects.size(); ++i)
-                    if (objects.get(i) != infoTextRender)
-                        objects.get(i).fadeOut(SCENE_FADE_DURATION);
-            } else elapsedTime += deltaTime;
+                for (int i = 0; i < objects_.size(); ++i)
+                    if (objects_.get(i) != hintTextRender_)
+                        objects_.get(i).fadeOut(SCENE_FADE_DURATION);
+            } else elapsedTime_ += deltaTime;
         }
-        if (fadeOut) { //Hace fade out hasta desaparecer por completo y luego cambia de escena.
-            if (elapsedTime >= SCENE_FADE_DURATION) {
+        if (fadeOut_) { //Hace fade out hasta desaparecer por completo y luego cambia de escena.
+            if (elapsedTime_ >= SCENE_FADE_DURATION) {
                 OhnOMenu app = new OhnOMenu();
                 eng_.changeScene(app);
-            } else elapsedTime += deltaTime;
+            } else elapsedTime_ += deltaTime;
         }
         return false;
     }
@@ -264,17 +264,17 @@ public class OhnOLevel implements Scene {
      * Actualiza los renderers, actualizando sus animaciones con deltaTime.
      */
     private void updateRenders(double deltaTime) {
-        for (int i = 0; i < objects.size(); ++i)
-            objects.get(i).updateRenderer(deltaTime);
+        for (int i = 0; i < objects_.size(); ++i)
+            objects_.get(i).updateRenderer(deltaTime);
         //Si deberian aparecer/desaparecer los candados se le dice a las celdas apropiadas que ciclen su visibilidad.
-        if (!lockChanged) return;
-        for (int i = 0; i < boardSize; ++i) {
-            for (int j = 0; j < boardSize; ++j) {
-                if (lockChanged && boardRenderer.getType(i, j) == CellRenderer.CELL_TYPE.LOCK)
-                    boardRenderer.changeLock(i, j);
+        if (!lockChanged_) return;
+        for (int i = 0; i < boardSize_; ++i) {
+            for (int j = 0; j < boardSize_; ++j) {
+                if (lockChanged_ && boardRenderer_.getType(i, j) == CellRenderer.CELL_TYPE.LOCK)
+                    boardRenderer_.changeLock(i, j);
             }
         }
-        lockChanged = false;
+        lockChanged_ = false;
     }
 
     //region Board Methods
@@ -282,28 +282,28 @@ public class OhnOLevel implements Scene {
      * Cambia el estado de una celda y lo que esto conlleva.
      */
     public void changeCell(int x, int y) {
-        if (!infoReset) {
-            infoTextRender.fadeNewText(infoRegContent, INFO_REG_SIZE, false, TEXT_FADE_DURATION);
-            boardRenderer.endHighlighting();
-            infoReset = true;
+        if (!infoReset_) {
+            hintTextRender_.fadeNewText(infoRegContent_, INFO_REG_SIZE, false, TEXT_FADE_DURATION);
+            boardRenderer_.endHighlighting();
+            infoReset_ = true;
         }
 
-        boardRenderer.transitionCell(x, y);
-        if (board.changeCell(x, y)) {
-            gameOver = true;
-            infoTextRender.fadeNewText(YOU_WIN_TEXTS[OhnORandom.r.nextInt(YOU_WIN_TEXTS.length)], INFO_WIN_SIZE, true, TEXT_FADE_DURATION);
+        boardRenderer_.transitionCell(x, y);
+        if (board_.changeCell(x, y)) {
+            gameOver_ = true;
+            hintTextRender_.fadeNewText(YOU_WIN_TEXTS[OhnORandom.r.nextInt(YOU_WIN_TEXTS.length)], INFO_WIN_SIZE, true, TEXT_FADE_DURATION);
         }
 
-        progressTextRender.setText(board.donePercentage() + "%"); //Actualiza el porcentaje de progreso.
-        timeForHint = 0; //Cuando se hace un input se reinicia la cuenta del tiempo de la pista que sale al completar el tablero mal.
+        progressTextRender_.setText(board_.donePercentage() + "%"); //Actualiza el porcentaje de progreso.
+        timeForHint_ = 0; //Cuando se hace un input se reinicia la cuenta del tiempo de la pista que sale al completar el tablero mal.
     }
 
     private void giveHint() {
-        board.calculateHint();
-        Hint hint = board.hint;
-        boardRenderer.highlightCell(hint.x, hint.y); //Se destaca la celda para dar la pista.
-        infoTextRender.fadeNewText(hint.type.text, INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Se muestra la pista.
-        infoReset = false;
+        board_.calculateHint();
+        Hint hint = board_.hint;
+        boardRenderer_.highlightCell(hint.x, hint.y); //Se destaca la celda para dar la pista.
+        hintTextRender_.fadeNewText(hint.type.text, INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Se muestra la pista.
+        infoReset_ = false;
     }
 
     /**
@@ -312,13 +312,13 @@ public class OhnOLevel implements Scene {
      */
     private void undoMove() {
         String text = "";
-        Tuple<Integer, Integer> cellPos = board.undoMove();
+        Tuple<Integer, Integer> cellPos = board_.undoMove();
         if (cellPos == null) {
             text = "No queda nada por hacer";
-            boardRenderer.endHighlighting();
+            boardRenderer_.endHighlighting();
         }
         else {
-            switch (board.getCurrState(cellPos.x, cellPos.y)) {
+            switch (board_.getCurrState(cellPos.x, cellPos.y)) {
                 case BLUE:
                     text = "Esta celda ha vuelto a azul";
                     break;
@@ -329,13 +329,13 @@ public class OhnOLevel implements Scene {
                     text = "Esta celda ha vuelto a rojo";
                     break;
             }
-            boardRenderer.transitionBack(cellPos.x, cellPos.y);
-            boardRenderer.highlightCell(cellPos.x, cellPos.y);
-            progressTextRender.setText(board.donePercentage() + "%"); //Actualiza el porcentaje de progreso.
+            boardRenderer_.transitionBack(cellPos.x, cellPos.y);
+            boardRenderer_.highlightCell(cellPos.x, cellPos.y);
+            progressTextRender_.setText(board_.donePercentage() + "%"); //Actualiza el porcentaje de progreso.
         }
-        infoTextRender.fadeNewText(text, INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Hace aparecer un texto con el string establecido.
-        infoReset = false;
-        timeForHint = 0; //Cuando se hace un input se reinicia la cuenta del tiempo de la pista que sale al completar el tablero mal.
+        hintTextRender_.fadeNewText(text, INFO_HINT_SIZE, false, TEXT_FADE_DURATION); //Hace aparecer un texto con el string establecido.
+        infoReset_ = false;
+        timeForHint_ = 0; //Cuando se hace un input se reinicia la cuenta del tiempo de la pista que sale al completar el tablero mal.
     }
     //endregion
 

@@ -24,16 +24,16 @@ public class OhnOIntro implements Scene {
     private final float SCENE_FADE_DURATION = 0.25f; //Segundos que duran los fades
 
     //Variables de animacion
-    private boolean fadeOut = false;
-    private float elapsedTime = 0f; //Segundos que lleva haciendose un fade
+    private boolean fadeOut_ = false;
+    private float elapsedTime_ = 0f; //Segundos que lleva haciendose un fade
 
     //Render
-    private ImageRenderer q42Image;
-    private TextRender logoText;
-    private TextRender playText;
-    private TextRender creditText1;
-    private TextRender creditText2;
-    private List<ObjectRenderer> objects = new ArrayList<>();
+    private ImageRenderer q42Image_;
+    private TextRender logoText_;
+    private TextRender playText_;
+    private TextRender creditText1_;
+    private TextRender creditText2_;
+    private List<ObjectRenderer> objects_ = new ArrayList<>();
 
     public OhnOIntro() {}
 
@@ -44,19 +44,19 @@ public class OhnOIntro implements Scene {
     public void init(Engine eng) {
         eng_ = eng;
         Graphics g = eng_.getGraphics();
-        logoText = new TextRender(g.newFont("assets/fonts/Molle-Regular.ttf", new Color(0, 0, 0, 255), 85, false),"Oh nO", true);
-        playText = new TextRender(g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(0, 0, 0, 255), 60, false), "Jugar", true);
-        creditText1 = new TextRender(g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(150, 150, 150, 255), 25, false), "Un juego copiado a Q42", true);
-        creditText2 = new TextRender(g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(150, 150, 150, 255), 25, false), "Creado por Martin Kool", true);
-        q42Image = new ImageRenderer(g.newImage("assets/sprites/q42.png"), IMAGE_WIDTH, IMAGE_HEIGHT, true);
-        objects.add(logoText);
-        objects.add(playText);
-        objects.add(creditText1);
-        objects.add(creditText2);
-        objects.add(q42Image);
+        logoText_ = new TextRender(g.newFont("assets/fonts/Molle-Regular.ttf", new Color(0, 0, 0, 255), 85, false),"Oh nO", true);
+        playText_ = new TextRender(g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(0, 0, 0, 255), 60, false), "Jugar", true);
+        creditText1_ = new TextRender(g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(150, 150, 150, 255), 25, false), "Un juego copiado a Q42", true);
+        creditText2_ = new TextRender(g.newFont("assets/fonts/JosefinSans-Bold.ttf", new Color(150, 150, 150, 255), 25, false), "Creado por Martin Kool", true);
+        q42Image_ = new ImageRenderer(g.newImage("assets/sprites/q42.png"), IMAGE_WIDTH, IMAGE_HEIGHT, true);
+        objects_.add(logoText_);
+        objects_.add(playText_);
+        objects_.add(creditText1_);
+        objects_.add(creditText2_);
+        objects_.add(q42Image_);
 
         //Se le dice a todos los objetos renderizables que aparezcan progresivamente al iniciar la escena.
-        for (int i = 0; i < objects.size(); ++i) objects.get(i).fadeIn(SCENE_FADE_DURATION);
+        for (int i = 0; i < objects_.size(); ++i) objects_.get(i).fadeIn(SCENE_FADE_DURATION);
     }
 
     /**
@@ -75,11 +75,11 @@ public class OhnOIntro implements Scene {
             if (checkCollisionBox(
                     eng_.getGraphics().getWidth() / 2,
                     PLAY_POS_Y,
-                    eng_.getGraphics().getTextWidth(playText.getFont(), playText.getText()),
-                    eng_.getGraphics().getTextHeight(playText.getFont(), playText.getText()),
+                    eng_.getGraphics().getTextWidth(playText_.getFont(), playText_.getText()),
+                    eng_.getGraphics().getTextHeight(playText_.getFont(), playText_.getText()),
                     event.x, event.y,true)) {
-                fadeOut = true; //Flag de transicion
-                for (int j = 0; j < objects.size(); ++j) objects.get(j).fadeOut(SCENE_FADE_DURATION);
+                fadeOut_ = true; //Flag de transicion
+                for (int j = 0; j < objects_.size(); ++j) objects_.get(j).fadeOut(SCENE_FADE_DURATION);
             }
         }
     }
@@ -92,18 +92,18 @@ public class OhnOIntro implements Scene {
         //g.scale(2, 1); // a
         g.save();
         g.translate(g.getWidth() / 2, LOGO_POS_Y);
-        logoText.render(g);
+        logoText_.render(g);
         g.translate(0, PLAY_POS_Y - LOGO_POS_Y);
-        playText.render(g);
+        playText_.render(g);
         g.translate(0, FIRST_CREDIT_POS_Y - PLAY_POS_Y);
-        creditText1.render(g);
+        creditText1_.render(g);
         g.translate(0, SECOND_CREDIT_POS_Y - FIRST_CREDIT_POS_Y);
-        creditText2.render(g);
+        creditText2_.render(g);
         g.restore();
 
         g.save();
         g.translate(g.getWidth() / 2, IMAGE_POS_Y);
-        q42Image.render(g);
+        q42Image_.render(g);
         g.restore();
     }
 
@@ -113,12 +113,12 @@ public class OhnOIntro implements Scene {
      */
     private boolean updateScene(double deltaTime) {
         updateRenders(deltaTime);
-        if (fadeOut) {
-            if (elapsedTime >= SCENE_FADE_DURATION) {
+        if (fadeOut_) {
+            if (elapsedTime_ >= SCENE_FADE_DURATION) {
                 OhnOMenu app = new OhnOMenu();
                 eng_.changeScene(app);
             }
-            else elapsedTime += deltaTime;
+            else elapsedTime_ += deltaTime;
         }
         return false;
     }
@@ -126,8 +126,8 @@ public class OhnOIntro implements Scene {
      * Actualiza los renderers
      */
     private void updateRenders(double deltaTime) {
-        for (int i = 0; i < objects.size(); ++i)
-            objects.get(i).updateRenderer(deltaTime);
+        for (int i = 0; i < objects_.size(); ++i)
+            objects_.get(i).updateRenderer(deltaTime);
     }
 
     /**

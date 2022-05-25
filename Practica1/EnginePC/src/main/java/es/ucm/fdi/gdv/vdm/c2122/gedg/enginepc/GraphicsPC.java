@@ -31,7 +31,7 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
         BufferStrategy strategy = jf.getBufferStrategy();
         while(strategy == null) { strategy = jf.getBufferStrategy(); }
         g_ = strategy.getDrawGraphics();
-        jf.addComponentListener(this);
+        jf_.addComponentListener(this);
         saves_ = new Stack<>();
     }
 
@@ -159,7 +159,7 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
         //Se calcula el alto y ancho del texto para poder centrarlo
         FontRenderContext frc = new FontRenderContext(null, true, true);
         Rectangle2D r2D = f.getFont().getStringBounds(text, frc);
-        int rWidth = (int)Math.round(r2D.getWidth());
+        int rWidth = fm.stringWidth(text);
         int rHeight = (int)Math.round(r2D.getHeight());
         int tX = (int)Math.round(r2D.getX());
         int tY = (int)Math.round(r2D.getY());

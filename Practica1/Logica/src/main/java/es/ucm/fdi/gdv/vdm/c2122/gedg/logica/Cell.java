@@ -19,14 +19,14 @@ public class Cell {
 
     private int curNumber_ = 0; // Numero de azules que tiene actualmente alrededor
     private int greysAround_ = 0; // Numero de grises alrededor
-    private boolean completedBlueAround = false; // Si tiene alrededor alguna azul completada
+    private boolean completedBlueAround_ = false; // Si tiene alrededor alguna azul completada
     private Board.Direction singlePossibleDirection_ = null; // Si solamente se puede expandir en una direccion
     private DirectionInfo[] directionInfo_ = new DirectionInfo[4]; // Informacion del resto de direcciones
 
     public void resetInfo(){
         curNumber_ = 0;
         greysAround_ = 0;
-        completedBlueAround = false;
+        completedBlueAround_ = false;
         singlePossibleDirection_ = null;
         directionInfo_ = new DirectionInfo[4];
         for (int i = 0; i < 4; i++) {
@@ -123,7 +123,7 @@ public class Cell {
         greysAround_ = number;
     }
     public void setCompletedBlueAround(boolean completedNumbersAround) {
-        completedBlueAround = completedNumbersAround;
+        completedBlueAround_ = completedNumbersAround;
     }
     public void setSinglePossibleDirection(Board.Direction d) {
         singlePossibleDirection_ = d;
@@ -135,7 +135,7 @@ public class Cell {
     public int getCurNumber() { return curNumber_; }
     public int getGreysAround() { return greysAround_; }
     public boolean getCompletedBlueAround() {
-        return completedBlueAround;
+        return completedBlueAround_;
     }
     public boolean canBeCompletedWithGreys(){return greysAround_ + curNumber_ == number_;}
     public boolean isCompleted(){return curNumber_ == number_;}

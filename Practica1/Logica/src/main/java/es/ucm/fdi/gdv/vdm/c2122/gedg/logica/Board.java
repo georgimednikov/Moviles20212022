@@ -36,12 +36,12 @@ public class Board {
     private int numCells_;
     private int fixedCells_ = 0; //Número total de celdas fijas (no modificables)
     private int coloredCells_ = 0; //Número de celdas no grises
-    private int numberTries; //Número de intentos que se realizan en el algoritmo de generación.
+    private int numberTries_; //Número de intentos que se realizan en el algoritmo de generación.
 
     public Board(int size) {
         numCells_ = size * size;
         boardSize_ = size;
-        numberTries = (boardSize_ * boardSize_) * 5; //Numero de intentos que vaya acorde del tamaño
+        numberTries_ = (boardSize_ * boardSize_) * 5; //Numero de intentos que vaya acorde del tamaño
 
         //Se crea e inicializa el tablero
         board_ = new Cell[size][size];
@@ -158,7 +158,7 @@ public class Board {
         for (int i = 0; i < boardSize_; i++) {
             for (int j = 0; j < boardSize_; j++) {
                 if (board_[i][j].getCurrState() == Cell.STATE.GREY ||
-                        (overwriteNumbers && board_[i][j].getCurrState() == Cell.STATE.BLUE && board_[i][j].isFixed())){
+                        (overwriteNumbers && board_[i][j].getCurrState() == Cell.STATE.BLUE)){
                     board_[i][j].fixCell(Cell.STATE.BLUE);
                     board_[i][j].setNumber(board_[i][j].getCurNumber());
                 }
@@ -197,7 +197,7 @@ public class Board {
     public void maxify(int maxAllowed){
         boolean tryAgain = true;
         int attempts = 0;
-        while(tryAgain && attempts++ < numberTries){
+        while(tryAgain && attempts++ < numberTries_){
             tryAgain = false;
             List<Tuple<Integer, Integer>> maxCells = new ArrayList<>();
             for (int i = 0; i < boardSize_; i++)
@@ -231,7 +231,6 @@ public class Board {
                 tryAgain = true;
             }
         }
-        render(board_);
     }
 
     /**
@@ -355,36 +354,14 @@ public class Board {
      */
     public void fillDirectionCell(int x, int y, Direction dir, Cell.STATE color){
         int k = 1;
-        while(inArray(x + dir.dx * k, y + dir.dy * k)){
-            Cell otherCell = board_[x + dir.dx * k][y + dir.dy * k];
+        Cell otherCell;
+        while(inArray(x + dir.dx * k, y + dir.dy * k) &&
+                (otherCell = board_[x + dir.dx * k][y + dir.dy * k]).getCurrState() != Cell.STATE.RED){
             if(otherCell.getCurrState() == Cell.STATE.GREY){
                 otherCell.setCurrState(color);
                 break;
             } else
                 k++;
-        }
-    }
-
-    public void render(Cell[][] board){
-        for (int i = 0; i < boardSize_; i++) {
-            for (int j = 0; j < boardSize_; j++) {
-                Cell c = board[i][j];
-                String s;
-                switch (c.getCurrState()){
-                    case RED:
-                    default:
-                        s = "R ";
-                        break;
-                    case GREY:
-                        s = "_ ";
-                        break;
-                    case BLUE:
-                        s = c.getNumber() + " ";
-                        break;
-                }
-                System.out.print(s);
-            }
-            System.out.println();
         }
     }
 
@@ -421,8 +398,6 @@ public class Board {
             }
         }
         solve(true); // Solo quedan pistas de no error
-        if (hint == null)
-            System.out.println("AH");
     }
 
     /**
@@ -460,7 +435,7 @@ public class Board {
         boolean tryAgain = true;
         int attempts = 0;
 
-        while (tryAgain && attempts++ < numberTries){
+        while (tryAgain && attempts++ < numberTries_){
             tryAgain = false;
 
             if(isDone())
@@ -486,9 +461,6 @@ public class Board {
                         if(!hintMode)
                             closeCell(i, j);
                         hint = new Hint(Hint.HintType.VISIBLE_CELLS_COVERED, i, j);
-                        //System.out.print(hint != null ? Hint.hintText[hint.type.ordinal()] + " " : "");
-                        //System.out.print(hint != null ? hint.x + " " : "");
-                        //System.out.println(hint != null ? hint.y + " " : "");//TODO
                         tryAgain = true;
                         break;
                     }
@@ -497,9 +469,6 @@ public class Board {
                         if(!hintMode)
                             fillDirectionCell(i, j, cell.getSinglePossibleDirection(), Cell.STATE.BLUE);
                         hint = new Hint(Hint.HintType.MUST_PLACE_BLUE, i, j);
-                        //System.out.print(hint != null ? Hint.hintText[hint.type.ordinal()] + " " : "");
-                        //System.out.print(hint != null ? hint.x + " " : "");
-                        //System.out.println(hint != null ? hint.y + " " : "");//TODO
                         tryAgain = true;
                         break;
                     }
@@ -510,9 +479,6 @@ public class Board {
                             if(!hintMode)
                                 fillDirectionCell(i, j, dir, Cell.STATE.RED);
                             hint = new Hint(Hint.HintType.CANNOT_SURPASS_LIMIT, i, j);
-                            //System.out.print(hint != null ? Hint.hintText[hint.type.ordinal()] + " " : "");
-                            //System.out.print(hint != null ? hint.x + " " : "");
-                            //System.out.println(hint != null ? hint.y + " " : "");//TODO
                             tryAgain = true;
                             break;
                         }
@@ -521,9 +487,6 @@ public class Board {
                             if(!hintMode)
                                 fillDirectionCell(i, j, dir, Cell.STATE.BLUE);
                             hint = new Hint(Hint.HintType.MUST_PLACE_BLUE, i, j);
-                            //System.out.print(hint != null ? Hint.hintText[hint.type.ordinal()] + " " : "");
-                            //System.out.print(hint != null ? hint.x + " " : "");
-                            //System.out.println(hint != null ? hint.y + " " : "");//TODO
                             tryAgain = true;
                             break;
                         }
@@ -536,9 +499,6 @@ public class Board {
                     if(!hintMode)
                         cell.setCurrState(Cell.STATE.RED);
                     hint = new Hint(Hint.HintType.ISOLATED_AND_EMPTY, i, j);
-                    //System.out.print(hint != null ? Hint.hintText[hint.type.ordinal()] + " " : "");
-                    //System.out.print(hint != null ? hint.x + " " : "");
-                    //System.out.println(hint != null ? hint.y + " " : "");//TODO
                     tryAgain = true;
                     break;
                 }
@@ -551,15 +511,11 @@ public class Board {
      * Coloca celdas grises en el tablero mientras tenga una solucion unica
      */
     public void breakDown(){
-        boolean tryAgain = true;
         int attempts = 0;
         int reds = 0;
         int minReds = 1;
         Cell cell;
         List<Tuple<Integer, Integer>> cellPool = new ArrayList<>();
-        //render(board_); // TODO
-        //System.out.println();
-        //System.out.println();
         for (int i = 0; i < boardSize_; i++) {
             for (int j = 0; j < boardSize_; j++) {
                 cell = board_[i][j];
@@ -570,8 +526,7 @@ public class Board {
             }
         }
 
-        while (tryAgain && cellPool.size() > 0 && attempts++ < numberTries){
-            tryAgain = false;
+        while (cellPool.size() > 0 && attempts++ < numberTries_){
             Cell[][] save1 = copyBoard();
 
             Tuple<Integer, Integer> poolCell = cellPool.remove(OhnORandom.r.nextInt(cellPool.size()));
@@ -580,11 +535,9 @@ public class Board {
 
             if (isRed && reds <= minReds) continue;
 
-            int cellNum = cell.getNumber();
-            cell.resetCell(); // Comentar
-            cell.setNumber(cellNum);
+            cell.setCurrState(Cell.STATE.GREY);
+            cell.unfix();
             Cell[][] save2 = copyBoard();
-            //render(board_); // TODO
             if (solve(false)) {
                 if (isRed) reds--;
                 board_ = save2;
@@ -592,9 +545,6 @@ public class Board {
             else {
                 board_ = save1;
             }
-            tryAgain = true;
-            //System.out.println();
-            //System.out.println();
         }
     }
 
