@@ -121,6 +121,7 @@ public class Board {
             coloredCells_--;
         }
 
+        solve(true); //Se actualizan las pistas que se pueden dar.
         return cellPos;
     }
 
