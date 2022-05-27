@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Tiene una pool de eventos por dentro a la que se puede acceder con enqueueEvent(), lo que hace que
+ * Pool de eventos a la que se puede acceder con enqueueEvent(), lo que hace que
  * se meta un evento en la cola de eventos a la que tiene acceso el usuario mediante dequeueEvent().
  * El usuario tiene que llamar a dequeueEvent() en un bucle para recoger todos los eventos emitidos
  * durante el frame. Si al final del frame quedan eventos por procesar, se quedan dentro

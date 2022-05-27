@@ -80,9 +80,8 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
-                                                <entry key="imagePath" value="D:\aloit\Documentos\Universidad\VDM\Moviles20212022\Practica1\assets\sprites\q42.png" />
-                                                <entry key="scalingPercent" value="102" />
-                                                <entry key="trimmed" value="true" />
+                                                <entry key="imagePath" value="D:\aloit\Documentos\Universidad\VDM\Moviles20212022\Practica1\assets\sprites\Icon.png" />
+                                                <entry key="scalingPercent" value="67" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -114,8 +113,7 @@
                                   </option>
                                   <option name="values">
                                     <map>
-                                      <entry key="backgroundLayerName" value="ohnoiconbackground" />
-                                      <entry key="foregroundLayerName" value="ohnoiconforeground" />
+                                      <entry key="previewDensity" value="XXXHIGH" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -279,6 +277,11 @@
                                           </PersistentState>
                                         </value>
                                       </entry>
+                                    </map>
+                                  </option>
+                                  <option name="values">
+                                    <map>
+                                      <entry key="previewDensity" value="XXXHIGH" />
                                     </map>
                                   </option>
                                 </PersistentState>

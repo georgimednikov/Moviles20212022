@@ -223,7 +223,7 @@ public class OhnOLevel implements Scene {
     }
 
     /**
-     * Actualiza todo lo relacionado con las animaciones de la escena
+     * Actualiza lo relacionado con las animaciones de la escena
      * Devuelve true si no se deben procesar inputs porque se esta realizando una animacion, false en caso contrario
      */
     private boolean updateScene(double deltaTime) {
@@ -314,7 +314,7 @@ public class OhnOLevel implements Scene {
         String text = "";
         Tuple<Integer, Integer> cellPos = board_.undoMove();
         if (cellPos == null) {
-            text = "No queda nada por hacer";
+            text = "No queda nada por deshacer";
             boardRenderer_.endHighlighting();
         }
         else {

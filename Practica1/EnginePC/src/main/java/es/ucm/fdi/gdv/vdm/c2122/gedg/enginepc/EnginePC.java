@@ -24,6 +24,9 @@ public class EnginePC implements Engine {
     private double deltaTime_;
     private double lastFrameTime_;
 
+    /**
+     * Crea la ventana, los gráficos y la entrada
+     */
     public boolean init(String windowName) {
         jf_ = new JFrame(windowName);
         jf_.setSize(600,400); //Tamaño por defecto se puede cambiar con setWindowSize del motor gráfico.
@@ -108,7 +111,7 @@ public class EnginePC implements Engine {
             }
 
             currApp.update();
-            ((InputPC)i_).releaseEvents();
+            ((InputPC)i_).releaseEvents();// Se liberan los eventos utilizados
             do {
                 do {
                     //Se consigue la estrategia de renderizado y la aplicacion le dice que dibujar

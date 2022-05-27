@@ -1,7 +1,7 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.logica;
 
 public class DirectionInfo {
-    public int greysCount = 0;
+    public int greysCount = 0; // Cuantos grises hay en esta direccion
     public int numberCountAfterGreys = 0; // Cuantos azules hay tras el primer gris encontrado
     public boolean wouldBeTooMuch = false; // Si al llenar el primer gris se pasaria del numero de azules
     public int maxPossibleCount = 0; // Hasta cuantas celdas azules podria ver en esta direccion

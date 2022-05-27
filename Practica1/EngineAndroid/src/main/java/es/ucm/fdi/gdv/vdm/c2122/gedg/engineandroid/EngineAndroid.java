@@ -99,7 +99,7 @@ public class EngineAndroid implements Engine, Runnable {
             graphics_.lock(); //Se fija un canvas
             graphics_.setGamePosition();
             currApp.update();
-            ((InputAndroid)input_).releaseEvents();
+            ((InputAndroid)input_).releaseEvents(); // Se liberan los eventos utilizados
             currApp.render(); //Se añaden elementos al canvas
             graphics_.unlock(); //Se desfija y renderiza
         }

@@ -231,7 +231,6 @@ public class GraphicsPC extends GraphicsCommon implements ComponentListener {
     @Override
     public void scale(float sx, float sy) {
         ((Graphics2D)g_).scale(sx, sy);
-        //super.scale((int)(sx * refSizeX), (int)(sy * refSizeY)); TODO: ª
     }
 
     /**

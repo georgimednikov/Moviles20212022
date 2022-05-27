@@ -168,7 +168,7 @@ public class OhnOMenu implements Scene {
     }
 
     /**
-     * Actualiza todo lo relacionado con las animaciones de la escena
+     * Actualiza lo relacionado con las animaciones de la escena
      * @return True si no se deben procesar inputs porque se esta realizando una animacion, false en caso contrario
      */
     private boolean updateScene(double deltaTime) {

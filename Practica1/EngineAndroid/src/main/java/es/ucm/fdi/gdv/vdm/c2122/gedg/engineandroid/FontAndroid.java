@@ -25,7 +25,7 @@ public class FontAndroid implements Font {
     }
 
     /**
-     * Devuelve la configuración de dibujado de JFrame de la fuente, que fundamentalmente es la fuente del texto.
+     * Devuelve la configuración de dibujado de Android de la fuente, que fundamentalmente es la fuente del texto.
      */
     public Paint getPaint() { return paint_; }
 
@@ -33,7 +33,6 @@ public class FontAndroid implements Font {
      * Fija el tamaño de la fuente con el que se va a escribir el texto.
      */
     @Override
-    //Modifica el tamaño de renderizado
     public void setRenderSize(int size) {
         paint_.setTextSize(size);
     }

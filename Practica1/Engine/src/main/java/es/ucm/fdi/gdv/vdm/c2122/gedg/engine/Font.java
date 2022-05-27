@@ -31,7 +31,7 @@ public interface Font {
     int	getSize();
 
     /**
-     * Devuelve el color del a fuente.
+     * Devuelve el color de la fuente.
      */
     Color getColor();
 }

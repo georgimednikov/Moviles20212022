@@ -10,6 +10,7 @@ import java.util.List;
  */
 public class Board {
 
+    // Almacena direcciones para su uso
     public enum Direction{
         LEFT(-1, 0, 0),
         UP(0, 1, 1),
@@ -27,7 +28,7 @@ public class Board {
         }
     }
 
-    public Hint hint;
+    public Hint hint; // Hint que se devuelve cuando se pide una
 
     private int boardSize_;
     private Cell[][] board_; //Tablero
@@ -38,6 +39,9 @@ public class Board {
     private int coloredCells_ = 0; //Número de celdas no grises
     private int numberTries_; //Número de intentos que se realizan en el algoritmo de generación.
 
+    /**
+     * Crea un tablero aleatorio del tamaño dado
+     */
     public Board(int size) {
         numCells_ = size * size;
         boardSize_ = size;
@@ -141,7 +145,7 @@ public class Board {
         // Pone celdas en grises mientras la solucion sea unica
         breakDown();
 
-        //Se cuentan las celdas fijas y se asignan las a 0 las coloreadas que ha puesto el usuario.
+        //Se cuentan las celdas fijas y se asignan a 0 las coloreadas que ha puesto el usuario.
         fixedCells_ = coloredCells_ = 0;
         for (int i = 0; i < boardSize_; i++) {
             for (int j = 0; j < boardSize_; j++) {
@@ -151,8 +155,8 @@ public class Board {
     }
 
     /**
-     * Pone todas las celdas que no son pared del tablero a relleno
-     * Si overwriteNumbers, las pone todas a azul
+     * Pone todas las celdas que no son pared del tablero a relleno con su numero
+     * Si overwriteNumbers, tambien las azules
      */
     public void setAllBlue(boolean overwriteNumbers){
         for (int i = 0; i < boardSize_; i++) {
@@ -192,7 +196,6 @@ public class Board {
 
     /**
      * Coloca paredes en el tablero de forma aleatoria hasta que todas las celdas vean como maximo el maxallowed
-     * Asigna el tablero solucion
      */
     public void maxify(int maxAllowed){
         boolean tryAgain = true;
@@ -350,7 +353,7 @@ public class Board {
     }
 
     /**
-     * Pone el color color al encontrarse un gris a partir de x,y siguiendo la direccion dir
+     * Rellena con el color dado al encontrarse un gris a partir de x,y siguiendo la direccion dir
      */
     public void fillDirectionCell(int x, int y, Direction dir, Cell.STATE color){
         int k = 1;
@@ -366,7 +369,7 @@ public class Board {
     }
 
     /**
-     * Busca una pista valida
+     * Busca una pista valida, con prioridad: error>normal
      */
     public void calculateHint(){
         hint = null;
@@ -405,33 +408,6 @@ public class Board {
      * @param hintMode Si es verdadero, el tablero no lo modifica, si no, aplica la pista directamente
      */
     public boolean solve(boolean hintMode){
-        /*board_ = new Cell[5][5];
-        board_[0][0] = new Cell(-1, Cell.STATE.RED, true);
-        board_[1][0] = new Cell(4, Cell.STATE.BLUE, true);
-        board_[2][0] = new Cell(2, Cell.STATE.BLUE, true);
-        board_[3][0] = new Cell(2, Cell.STATE.BLUE, true);
-        board_[4][0] = new Cell(-1, Cell.STATE.RED, true);
-        board_[0][1] = new Cell(2, Cell.STATE.BLUE, true);
-        board_[1][1] = new Cell(3, Cell.STATE.BLUE, true);
-        board_[2][1] = new Cell(-1, Cell.STATE.RED, true);
-        board_[3][1] = new Cell(-1, Cell.STATE.RED, true);
-        board_[4][1] = new Cell(3, Cell.STATE.BLUE, true);
-        board_[0][2] = new Cell(3, Cell.STATE.BLUE, true);
-        board_[1][2] = new Cell(2, Cell.STATE.BLUE, true);
-        board_[2][2] = new Cell(-1, Cell.STATE.RED, true);
-        board_[3][2] = new Cell(1, Cell.STATE.BLUE, true);
-        board_[4][2] = new Cell(4, Cell.STATE.BLUE, true);
-        board_[0][3] = new Cell(-1, Cell.STATE.RED, true);
-        board_[1][3] = new Cell(-1, Cell.STATE.RED, true);
-        board_[2][3] = new Cell(-1, Cell.STATE.RED, true);
-        board_[3][3] = new Cell(-1, Cell.STATE.RED, true);
-        board_[4][3] = new Cell(3, Cell.STATE.BLUE, true);
-        board_[0][4] = new Cell(1, Cell.STATE.GREY, false);
-        board_[1][4] = new Cell(1, Cell.STATE.GREY, false);
-        board_[2][4] = new Cell(-1, Cell.STATE.RED, true);
-        board_[3][4] = new Cell(1, Cell.STATE.BLUE, true);
-        board_[4][4] = new Cell(4, Cell.STATE.BLUE, true);
-*/
         boolean tryAgain = true;
         int attempts = 0;
 

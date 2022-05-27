@@ -22,12 +22,12 @@ public class ImageAndroid implements Image {
     }
 
     /**
-     * Devuelve el bitmap de JFrame que describe la imagen.
+     * Devuelve el bitmap de Android que describe la imagen.
      */
     public Bitmap getBitmap() { return sprite_; }
 
     /**
-     * Devuelve la configuración de dibujado de JFrame de la imagen.
+     * Devuelve la configuración de dibujado de Android de la imagen.
      */
     public Paint getPaint() { return paint_; }
 

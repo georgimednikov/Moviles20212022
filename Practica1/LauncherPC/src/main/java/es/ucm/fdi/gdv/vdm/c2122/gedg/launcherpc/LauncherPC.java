@@ -7,7 +7,6 @@ import es.ucm.fdi.gdv.vdm.c2122.gedg.logica.OhnOIntro;
 
 public class LauncherPC {
     public static void main(String[] args){
-        //Board b = new Board(5);
         //Inicia el motor.
         EnginePC pc = new EnginePC();
         pc.init("0hn0");

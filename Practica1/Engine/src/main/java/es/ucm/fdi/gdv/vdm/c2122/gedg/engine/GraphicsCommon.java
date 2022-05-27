@@ -1,5 +1,11 @@
 package es.ucm.fdi.gdv.vdm.c2122.gedg.engine;
 
+/**
+ * Separa el tamaño lógico del físico de la pantalla.
+ * Las posiciones que la lógica utiliza son respecto a refSize, que al llamar a toPhysical se escalan
+ * según el tamaño de la ventana y se mueven según su relación de aspecto, de forma que esté colocado
+ * el canvas en el centro de la pantalla pero la lógica no tenga que hacer cálculos para esto.
+ */
 public abstract class GraphicsCommon implements Graphics {
 
     //Tamaño de la ventana en la que trabaja la lógica.
@@ -60,11 +66,4 @@ public abstract class GraphicsCommon implements Graphics {
             curPosY = (y - curSizeY) / 2;
         }
     }
-
-    /**
-     * Escala el tamaño del canvas a unas dimensiones dadas (por defecto 1, 1).
-     */
-/*    public void scale(float sx, float sy) {
-        adjustToWindowSize((int) sx, (int) sy); TODO: ª
-    }*/
 }

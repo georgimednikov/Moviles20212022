@@ -13,10 +13,12 @@ public class Cell {
         BLUE
     }
 
+    // Estado
     private boolean fixed_; //Si se puede modificar el estado
     private Cell.STATE currState_; //Color actual de la celda
     private int number_ = 0; // Numero de azules que tiene que tener alrededor
 
+    // Info
     private int curNumber_ = 0; // Numero de azules que tiene actualmente alrededor
     private int greysAround_ = 0; // Numero de grises alrededor
     private boolean completedBlueAround_ = false; // Si tiene alrededor alguna azul completada
@@ -106,6 +108,9 @@ public class Cell {
         return currState_;
     }
 
+    /**
+     * Desfija la celda
+     */
     public void unfix(){
         fixed_ = false;
     }
