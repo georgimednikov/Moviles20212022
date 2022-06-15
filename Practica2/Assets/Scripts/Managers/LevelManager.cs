@@ -29,6 +29,13 @@ public class LevelManager : MonoBehaviour
     [SerializeField] CompleteRect completeRect;
     [SerializeField] CanvasScaler canvasScaler;
 
+#if DEVELOPMENT_BUILD || CHEATS_AVAILABLE
+    [SerializeField] int cheatClicks = 3;
+    [SerializeField] float cheatTimeframe = 1.0f;
+
+    List<float> cheatTimestamps = new List<float>();
+#endif
+
     public bool LoadLevel(string level, bool animate = true)
     {
         try {
@@ -165,5 +172,15 @@ public class LevelManager : MonoBehaviour
     public void UpdateHints()
     {
         hintsText.text = GameManager.instance.hints + " x";
+    }
+
+    public void CheatClick()
+    {
+#if DEVELOPMENT_BUILD || CHEATS_AVAILABLE
+        if (cheatTimestamps.Count == cheatClicks) cheatTimestamps.RemoveAt(0);
+        cheatTimestamps.Add(Time.time);
+        if (cheatTimestamps.Count == cheatClicks && cheatTimestamps[cheatClicks - 1] - cheatTimestamps[0] <= cheatTimeframe)
+            BM.ApplyCheat();
+#endif
     }
 }

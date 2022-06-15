@@ -30,24 +30,27 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
+#if UNITY_EDITOR
+        nextBundle = levelBundles[bundle];
+        nextPack = nextBundle.packs[pack];
+        nextLevel = nextPack.levelMap.text.Split('\n')[level];
+#endif
         if (instance == null)
         {
             instance = this;
+            SaveManager sm = instance.GetComponent<SaveManager>();
             currSkin = skinPacks[0];
-            hints = instance.GetComponent<SaveManager>().RestoreHint();
+            hints = sm.RestoreHint();
             DontDestroyOnLoad(gameObject);
-            currSkin = skinPacks[instance.GetComponent<SaveManager>().RestoreSkin()];
+            currSkin = skinPacks[sm.RestoreSkin()];
+            if(sm.levelSaveFile != null)
+                instance.LoadLevel(sm.levelSaveFile.bundle, sm.levelSaveFile.pack, sm.levelSaveFile.id);
         }
         else
         {
             instance.LM = LM;
             Destroy(gameObject);
         }
-#if UNITY_EDITOR
-        nextBundle = levelBundles[bundle];
-        nextPack = nextBundle.packs[pack];
-        nextLevel = nextPack.levelMap.text.Split('\n')[level];
-#endif
         instance.LM?.LoadLevel(instance.nextLevel, false);
     }
 
@@ -59,6 +62,13 @@ public class GameManager : MonoBehaviour
         instance.nextBundle = instance.levelBundles[onClick.bundle];
         instance.nextPack = instance.nextBundle.packs[onClick.pack];
         GoToLevelSelect();
+    }
+
+    public void LoadLevel(int bundle, int pack, int level)
+    {
+        instance.nextBundle = instance.levelBundles[bundle];
+        instance.nextPack = instance.nextBundle.packs[pack];
+        NextLevel(level);
     }
 
     /// <summary>

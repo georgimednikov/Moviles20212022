@@ -9,12 +9,18 @@ using System.Text;
 public class SaveManager : MonoBehaviour
 {
     SaveFile saveFile;
+    public LevelSaveFile levelSaveFile { get; private set; }
 
     public string saveDirection = "/save";
     string pimienta = "https://gl.wikipedia.org/wiki/Pementa";
 
     private void Awake()
     {
+        if (LoadLevelFromFile(saveDirection))
+        {
+            Debug.Log("Intento cargar");
+        }
+
         if (!LoadFromFile(saveDirection))
         {
             Debug.LogError("Oh no datos corruptos");
@@ -25,7 +31,21 @@ public class SaveManager : MonoBehaviour
     private void OnApplicationQuit()
     {
         SaveToFile(saveDirection);
+        if (GameManager.instance.LM)
+        {
+            SaveLevelToFile(saveDirection);
+        }
+        else
+            DeleteLevelSaveFile(saveDirection);
     }
+
+    private void DeleteLevelSaveFile(string saveDirection)
+    {
+        string destination = Application.persistentDataPath + saveDirection + "1.json";
+        if (File.Exists(destination))
+            File.Delete(destination);
+    }
+
     /// <summary>
     /// Guarda la informacion de guardado en el archivo Application.persistentDataPath + fileString + ".json", utilizando sal y pimienta
     /// </summary>
@@ -38,6 +58,27 @@ public class SaveManager : MonoBehaviour
             string json = JsonUtility.ToJson(saveFile);
             saveFile.hash = Hash(pimienta.Substring(0, 16) + json + pimienta.Substring(15, 21));
             string jsonhash = JsonUtility.ToJson(saveFile);
+            sw.Write(jsonhash);
+        }
+    }
+
+    public void SaveLevelToFile(string fileString)
+    {
+        if(levelSaveFile == null)
+        {
+            levelSaveFile = new LevelSaveFile();
+        }
+        levelSaveFile.bundle = Array.FindIndex(GameManager.instance.levelBundles, p => p.name.Equals(GameManager.instance.nextBundle.name));
+        levelSaveFile.pack = Array.FindIndex(GameManager.instance.nextBundle.packs, p => p.name.Equals(GameManager.instance.nextPack.name));
+        levelSaveFile.id = GameManager.instance.levelIndex;
+
+        string destination = Application.persistentDataPath + fileString + "1.json";
+        using (StreamWriter sw = new StreamWriter(destination))
+        {
+            levelSaveFile.hash = "";
+            string json = JsonUtility.ToJson(levelSaveFile);
+            levelSaveFile.hash = Hash(pimienta.Substring(0, 16) + json + pimienta.Substring(15, 21));
+            string jsonhash = JsonUtility.ToJson(levelSaveFile);
             sw.Write(jsonhash);
         }
     }
@@ -60,6 +101,20 @@ public class SaveManager : MonoBehaviour
         string hash = saveFile.hash;
         saveFile.hash = "";
         string json = JsonUtility.ToJson(saveFile);
+        string hashNew = Hash(pimienta.Substring(0, 16) + json + pimienta.Substring(15, 21));
+        return hash == hashNew;
+    }
+
+    public bool LoadLevelFromFile(string fileString)
+    {
+        string source = Application.persistentDataPath + fileString + "1.json";
+        if (File.Exists(source))
+            levelSaveFile = JsonUtility.FromJson<LevelSaveFile>(File.ReadAllText(source));
+        else return false;
+
+        string hash = levelSaveFile.hash;
+        levelSaveFile.hash = "";
+        string json = JsonUtility.ToJson(levelSaveFile);
         string hashNew = Hash(pimienta.Substring(0, 16) + json + pimienta.Substring(15, 21));
         return hash == hashNew;
     }

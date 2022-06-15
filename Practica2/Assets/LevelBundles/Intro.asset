@@ -15,7 +15,10 @@ MonoBehaviour:
   bundleName: Intro
   bundleColor:
     serializedVersion: 2
-    rgba: 4278255360
+    rgba: 4280295648
+  wallsColor:
+    serializedVersion: 2
+    rgba: 0
   packs:
   - {fileID: 11400000, guid: 81c4081d27064084a95f23bb0da9dd57, type: 2}
   - {fileID: 11400000, guid: 0abcd8604c3b77049ad09f07816681b7, type: 2}

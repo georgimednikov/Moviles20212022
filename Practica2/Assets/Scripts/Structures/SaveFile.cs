@@ -28,3 +28,12 @@ public class SaveFile
     public bool disabledAds;
     public int skinIndex;
 }
+
+[System.Serializable]
+public class LevelSaveFile
+{
+    public string hash;
+    public int id;
+    public int pack;
+    public int bundle;
+}

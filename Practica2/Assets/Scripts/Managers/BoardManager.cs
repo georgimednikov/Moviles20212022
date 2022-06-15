@@ -105,7 +105,7 @@ public class BoardManager : MonoBehaviour
         LogicTile[] flowEnds = map.GetFlowEnds();
         int i = 0;
         Color32[] colorPool = GameManager.instance.currSkin.colors;
-        Color32 color = GameManager.instance.nextBundle.bundleColor;
+        Color32 color = GameManager.instance.nextBundle.wallsColor;
         foreach (LogicTile end in flowEnds)
         {
             Tile tile = board[end.pos.x, end.pos.y];
@@ -182,6 +182,12 @@ public class BoardManager : MonoBehaviour
         RenderReset();
         RenderFlows();
         LM.UpdateFlowInfo(map.percentageFull);
+    }
+
+    public void ApplyCheat()
+    {
+        while (!map.IsGameSolved())
+            GiveHint();
     }
 
     /// <summary>

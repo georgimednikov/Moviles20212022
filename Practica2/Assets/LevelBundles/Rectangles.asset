@@ -16,6 +16,9 @@ MonoBehaviour:
   bundleColor:
     serializedVersion: 2
     rgba: 4278225403
+  wallsColor:
+    serializedVersion: 2
+    rgba: 4292878368
   packs:
   - {fileID: 11400000, guid: d9550d8aeafc87f49a04e64e3a3b443c, type: 2}
   - {fileID: 11400000, guid: 41d41a23b64805344ac9ef7c13722c38, type: 2}

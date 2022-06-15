@@ -650,7 +650,8 @@ PlayerSettings:
   webGLLinkerTarget: 1
   webGLThreadsSupport: 0
   webGLDecompressionFallback: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    1: CHEATS_AVAILABLE
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
