@@ -8,6 +8,7 @@ public class LevelPackSave
     public string name;
     public List<LevelSave> levelstates = new List<LevelSave>();
     public int numCompleted;
+    public Vector2 contentScroll;
 }
 
 [System.Serializable]

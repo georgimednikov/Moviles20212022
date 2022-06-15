@@ -64,6 +64,20 @@ public class SaveManager : MonoBehaviour
         return hash == hashNew;
     }
 
+    public int NextImperfectLevel(string pack, int from)
+    {
+        LevelPackSave psave = saveFile.packSaves.Find(p => { return p.name.Equals(pack); });
+        for (int i = from + 1; i < psave.levelstates.Count; i++)
+        {
+            if(psave.levelstates[i].completed < 2)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     /// <summary>
     /// Utilizando SHA256, devuelve un hash en formato de string con el json recibido
     /// </summary>
@@ -83,6 +97,16 @@ public class SaveManager : MonoBehaviour
             }
             return builder.ToString();
         }
+    }
+
+    public void StoreLevelScroll(LevelPack pack, Vector2 anchoredPosition)
+    {
+        saveFile.packSaves.Find(p => p.name.Equals(pack.levelName)).contentScroll = anchoredPosition;
+    }
+
+    public Vector2 RestoreLevelScroll(LevelPack pack)
+    {
+        return saveFile.packSaves.Find(p => p.name.Equals(pack.levelName)).contentScroll;
     }
 
     /// <summary>

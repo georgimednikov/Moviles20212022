@@ -24,6 +24,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] Text levelCompleteText;
     [SerializeField] Button nextLevelButton;
     [SerializeField] Button prevLevelButton;
+    [SerializeField] Button imperfectLevelButton;
     [SerializeField] Image finishedStar;
     [SerializeField] Image finishedTick;
     [SerializeField] CompleteRect completeRect;
@@ -90,6 +91,15 @@ public class LevelManager : MonoBehaviour
         } else
         {
             prevLevelButton.interactable = false;
+        }
+
+        int imperfectLevel = GameManager.instance.GetComponent<SaveManager>().NextImperfectLevel(GameManager.instance.nextPack.levelName, currentLevel);
+        if (imperfectLevel > -1)
+        {
+            imperfectLevelButton.onClick.AddListener(() => { GameManager.LoadLevel(imperfectLevel); });
+        } else
+        {
+            imperfectLevelButton.interactable = false;
         }
     }
 

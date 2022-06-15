@@ -10,6 +10,7 @@ public class PackText : MonoBehaviour
 {
     [SerializeField] Text nameText;
     [SerializeField] Text levelsText;
+    [SerializeField] Button arrow;
 
     int totalLevels;
     int completedLevels;
@@ -33,6 +34,19 @@ public class PackText : MonoBehaviour
     public void SetColor(Color32 col)
     {
         nameText.color = col;
+    }
+
+    public void SetArrowOnClick(int bundle, int pack, int level)
+    {
+        GameManager.OnClickBundle b = new GameManager.OnClickBundle();
+        b.bundle = bundle;
+        b.pack = pack;
+        arrow.onClick.AddListener(() => { GameManager.NextLevelDirect(b, level); });
+    }
+
+    public void TogggleArrowInteract()
+    {
+        arrow.interactable = !arrow.interactable;
     }
 
     public void SetPackTotalLevels(int levels)

@@ -51,6 +51,16 @@ public class GameManager : MonoBehaviour
         instance.LM?.LoadLevel(instance.nextLevel, false);
     }
 
+    internal void StoreLevelScroll(Vector2 anchoredPosition)
+    {
+        instance.GetComponent<SaveManager>().StoreLevelScroll(instance.nextPack, anchoredPosition);
+    }
+
+    internal Vector2 RestoreLevelScroll()
+    {
+        return instance.GetComponent<SaveManager>().RestoreLevelScroll(instance.nextPack);
+    }
+
     /// <summary>
     /// Se le comunica al Game Manager de qu� pack va a ser el siguiente nivel
     /// </summary>
@@ -59,6 +69,15 @@ public class GameManager : MonoBehaviour
         instance.nextBundle = instance.levelBundles[onClick.bundle];
         instance.nextPack = instance.nextBundle.packs[onClick.pack];
         GoToLevelSelect();
+    }
+
+    public static void NextLevelDirect(OnClickBundle onClick, int level)
+    {
+        instance.nextBundle = instance.levelBundles[onClick.bundle];
+        instance.nextPack = instance.nextBundle.packs[onClick.pack];
+        instance.levelIndex = level;
+        instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[level];
+        SceneManager.LoadScene("Level");
     }
 
     /// <summary>
@@ -74,6 +93,19 @@ public class GameManager : MonoBehaviour
             return;
         }
         instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[++instance.levelIndex];
+        instance.LM.LoadLevel(instance.nextLevel);
+    }
+
+    /// <summary>
+    /// Se carga el siguiente nivel
+    /// </summary>
+    public static void LoadLevel(int level)
+    {
+        var nl = instance.GetComponent<SaveManager>().RestoreLevel(instance.nextPack.levelName, instance.levelIndex);
+        if (nl.locked == 1 || nl.locked == -1 && instance.nextPack.locked && instance.levelIndex + 1 != 0) return;
+
+        instance.levelIndex = level;
+        instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[level];
         instance.LM.LoadLevel(instance.nextLevel);
     }
 

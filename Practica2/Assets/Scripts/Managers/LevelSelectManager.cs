@@ -11,6 +11,7 @@ public class LevelSelectManager : MonoBehaviour
 
     private void Start()
     {
+        ((RectTransform)content).anchoredPosition = GameManager.instance.RestoreLevelScroll();
         LoadLevels();
     }
 
@@ -25,7 +26,7 @@ public class LevelSelectManager : MonoBehaviour
         while(i < pack.numLevels)
         {
             LevelGrid g = Instantiate(levelGridPrefab, content).GetComponent<LevelGrid>();
-            g.SetIndexStart(i);
+            g.SetIndexStart((RectTransform)content, i);
             g.SetColor(skin.colors[j]);
             g.SetDescriptionText(pack.minipackName[i / 30]);
             i += 30;

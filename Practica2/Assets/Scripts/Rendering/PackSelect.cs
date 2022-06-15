@@ -40,6 +40,12 @@ public class PackSelect : MonoBehaviour
             ui.SetColor(bundle.bundleColor);
             ui.SetButtonEvent(bundleIndex, i);
             ui.SetPackCompletedLevels(GameManager.instance.GetComponent<SaveManager>().RestoreNumCompleted(bundle.packs[i].levelName));
+            int nextimp = GameManager.instance.GetComponent<SaveManager>().NextImperfectLevel(bundle.packs[i].levelName, 0);
+            if(nextimp == -1)
+            {
+                ui.TogggleArrowInteract();
+            }else 
+                ui.SetArrowOnClick(bundleIndex, i, nextimp);
         }
     }
 }
