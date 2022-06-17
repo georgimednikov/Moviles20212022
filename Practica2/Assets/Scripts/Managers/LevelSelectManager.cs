@@ -7,7 +7,7 @@ public class LevelSelectManager : MonoBehaviour
 {
     [SerializeField] GameObject levelGridPrefab;
     [SerializeField] Text nameText;
-    [SerializeField] Transform content;
+    [SerializeField] RectTransform content;
 
     private void Start()
     {
@@ -25,11 +25,12 @@ public class LevelSelectManager : MonoBehaviour
         while(i < pack.numLevels)
         {
             LevelGrid g = Instantiate(levelGridPrefab, content).GetComponent<LevelGrid>();
-            g.SetIndexStart(i);
+            g.SetIndexStart(content, i);
             g.SetColor(skin.colors[j]);
             g.SetDescriptionText(pack.minipackName[i / 30]);
             i += 30;
             ++j;
         }
+        content.anchoredPosition = GameManager.instance.RestoreScroll(pack.levelName);
     }
 }

@@ -120,7 +120,7 @@ public class BoardManager : MonoBehaviour
             if (tile.tileType == LogicTile.TileType.EMPTY) board[tile.pos.x, tile.pos.y].Deactivate();
             for (int j = 0; j < tile.walls.Length; ++j)
             {
-                if (tile.walls[j]) board[tile.pos.x, tile.pos.y].SetWalls(j, color);
+                if (tile.walls[j]) board[tile.pos.x, tile.pos.y].SetWalls(j, GameManager.instance.nextBundle.wallsColor);
             }
         }
         LM.UpdateInfo(map.movements, 0, map.GetNumFlows());
@@ -182,6 +182,11 @@ public class BoardManager : MonoBehaviour
         RenderReset();
         RenderFlows();
         LM.UpdateFlowInfo(map.percentageFull);
+    }
+
+    public void ApplyCheat()
+    {
+        while (!map.IsGameSolved()) GiveHint();
     }
 
     /// <summary>

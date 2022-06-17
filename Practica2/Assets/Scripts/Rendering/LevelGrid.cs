@@ -18,7 +18,7 @@ public class LevelGrid : MonoBehaviour
     /// Si es la primera vez que se carga el pack, se encarga de asignarle al nivel si debe estar bloqueado o no, segun si es el primero de los instanciados o no
     /// </summary>
     /// <param name="index">Index desde el que se crean 30 botones</param>
-    public void SetIndexStart(int index)
+    public void SetIndexStart(RectTransform content, int index)
     {
         ind = index;
         for(int i = 0; i < levels.Length; ++i){
@@ -35,7 +35,7 @@ public class LevelGrid : MonoBehaviour
             }
             else
             {
-                levels[i].SetButtonEvent(index + i);
+                levels[i].SetButtonEvent(content, index + i);
                 levelsave.locked = 0; // Si es -1, hay que ponerle el valor de verdad
             }
         }

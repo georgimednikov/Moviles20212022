@@ -8,6 +8,7 @@ public class LevelPackSave
     public string name;
     public List<LevelSave> levelstates = new List<LevelSave>();
     public int numCompleted;
+    public Vector2 scroll;
 }
 
 [System.Serializable]
@@ -20,6 +21,15 @@ public class LevelSave
 }
 
 [System.Serializable]
+public class LevelContinueSave
+{
+    public bool toLoad;
+    public int bundle;
+    public int pack;
+    public int level;
+}
+
+[System.Serializable]
 public class SaveFile
 {
     public string hash;
@@ -27,4 +37,5 @@ public class SaveFile
     public int hints = 3;
     public bool disabledAds;
     public int skinIndex;
+    public LevelContinueSave levelContinue;
 }

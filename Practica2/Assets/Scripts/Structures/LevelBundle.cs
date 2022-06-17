@@ -7,5 +7,6 @@ public class LevelBundle: ScriptableObject
 {
     public string bundleName;
     public Color32 bundleColor;
+    public Color32 wallsColor;
     public LevelPack[] packs;
 }

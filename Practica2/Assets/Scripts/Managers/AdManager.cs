@@ -153,7 +153,7 @@ public class AdManager : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowList
             if (adUnitId.Equals(_AdUnitId[0].id))
             {
                 _AdUnitId[0].init = true;
-                GameManager.instance.addHint();
+                GameManager.instance.AddHint();
             }
             else if (adUnitId.Equals(_AdUnitId[1].id))
             {

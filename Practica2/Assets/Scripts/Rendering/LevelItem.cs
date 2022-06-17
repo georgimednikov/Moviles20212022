@@ -19,9 +19,13 @@ public class LevelItem : MonoBehaviour
     /// <summary>
     /// Añade el evento que hace que se cargue el nivel level al ser pulsado el boton
     /// </summary>
-    public void SetButtonEvent(int level)
+    public void SetButtonEvent(RectTransform content, int level)
     {
-        GetComponent<Button>().onClick.AddListener(() => { GameManager.NextLevel(level); });
+        GetComponent<Button>().onClick.AddListener(() =>
+        {
+            GameManager.instance.StoreScroll(content.anchoredPosition);
+            GameManager.NextLevel(level);
+        });
     }
 
     public void SetColor(Color32 col)

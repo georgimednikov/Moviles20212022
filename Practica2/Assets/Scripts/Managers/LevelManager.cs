@@ -24,10 +24,19 @@ public class LevelManager : MonoBehaviour
     [SerializeField] Text levelCompleteText;
     [SerializeField] Button nextLevelButton;
     [SerializeField] Button prevLevelButton;
+    [SerializeField] Button arrowButton;
     [SerializeField] Image finishedStar;
     [SerializeField] Image finishedTick;
     [SerializeField] CompleteRect completeRect;
     [SerializeField] CanvasScaler canvasScaler;
+
+#if CHEATS_AVAILABLE || DEVELOPMENT_BUILD
+//#if true
+    public int cheatClicks = 3;
+    public float cheatTimespan = 1.0f;
+
+    List<float> timestamps = new List<float>();
+#endif
 
     public bool LoadLevel(string level, bool animate = true)
     {
@@ -91,6 +100,15 @@ public class LevelManager : MonoBehaviour
         {
             prevLevelButton.interactable = false;
         }
+        int impLevel = GameManager.NextImperfectLevel();
+        if (impLevel == -1)
+        {
+            arrowButton.interactable = false;
+        }
+        else
+        {
+            arrowButton.onClick.AddListener(() => { GameManager.LoadNextLevel(impLevel); });
+        }
     }
 
     public void ResetLevel()
@@ -133,6 +151,17 @@ public class LevelManager : MonoBehaviour
         SM.SaveToFile(GameManager.instance.GetComponent<SaveManager>().saveDirection);
         SetLevelButtonsInteractable();
     }
+
+#if CHEATS_AVAILABLE || DEVELOPMENT_BUILD
+//#if true
+    public void CheatClick()
+    {
+        if (timestamps.Count == cheatClicks) timestamps.RemoveAt(0);
+        timestamps.Add(Time.time);
+        if (timestamps.Count == cheatClicks && timestamps[cheatClicks - 1] - timestamps[0] <= cheatTimespan)
+            BM.ApplyCheat();
+    }
+#endif
 
     public void UndoMove()
     {

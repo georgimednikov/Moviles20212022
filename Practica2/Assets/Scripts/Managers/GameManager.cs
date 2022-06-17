@@ -24,31 +24,47 @@ public class GameManager : MonoBehaviour
     public LevelBundle nextBundle;
     public string nextLevel;
     public int levelIndex = 0;
+
 #if UNITY_EDITOR
     public int bundle, pack, level;
 #endif
 
+    SaveManager sm;
+
     void Awake()
     {
+#if UNITY_EDITOR
+        nextBundle = levelBundles[bundle];
+        nextPack = nextBundle.packs[pack];
+        nextLevel = nextPack.levelMap.text.Split('\n')[level];
+#endif
         if (instance == null)
         {
             instance = this;
             currSkin = skinPacks[0];
-            hints = instance.GetComponent<SaveManager>().RestoreHint();
+            sm = GetComponent<SaveManager>();
+            hints = sm.RestoreHint();
             DontDestroyOnLoad(gameObject);
-            currSkin = skinPacks[instance.GetComponent<SaveManager>().RestoreSkin()];
+            currSkin = skinPacks[sm.RestoreSkin()];
+            LevelContinueSave levelSave = sm.LevelToContinue();
+            if (levelSave != null)
+                LoadLevel(levelSave);
         }
         else
         {
             instance.LM = LM;
             Destroy(gameObject);
         }
-#if UNITY_EDITOR
-        nextBundle = levelBundles[bundle];
-        nextPack = nextBundle.packs[pack];
-        nextLevel = nextPack.levelMap.text.Split('\n')[level];
-#endif
         instance.LM?.LoadLevel(instance.nextLevel, false);
+    }
+
+    internal static int NextImperfectLevel()
+    {
+        return instance.sm.NextImperfectLevel(instance.nextPack.levelName, instance.levelIndex + 1);
+    }
+    internal static int NextImperfectLevel(int bundle, int pack, int start = 0)
+    {
+        return instance.sm.NextImperfectLevel(instance.levelBundles[bundle].packs[pack].levelName, start);
     }
 
     /// <summary>
@@ -66,7 +82,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public static void LoadNextLevel()
     {
-        var nl = instance.GetComponent<SaveManager>().RestoreLevel(instance.nextPack.levelName, instance.levelIndex);
+        var nl = instance.sm.RestoreLevel(instance.nextPack.levelName, instance.levelIndex);
         if (nl.locked == 1 || nl.locked == -1 && instance.nextPack.locked && instance.levelIndex + 1 != 0) return;
         if (instance.levelIndex + 1 >= instance.nextPack.numLevels)
         {
@@ -77,16 +93,36 @@ public class GameManager : MonoBehaviour
         instance.LM.LoadLevel(instance.nextLevel);
     }
 
+    public static void LoadNextLevel(int level)
+    {
+        instance.sm.RestoreLevel(instance.nextPack.levelName, instance.levelIndex);
+        if (level == -1) return;
+
+        instance.levelIndex = level;
+        instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[level];
+        instance.LM.LoadLevel(instance.nextLevel);
+    }
+
     /// <summary>
     /// Se carga el anterior nivel
     /// </summary>
     public static void LoadPrevLevel()
     {
-        var nl = instance.GetComponent<SaveManager>().RestoreLevel(instance.nextPack.levelName, instance.levelIndex);
+        var nl = instance.sm.RestoreLevel(instance.nextPack.levelName, instance.levelIndex);
         if (nl.locked == 1 || nl.locked == -1 && instance.nextPack.locked && instance.levelIndex - 1 != 0) return; // por si acaso
         if (instance.levelIndex < 1) return;
         instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[--instance.levelIndex];
         instance.LM.LoadLevel(instance.nextLevel);
+    }
+
+    public static void LoadLevel(int bundle, int pack, int level)
+    {
+        instance.sm.RestoreLevel(instance.nextPack.levelName, instance.levelIndex);
+        instance.nextBundle = instance.levelBundles[bundle];
+        instance.nextPack = instance.nextBundle.packs[pack];
+        instance.levelIndex = level;
+        instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[level];
+        SceneManager.LoadScene("Level");
     }
 
     public static void ResetLevel()
@@ -104,6 +140,15 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("Level");
     }
 
+    public static void LoadLevel(LevelContinueSave save)
+    {
+        instance.nextBundle = instance.levelBundles[save.bundle];
+        instance.nextPack = instance.nextBundle.packs[save.pack];
+        instance.levelIndex = save.level;
+        instance.nextLevel = instance.nextPack.levelMap.text.Split('\n')[save.level];
+        SceneManager.LoadScene("Level");
+    }
+
     public static void GoToLevelSelect()
     {
         SceneManager.LoadScene("LevelSelect");
@@ -115,7 +160,7 @@ public class GameManager : MonoBehaviour
     public void ChangeSkin(int skin)
     {
         currSkin = skinPacks[skin];
-        GetComponent<SaveManager>().StoreSkin(skin);
+        sm.StoreSkin(skin);
     }
 
     public static void GoToMainMenu()
@@ -123,15 +168,39 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("MainMenu");
     }
 
-    internal void addHint()
+    internal void AddHint()
     {
         hints++;
-        instance.GetComponent<SaveManager>().StoreHint(hints);
+        sm.StoreHint(hints);
         LM.UpdateHints();
+    }
+
+    internal void StoreScroll(Vector2 scroll)
+    {
+        sm.StoreScroll(scroll);
+    }
+    internal Vector2 RestoreScroll(string packName)
+    {
+        return sm.SavedScroll();
     }
 
     public static void GoToPackSelect()
     {
         SceneManager.LoadScene("PackSelect");
+    }
+
+    public static int GetBundleIndex()
+    {
+        return Array.FindIndex(instance.levelBundles, p => p.name.Equals(instance.nextBundle.name));
+    }
+
+    public static int GetPackIndex(int bundle)
+    {
+        return Array.FindIndex(instance.levelBundles[bundle].packs, p => p.name.Equals(instance.nextPack.name));
+    }
+
+    public static bool InGame()
+    {
+        return instance.LM != null;
     }
 }

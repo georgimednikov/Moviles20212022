@@ -24,6 +24,7 @@ public class SaveManager : MonoBehaviour
 
     private void OnApplicationQuit()
     {
+        SaveLevel();
         SaveToFile(saveDirection);
     }
     /// <summary>
@@ -49,11 +50,13 @@ public class SaveManager : MonoBehaviour
     public bool LoadFromFile(string fileString)
     {
         string source = Application.persistentDataPath + fileString + ".json";
+        File.Delete(source);
         if (File.Exists(source))
             saveFile = JsonUtility.FromJson<SaveFile>(File.ReadAllText(source));
         else
         {
             saveFile = new SaveFile();
+            saveFile.levelContinue = new LevelContinueSave();
             return true;
         }
 
@@ -115,6 +118,37 @@ public class SaveManager : MonoBehaviour
     public void StoreSkin(int index)
     {
         saveFile.skinIndex = index;
+    }
+
+    public void StoreScroll(Vector2 scroll)
+    {
+        LevelPackSave save = saveFile.packSaves.Find(p => p.name.Equals(GameManager.instance.nextPack.levelName));//.scroll = scroll;
+        save.scroll = scroll;
+    }
+
+    public void SaveLevel()
+    {
+        if (!GameManager.InGame())
+        {
+            saveFile.levelContinue.toLoad = false;
+            return;
+        }
+        saveFile.levelContinue = new LevelContinueSave();
+        saveFile.levelContinue.toLoad = true;
+        saveFile.levelContinue.bundle = GameManager.GetBundleIndex();
+        saveFile.levelContinue.pack = GameManager.GetPackIndex(saveFile.levelContinue.bundle);
+        saveFile.levelContinue.level = GameManager.instance.levelIndex;
+    }
+
+    public LevelContinueSave LevelToContinue()
+    {
+        if (!saveFile.levelContinue.toLoad) return null;
+        else return saveFile.levelContinue;
+    }
+
+    public Vector2 SavedScroll()
+    {
+        return saveFile.packSaves.Find(p => p.name.Equals(GameManager.instance.nextPack.levelName)).scroll;
     }
 
     /// <summary>
@@ -181,5 +215,24 @@ public class SaveManager : MonoBehaviour
     public int RestoreSkin()
     {
         return saveFile.skinIndex;
+    }
+
+    public int NextImperfectLevel(string pack, int start)
+    {
+        int level = -1;
+        LevelPackSave packSave = saveFile.packSaves.Find(p => p.name.Equals(pack));
+        if (packSave == null) return 0;
+        List<LevelSave> levels = packSave.levelstates;
+        if (levels.Count == 0) return 0;
+
+        for (int i = start; i < levels.Count; i++)
+        {
+            if (levels[i].completed < 2)
+            {
+                level = i;
+                break;
+            }
+        }
+        return level;
     }
 }
